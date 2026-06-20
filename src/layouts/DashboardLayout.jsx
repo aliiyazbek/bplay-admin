@@ -1,16 +1,14 @@
 import { Outlet } from "react-router-dom";
-import Sidebar from "../shared/components/sidebar/Sidebar";
+import Sidebar from "../shared/components/Sidebar/Sidebar";
 
 function DashboardLayout() {
   return (
-    <div className="app-shell">
-
+    <div className="app-layout">
       <Sidebar />
 
-      <main className="app-content">
+      <main className="main-content">
         <Outlet />
       </main>
-
     </div>
   );
 }

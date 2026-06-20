@@ -1,89 +1,76 @@
-import { mockAdmins } from "../data/mockAdmins";
+import apiClient from "../../../shared/services/apiClient";
 
-let admins = [...mockAdmins];
+const ADMIN_MANAGEMENT_PATH = "/admin/admin-management";
 
-let logs = [];
+const normalizeStatus = (admin) => {
+  const isActive =
+    typeof admin?.is_active === "boolean"
+      ? admin.is_active
+      : typeof admin?.isActive === "boolean"
+        ? admin.isActive
+        : admin?.status
+          ? admin.status !== "suspended"
+          : true;
 
-// =====================
-// GET ADMINS
-// =====================
-export const getAdmins = () => {
-  return [...admins];
+  return {
+    id: admin?.id ?? admin?._id ?? admin?.admin_id,
+    name: admin?.name || "",
+    email: admin?.email || "",
+    role: admin?.role || "admin",
+    isActive,
+    status: isActive ? "active" : "suspended",
+  };
 };
 
-// =====================
-// GET LOGS
-// =====================
-export const getLogs = () => {
-  return [...logs];
+const extractList = (payload) => {
+  if (Array.isArray(payload?.data?.data)) {
+    return payload.data.data;
+  }
+
+  if (Array.isArray(payload?.data?.admins)) {
+    return payload.data.admins;
+  }
+
+  if (Array.isArray(payload?.data)) {
+    return payload.data;
+  }
+
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  return [];
 };
 
-// =====================
-// ADD LOG
-// =====================
-const addLog = (message, adminName = "System") => {
-  logs.unshift({
-    id: Date.now(),
-    message,
-    admin: adminName,
-    time: new Date().toLocaleTimeString(),
-  });
+export const getAdmins = async () => {
+  const response = await apiClient.get(ADMIN_MANAGEMENT_PATH);
+  return extractList(response).map(normalizeStatus);
 };
 
-// =====================
-// INVITE ADMIN
-// =====================
-export const inviteAdmin = (admin) => {
-  admins.push({
-    id: Date.now(),
-    ...admin,
-    status: "active",
-  });
-
-  addLog(`Invited admin ${admin.name}`, "You");
+export const createAdmin = async (adminData) => {
+  const response = await apiClient.post(ADMIN_MANAGEMENT_PATH, adminData);
+  return response.data;
 };
 
-// =====================
-// UPDATE ADMIN
-// =====================
-export const updateAdmin = (id, data) => {
-  const target = admins.find((a) => a.id === id);
-
-  admins = admins.map((admin) =>
-    admin.id === id ? { ...admin, ...data } : admin
+export const updateAdmin = async (id, adminData) => {
+  const response = await apiClient.patch(
+    `${ADMIN_MANAGEMENT_PATH}/${id}`,
+    adminData
   );
-
-  addLog(`Updated admin ${target?.name}`, "You");
+  return response.data;
 };
 
-// =====================
-// SUSPEND / ACTIVATE
-// =====================
-export const suspendAdmin = (id) => {
-  const target = admins.find((a) => a.id === id);
-
-  admins = admins.map((admin) =>
-    admin.id === id
-      ? {
-          ...admin,
-          status:
-            admin.status === "active"
-              ? "suspended"
-              : "active",
-        }
-      : admin
+export const toggleAdminActiveStatus = async (id, isActive) => {
+  const response = await apiClient.post(
+    `${ADMIN_MANAGEMENT_PATH}/is_active/${id}`,
+    {
+      is_active: isActive,
+    }
   );
-
-  addLog(`Changed status of ${target?.name}`, "You");
+  return response.data;
 };
 
-// =====================
-// DELETE ADMIN
-// =====================
-export const deleteAdmin = (id) => {
-  const target = admins.find((a) => a.id === id);
-
-  admins = admins.filter((a) => a.id !== id);
-
-  addLog(`Deleted admin ${target?.name}`, "You");
+export const deleteAdmin = async (id) => {
+  const response = await apiClient.delete(`${ADMIN_MANAGEMENT_PATH}/${id}`);
+  return response.data;
 };

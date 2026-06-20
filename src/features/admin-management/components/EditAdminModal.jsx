@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 function EditAdminModal({
@@ -10,8 +10,16 @@ function EditAdminModal({
   const [form, setForm] = useState({
     name: admin?.name || "",
     email: admin?.email || "",
-    role: admin?.role || "",
+    role: admin?.role || "admin",
   });
+
+  useEffect(() => {
+    setForm({
+      name: admin?.name || "",
+      email: admin?.email || "",
+      role: admin?.role || "admin",
+    });
+  }, [admin, isOpen]);
 
   if (!isOpen) return null;
 
@@ -71,8 +79,8 @@ function EditAdminModal({
             value={form.role}
             onChange={handleChange}
           >
-            <option value="Admin">Admin</option>
-            <option value="Super Admin">Super Admin</option>
+            <option value="admin">Admin</option>
+            <option value="super_admin">Super Admin</option>
           </select>
 
           <button className="invite-button" onClick={handleSave}>

@@ -3,11 +3,9 @@ function AdminSearch({ search, setSearch }) {
     <input
       className="admin-search"
       type="text"
-      placeholder="Search admin by name or email..."
+      placeholder="Search by name or email..."
       value={search}
-      onChange={(e) =>
-        setSearch(e.target.value)
-      }
+      onChange={(e) => setSearch(e.target.value)}
     />
   );
 }

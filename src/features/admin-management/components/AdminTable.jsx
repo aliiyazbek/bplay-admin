@@ -1,26 +1,11 @@
-import { useAdminStore } from "../../../store/adminStore";
-import "../styles/AdminTable.css";
 function AdminTable({
   admins,
-  search,
-  filter,
-  setSelectedAdmin,
-  openEdit,
-  openSuspend,
-  openDelete,
+  loading,
+  onEdit,
+  onSuspend,
+  onDelete,
 }) {
-  const { currentUser } = useAdminStore();
-
-  const filteredAdmins = admins.filter((admin) => {
-    const searchMatch =
-      admin.name.toLowerCase().includes(search.toLowerCase()) ||
-      admin.email.toLowerCase().includes(search.toLowerCase());
-
-    const filterMatch =
-      filter === "all" ? true : admin.status === filter;
-
-    return searchMatch && filterMatch;
-  });
+  const hasRows = admins.length > 0;
 
   return (
     <table className="admin-table">
@@ -36,8 +21,21 @@ function AdminTable({
       </thead>
 
       <tbody>
-        {filteredAdmins.map((admin) => (
-          <tr key={admin.id}>
+        {loading ? (
+          <tr>
+            <td className="admin-empty" colSpan="5">
+              Loading admins...
+            </td>
+          </tr>
+        ) : !hasRows ? (
+          <tr>
+            <td className="admin-empty" colSpan="5">
+              No admins found.
+            </td>
+          </tr>
+        ) : (
+          admins.map((admin) => (
+            <tr key={admin.id}>
 
             <td>{admin.name}</td>
             <td>{admin.email}</td>
@@ -52,39 +50,28 @@ function AdminTable({
             <td>
 
               <button
-                onClick={() => {
-                  setSelectedAdmin(admin);
-                  openEdit();
-                }}
-                disabled={currentUser.role === "Viewer"}
+                onClick={() => onEdit(admin)}
               >
                 Edit
               </button>
 
               <button
-                onClick={() => {
-                  setSelectedAdmin(admin);
-                  openSuspend();
-                }}
-                disabled={currentUser.role === "Viewer"}
+                onClick={() => onSuspend(admin)}
               >
-                Suspend
+                {admin.status === "active" ? "Suspend" : "Activate"}
               </button>
 
               <button
-                onClick={() => {
-                  setSelectedAdmin(admin);
-                  openDelete();
-                }}
-                disabled={currentUser.role !== "Super Admin"}
+                onClick={() => onDelete(admin)}
               >
                 Delete
               </button>
 
             </td>
 
-          </tr>
-        ))}
+            </tr>
+          ))
+        )}
       </tbody>
 
     </table>

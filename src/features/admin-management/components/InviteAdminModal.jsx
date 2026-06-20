@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import "../styles/InviteAdminModal.css";
 
 function InviteAdminModal({ isOpen, onClose, onInvite }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("Admin");
+  const [password, setPassword] = useState("");
 
   if (!isOpen) return null;
 
@@ -15,12 +14,13 @@ function InviteAdminModal({ isOpen, onClose, onInvite }) {
     onInvite({
       name,
       email,
-      role,
+      role: "admin",
+      password,
     });
 
     setName("");
     setEmail("");
-    setRole("Admin");
+    setPassword("");
 
     onClose();
   };
@@ -39,7 +39,7 @@ function InviteAdminModal({ isOpen, onClose, onInvite }) {
         <div className="invite-avatar">⚽</div>
 
         <h2 className="invite-title">Invite Admin</h2>
-        <p className="invite-subtitle">Send an invitation to new admin</p>
+        <p className="invite-subtitle">Create a new admin account</p>
 
         <div className="invite-divider" />
 
@@ -57,16 +57,15 @@ function InviteAdminModal({ isOpen, onClose, onInvite }) {
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          >
-            <option>Admin</option>
-            <option>Super Admin</option>
-          </select>
+          <input
+            type="password"
+            placeholder="Temporary Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
           <button type="submit" className="invite-button">
-            Send Invite
+            Create Admin
           </button>
 
           <button type="button" className="invite-cancel" onClick={onClose}>

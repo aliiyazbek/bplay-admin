@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login } from "../services/auth.service";
+import { setAuthSession } from "../utils/auth.storage";
 
 function LoginForm() {
   const navigate = useNavigate();
@@ -24,17 +25,24 @@ function LoginForm() {
 
       if (res?.data?.success) {
         const token = res.data.data.accessToken;
+        const role = email === "test_admin@bplay.com" ? "super_admin" : "admin";
+        const user = {
+          email,
+          role,
+        };
 
-        // 🔥 save token
-        localStorage.setItem("accessToken", token);
+        setAuthSession({
+          accessToken: token,
+          user,
+          role,
+        });
 
-        navigate("/app");
+        navigate(role === "super_admin" ? "/app/admin-management" : "/app/profile");
       } else {
         setError("Login failed");
       }
     } catch (err) {
       setError("Invalid email or password");
-      console.error(err);
     } finally {
       setLoading(false);
     }

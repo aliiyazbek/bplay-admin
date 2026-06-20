@@ -1,21 +1,29 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { logout } from "../../../features/auth/services/auth.service";
+import {
+  clearAuthSession,
+  getStoredRole,
+  getStoredUser,
+} from "../../../features/auth/utils/auth.storage";
 import "./Sidebar.css";
 
 function Sidebar() {
   const navigate = useNavigate();
+  const role = getStoredRole();
+  const user = getStoredUser();
+  const isSuperAdmin = role === "super_admin";
+  const email = user?.email || "admin@bplay.com";
+  const displayName = email.split("@")[0] || "Admin";
 
   const handleLogout = async () => {
     try {
       await logout();
-
-      // remove token
-      localStorage.removeItem("accessToken");
-
-      navigate("/login");
     } catch (err) {
-      console.error("Logout failed", err);
+      // Clear client session even if the backend logout endpoint fails.
+    } finally {
+      clearAuthSession();
+      navigate("/login");
     }
   };
 
@@ -33,15 +41,17 @@ function Sidebar() {
       <NavLink to="/app/profile" className="profile">
         <div className="avatar">A</div>
         <div className="info">
-          <div className="name">Admin</div>
-          <div className="email">admin@bplay.com</div>
+          <div className="name">{displayName}</div>
+          <div className="email">{email}</div>
         </div>
       </NavLink>
 
       <div className="menu">
-        <NavLink to="/app/admins" className="menu-item">
-          👥 Admin Management
-        </NavLink>
+        {isSuperAdmin && (
+          <NavLink to="/app/admin-management" className="menu-item">
+            👥 Admin Management
+          </NavLink>
+        )}
       </div>
 
       <div className="spacer" />

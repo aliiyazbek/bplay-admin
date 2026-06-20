@@ -3,9 +3,7 @@ function AdminFilters({ filter, setFilter }) {
     <select
       className="admin-filter"
       value={filter}
-      onChange={(e) =>
-        setFilter(e.target.value)
-      }
+      onChange={(e) => setFilter(e.target.value)}
     >
       <option value="all">All</option>
       <option value="active">Active</option>

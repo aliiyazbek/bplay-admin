@@ -15,14 +15,14 @@ function SuspendAdminModal({ isOpen, onClose, admin, onConfirm }) {
         <div className="invite-avatar">⛔</div>
 
         <h2 className="invite-title">
-          {admin?.status === "active"
+          {admin?.isActive
             ? "Suspend Admin"
             : "Activate Admin"}
         </h2>
 
         <p className="invite-subtitle">
           Are you sure you want to change status of{" "}
-          <b>{admin?.name}</b>?
+          <b>{admin?.name || "this admin"}</b>?
         </p>
 
         <div className="invite-divider" />

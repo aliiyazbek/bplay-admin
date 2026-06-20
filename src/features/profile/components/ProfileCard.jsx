@@ -1,6 +1,16 @@
 import { motion } from "framer-motion";
+import {
+  getStoredRole,
+  getStoredUser,
+} from "../../auth/utils/auth.storage";
 
 function ProfileCard() {
+  const user = getStoredUser();
+  const role = getStoredRole();
+  const email = user?.email || "admin@bplay.com";
+  const displayName = user?.name || email.split("@")[0] || "Bplay Admin";
+  const displayRole = role === "super_admin" ? "Super Admin" : "Admin";
+
   return (
     <motion.div
       className="profile-card"
@@ -21,11 +31,11 @@ function ProfileCard() {
       </div>
 
       <h2 className="profile-name">
-        Bplay Admin
+        {displayName}
       </h2>
 
       <p className="profile-email">
-        admin@bplay.com
+        {email}
       </p>
 
       <div className="profile-divider" />
@@ -34,7 +44,7 @@ function ProfileCard() {
 
         <div className="profile-item">
           <span>Role</span>
-          <strong>Administrator</strong>
+          <strong>{displayRole}</strong>
         </div>
 
         <div className="profile-item">
