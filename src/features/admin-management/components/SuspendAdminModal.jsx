@@ -29,9 +29,16 @@ function SuspendAdminModal({ isOpen, onClose, admin, onConfirm }) {
 
         <button
           className="invite-button"
-          onClick={() => {
-            onConfirm();
-            onClose();
+          onClick={async () => {
+            try {
+              const res = await onConfirm();
+              // only close if handler returned truthy (success)
+              if (res !== false) {
+                onClose();
+              }
+            } catch (err) {
+              // keep modal open; page will show error message via parent
+            }
           }}
         >
           Confirm

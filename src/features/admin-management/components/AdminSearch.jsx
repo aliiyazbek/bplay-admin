@@ -1,12 +1,15 @@
 function AdminSearch({ search, setSearch }) {
   return (
-    <input
-      className="admin-search"
-      type="text"
-      placeholder="Search by name or email..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-    />
+    <div className="admin-search-wrap">
+      <input
+        className="admin-search"
+        type="text"
+        placeholder="Search admins by name or email"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        aria-label="Search admins"
+      />
+    </div>
   );
 }
 

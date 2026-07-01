@@ -12,11 +12,16 @@ const normalizeStatus = (admin) => {
           ? admin.status !== "suspended"
           : true;
 
+  // Robustly map possible name/email locations from backend
+  const name = admin?.name || admin?.full_name || admin?.user?.name || admin?.user?.fullName || "";
+  const email = admin?.email || admin?.email_address || admin?.user?.email || admin?.contact?.email || admin?.account?.email || "";
+  const role = admin?.role || admin?.user?.role || "admin";
+
   return {
     id: admin?.id ?? admin?._id ?? admin?.admin_id,
-    name: admin?.name || "",
-    email: admin?.email || "",
-    role: admin?.role || "admin",
+    name,
+    email,
+    role,
     isActive,
     status: isActive ? "active" : "suspended",
   };
@@ -48,7 +53,14 @@ export const getAdmins = async () => {
 };
 
 export const createAdmin = async (adminData) => {
-  const response = await apiClient.post(ADMIN_MANAGEMENT_PATH, adminData);
+  const payload = {
+    name: adminData?.name || "",
+    email: adminData?.email || "",
+    role: adminData?.role || "admin",
+    password: adminData?.password || "",
+  };
+
+  const response = await apiClient.post(ADMIN_MANAGEMENT_PATH, payload);
   return response.data;
 };
 

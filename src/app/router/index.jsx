@@ -1,5 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AdminManagementPage from "../../features/admin-management/pages/AdminManagementPage";
+import RegionManagementPage from "../../features/region-management/pages/RegionManagementPage";
+import OwnerManagementPage from "../../features/owner-management/pages/OwnerManagementPage";
+import OwnerProfilePage from "../../features/owner-management/pages/OwnerProfilePage";
 import ForgotPasswordPage from "../../features/auth/pages/ForgotPasswordPage";
 import LoginPage from "../../features/auth/pages/LoginPage";
 import ResetPasswordPage from "../../features/auth/pages/ResetPasswordPage";
@@ -59,6 +62,30 @@ function AppRouter() {
             element={
               <RequireSuperAdmin>
                 <AdminManagementPage />
+              </RequireSuperAdmin>
+            }
+          />
+          <Route
+            path="region-management"
+            element={
+              <RequireSuperAdmin>
+                <RegionManagementPage />
+              </RequireSuperAdmin>
+            }
+          />
+          <Route
+            path="owner-management"
+            element={
+              <RequireSuperAdmin>
+                <OwnerManagementPage />
+              </RequireSuperAdmin>
+            }
+          />
+          <Route
+            path="owner-management/:ownerId"
+            element={
+              <RequireSuperAdmin>
+                <OwnerProfilePage />
               </RequireSuperAdmin>
             }
           />

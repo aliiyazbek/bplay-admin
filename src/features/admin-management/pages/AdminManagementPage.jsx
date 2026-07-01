@@ -70,8 +70,8 @@ function AdminManagementPage() {
       const searchTerm = search.trim().toLowerCase();
       const matchesSearch =
         searchTerm.length === 0 ||
-        admin.name.toLowerCase().includes(searchTerm) ||
-        admin.email.toLowerCase().includes(searchTerm);
+        (admin.name || "").toLowerCase().includes(searchTerm) ||
+        (admin.email || "").toLowerCase().includes(searchTerm);
 
       const matchesFilter =
         filter === "all" ? true : admin.status === filter;
@@ -96,35 +96,67 @@ function AdminManagementPage() {
   };
 
   const handleInviteAdmin = async (data) => {
-    await createAdmin(data);
-    await loadAdmins();
+    try {
+      await createAdmin(data);
+      await loadAdmins();
+      setError("");
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to create admin. Please try again.");
+    }
   };
 
   const handleEditAdmin = async (data) => {
     if (!selectedAdmin) {
-      return;
+      return false;
     }
 
-    await updateAdmin(selectedAdmin.id, data);
-    await loadAdmins();
+    const payload = {
+      name: data.name?.trim() || "",
+      email: data.email?.trim() || "",
+      role: data.role || "admin",
+    };
+
+    try {
+      await updateAdmin(selectedAdmin.id, payload);
+      await loadAdmins();
+      setError("");
+      return true;
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to update admin. Please try again.");
+      return false;
+    }
   };
 
   const handleSuspendAdmin = async () => {
     if (!selectedAdmin) {
-      return;
+      return false;
     }
 
-    await toggleAdminActiveStatus(selectedAdmin.id, !selectedAdmin.isActive);
-    await loadAdmins();
+    try {
+      await toggleAdminActiveStatus(selectedAdmin.id, !selectedAdmin.isActive);
+      await loadAdmins();
+      setError("");
+      return true;
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to update admin status. Please try again.");
+      return false;
+    }
   };
 
   const handleDeleteAdmin = async () => {
     if (!selectedAdmin) {
-      return;
+      return false;
     }
 
-    await deleteAdmin(selectedAdmin.id);
-    await loadAdmins();
+    try {
+      await deleteAdmin(selectedAdmin.id);
+      await loadAdmins();
+      setError("");
+      return true;
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to delete admin. Please try again.");
+      return false;
+    }
   };
 
   return (

@@ -8,14 +8,18 @@ function InviteAdminModal({ isOpen, onClose, onInvite }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    onInvite({
-      name,
-      email,
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      return;
+    }
+
+    await onInvite({
+      name: name.trim(),
+      email: email.trim(),
       role: "admin",
-      password,
+      password: password.trim(),
     });
 
     setName("");

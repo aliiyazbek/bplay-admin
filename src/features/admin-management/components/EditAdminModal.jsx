@@ -13,6 +13,8 @@ function EditAdminModal({
     role: admin?.role || "admin",
   });
 
+  const [localError, setLocalError] = useState("");
+
   useEffect(() => {
     setForm({
       name: admin?.name || "",
@@ -31,8 +33,22 @@ function EditAdminModal({
   };
 
   const handleSave = () => {
-    onSave(form);
-    onClose();
+    // Call onSave and only close on success. onSave should return true on success or throw on error.
+    const doSave = async () => {
+      try {
+        const res = await onSave(form);
+        // If onSave returns falsy, assume failure and keep modal open
+        if (res === false) {
+          return;
+        }
+        onClose();
+      } catch (err) {
+        // Keep modal open; show inline error if available
+        setLocalError(err?.response?.data?.message || err?.message || "Failed to update admin.");
+      }
+    };
+
+    doSave();
   };
 
   return (
@@ -86,7 +102,9 @@ function EditAdminModal({
           <button className="invite-button" onClick={handleSave}>
             Save Changes
           </button>
-
+          {localError && (
+            <div style={{ color: "#fecaca", marginTop: 8 }}>{localError}</div>
+          )}
           <button className="invite-cancel" onClick={onClose}>
             Cancel
           </button>

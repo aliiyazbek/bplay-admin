@@ -23,7 +23,19 @@ function DeleteAdminModal({ isOpen, onClose, onConfirm, admin }) {
 
         <div className="invite-divider" />
 
-        <button className="invite-button" onClick={onConfirm}>
+        <button
+          className="invite-button"
+          onClick={async () => {
+            try {
+              const res = await onConfirm();
+              if (res !== false) {
+                onClose();
+              }
+            } catch (err) {
+              // keep modal open; parent will set error
+            }
+          }}
+        >
           Yes, Delete
         </button>
 

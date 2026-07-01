@@ -48,9 +48,17 @@ function Sidebar() {
 
       <div className="menu">
         {isSuperAdmin && (
-          <NavLink to="/app/admin-management" className="menu-item">
-            👥 Admin Management
-          </NavLink>
+          <>
+            <NavLink to="/app/admin-management" className="menu-item">
+              👥 Admin Management
+            </NavLink>
+            <NavLink to="/app/region-management" className="menu-item">
+              🌍 Region Management
+            </NavLink>
+            <NavLink to="/app/owner-management" className="menu-item">
+              🏟️ Owner Management
+            </NavLink>
+          </>
         )}
       </div>
 
