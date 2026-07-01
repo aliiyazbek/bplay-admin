@@ -1,0 +1,107 @@
+{
+  "common": {
+    "appName": "Bplay Admin",
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "retry": "Retry",
+    "back": "Back",
+    "close": "Close",
+    "clearFilters": "Clear filters",
+    "loadError": "Failed to load. Please try again.",
+    "signOut": "Sign out",
+    "language": "Language",
+    "skipToContent": "Skip to content"
+  },
+  "nav": {
+    "adminManagement": "Admins",
+    "regionManagement": "Regions",
+    "ownerManagement": "Owners",
+    "profile": "Profile",
+    "dashboard": "Dashboard"
+  },
+  "status": {
+    "all": "All",
+    "active": "Active",
+    "suspended": "Suspended",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "inactive": "Inactive",
+    "blocked": "Blocked",
+    "review": "Under review",
+    "verified": "Verified"
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Sign in to your admin account",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "forgotPassword": "Forgot password?",
+    "forgotTitle": "Reset your password",
+    "forgotSubtitle": "Enter your email and we'll send you a reset link",
+    "sendReset": "Send reset link",
+    "backToLogin": "Back to sign in",
+    "forgotSent": "If the email exists, a reset link is on its way.",
+    "resetTitle": "Set a new password",
+    "resetSubtitle": "Choose a strong password for your account",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "resetSubmit": "Update password",
+    "resetDone": "Password updated. Please sign in.",
+    "errors": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordShort": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match"
+    }
+  },
+  "admin": {
+    "title": "Admin Management",
+    "subtitle": "Invite and manage platform admins",
+    "invite": "Invite admin",
+    "search": "Search admins…",
+    "col": { "name": "Name", "email": "Email", "role": "Role", "status": "Status" },
+    "empty": { "title": "No admins found", "desc": "Invite your first admin to get started." },
+    "invite_modal": {
+      "title": "Invite admin",
+      "name": "Full name",
+      "email": "Email",
+      "password": "Temporary password",
+      "submit": "Send invite"
+    },
+    "edit_modal": { "title": "Edit admin", "submit": "Save changes" },
+    "suspend": { "title": "Suspend this admin?", "message": "They will lose access until reactivated.", "confirm": "Suspend" },
+    "activate": { "title": "Activate this admin?", "message": "They will regain access immediately.", "confirm": "Activate" },
+    "delete": { "title": "Delete this admin?", "message": "This action cannot be undone.", "confirm": "Delete" },
+    "actions": { "edit": "Edit", "suspend": "Suspend", "activate": "Activate", "delete": "Delete" },
+    "errors": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email",
+      "passwordShort": "Password must be at least 8 characters"
+    },
+    "toast": {
+      "created": "Admin invited",
+      "updated": "Admin updated",
+      "suspended": "Admin suspended",
+      "activated": "Admin activated",
+      "deleted": "Admin deleted"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Your account details",
+    "role": "Role",
+    "email": "Email"
+  },
+  "owner": {"title":"Owner Management","subtitle":"Review owner requests, manage verification, and maintain owner access","search":"Search owners…","col":{"name":"Owner","email":"Email","phone":"Phone","region":"Region","status":"Status","verification":"Verification","trustTier":"Trust tier","active":"Active","created":"Created"},"empty":{"title":"No owners found","desc":"No owners match the current filters."},"value":{"yes":"Yes","no":"No"},"tier":{"basic":"Basic","verified":"Verified","premium":"Premium"},"actions":{"view":"View","approve":"Approve","reject":"Reject","activate":"Activate","disable":"Disable","block":"Block"},"confirm":{"approve":{"title":"Approve this owner?","message":"{{name}} will be approved and their account activated."},"reject":{"title":"Reject this owner?","message":"{{name}}'s verification will be rejected."},"activate":{"title":"Activate this owner?","message":"{{name}} will regain access immediately."},"disable":{"title":"Disable this owner?","message":"{{name}} will lose access until reactivated."},"block":{"title":"Block this owner?","message":"{{name}} will be blocked from the platform."}},"toast":{"approve":"Owner approved","reject":"Owner rejected","activate":"Owner activated","disable":"Owner disabled","block":"Owner blocked"},"profile":{"title":"Owner Profile","subtitle":"Review registration details, verification status, and documents","notFound":"Owner not found","statusSection":"Status","documents":"Verification documents","noDocuments":"No verification documents uploaded.","preview":"Preview"}},
+  "region": {"title":"Region Management","subtitle":"Manage cities and neighborhoods and assign coverage to admins.","create":"Create Region","search":"Search regions...","col":{"name":"Name","type":"Type","assignedAdmin":"Assigned Admin","status":"Status"},"type":{"city":"City","neighborhood":"Neighborhood"},"status":{"active":"Active","inactive":"Inactive"},"filter":{"all":"All types"},"empty":{"title":"No regions yet","desc":"Create a city or neighborhood to get started."},"form":{"createTitle":"Create Region","editTitle":"Edit Region","name":"Name","type":"Type","city":"City","cityPlaceholder":"Select a city","createSubmit":"Create","saveSubmit":"Save changes"},"assign":{"title":"Assign Admin","admin":"Admin","placeholder":"Select an admin","submit":"Assign"},"actions":{"edit":"Edit","assign":"Assign admin","activate":"Activate","deactivate":"Deactivate","delete":"Delete"},"activate":{"title":"Activate region","message":"This region will become active and visible.","confirm":"Activate"},"deactivate":{"title":"Deactivate region","message":"This region will be hidden and marked inactive.","confirm":"Deactivate"},"delete":{"title":"Delete region","message":"This region will be permanently removed. This cannot be undone.","confirm":"Delete"},"toast":{"created":"Region created","updated":"Region updated","activated":"Region activated","deactivated":"Region deactivated","assigned":"Admin assigned","deleted":"Region deleted"},"errors":{"nameRequired":"Name must be at least 2 characters","cityRequired":"Please select a city","adminRequired":"Please select an admin"}}
+}

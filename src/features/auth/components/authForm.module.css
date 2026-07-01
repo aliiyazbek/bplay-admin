@@ -1,0 +1,15 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  text-align: start;
+}
+.link {
+  align-self: center;
+  margin-block-start: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-primary-accent);
+}
+.link:hover {
+  text-decoration: underline;
+}

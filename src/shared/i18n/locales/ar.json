@@ -1,0 +1,107 @@
+{
+  "common": {
+    "appName": "بي بلاي أدمن",
+    "loading": "جارٍ التحميل…",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "retry": "إعادة المحاولة",
+    "back": "رجوع",
+    "close": "إغلاق",
+    "clearFilters": "مسح عوامل التصفية",
+    "loadError": "فشل التحميل. حاول مرة أخرى.",
+    "signOut": "تسجيل الخروج",
+    "language": "اللغة",
+    "skipToContent": "تخطَّ إلى المحتوى"
+  },
+  "nav": {
+    "adminManagement": "المدراء",
+    "regionManagement": "المناطق",
+    "ownerManagement": "المالكون",
+    "profile": "الملف الشخصي",
+    "dashboard": "لوحة التحكم"
+  },
+  "status": {
+    "all": "الكل",
+    "active": "نشط",
+    "suspended": "موقوف",
+    "pending": "قيد المراجعة",
+    "approved": "مقبول",
+    "rejected": "مرفوض",
+    "inactive": "غير نشط",
+    "blocked": "محظور",
+    "review": "قيد المراجعة",
+    "verified": "موثّق"
+  },
+  "auth": {
+    "loginTitle": "مرحباً بعودتك",
+    "loginSubtitle": "سجّل الدخول إلى حساب المشرف",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "signIn": "تسجيل الدخول",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "forgotTitle": "إعادة تعيين كلمة المرور",
+    "forgotSubtitle": "أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين",
+    "sendReset": "إرسال رابط الإعادة",
+    "backToLogin": "العودة لتسجيل الدخول",
+    "forgotSent": "إذا كان البريد موجوداً، فرابط إعادة التعيين في طريقه إليك.",
+    "resetTitle": "تعيين كلمة مرور جديدة",
+    "resetSubtitle": "اختر كلمة مرور قوية لحسابك",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "resetSubmit": "تحديث كلمة المرور",
+    "resetDone": "تم تحديث كلمة المرور. الرجاء تسجيل الدخول.",
+    "errors": {
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "أدخل بريداً إلكترونياً صحيحاً",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "passwordShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+      "passwordMismatch": "كلمتا المرور غير متطابقتين"
+    }
+  },
+  "admin": {
+    "title": "إدارة المدراء",
+    "subtitle": "دعوة وإدارة مدراء المنصة",
+    "invite": "دعوة مدير",
+    "search": "ابحث عن مدير…",
+    "col": { "name": "الاسم", "email": "البريد الإلكتروني", "role": "الدور", "status": "الحالة" },
+    "empty": { "title": "لا يوجد مدراء", "desc": "ادعُ أول مدير للبدء." },
+    "invite_modal": {
+      "title": "دعوة مدير",
+      "name": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة مرور مؤقتة",
+      "submit": "إرسال الدعوة"
+    },
+    "edit_modal": { "title": "تعديل المدير", "submit": "حفظ التغييرات" },
+    "suspend": { "title": "تعليق هذا المدير؟", "message": "سيفقد الوصول حتى إعادة التفعيل.", "confirm": "تعليق" },
+    "activate": { "title": "تفعيل هذا المدير؟", "message": "سيستعيد الوصول فوراً.", "confirm": "تفعيل" },
+    "delete": { "title": "حذف هذا المدير؟", "message": "لا يمكن التراجع عن هذا الإجراء.", "confirm": "حذف" },
+    "actions": { "edit": "تعديل", "suspend": "تعليق", "activate": "تفعيل", "delete": "حذف" },
+    "errors": {
+      "nameRequired": "الاسم مطلوب",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "أدخل بريداً إلكترونياً صحيحاً",
+      "passwordShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل"
+    },
+    "toast": {
+      "created": "تمت دعوة المدير",
+      "updated": "تم تحديث المدير",
+      "suspended": "تم تعليق المدير",
+      "activated": "تم تفعيل المدير",
+      "deleted": "تم حذف المدير"
+    }
+  },
+  "profile": {
+    "title": "ملفي الشخصي",
+    "subtitle": "تفاصيل حسابك",
+    "role": "الدور",
+    "email": "البريد الإلكتروني"
+  },
+  "owner": {"title":"إدارة المُلاك","subtitle":"مراجعة طلبات المُلاك وإدارة التحقق والحفاظ على وصول المُلاك","search":"البحث عن المُلاك…","col":{"name":"المالك","email":"البريد الإلكتروني","phone":"الهاتف","region":"المنطقة","status":"الحالة","verification":"التحقق","trustTier":"مستوى الثقة","active":"نشط","created":"تاريخ الإنشاء"},"empty":{"title":"لا يوجد مُلاك","desc":"لا يوجد مُلاك يطابقون عوامل التصفية الحالية."},"value":{"yes":"نعم","no":"لا"},"tier":{"basic":"أساسي","verified":"موثّق","premium":"مميّز"},"actions":{"view":"عرض","approve":"موافقة","reject":"رفض","activate":"تفعيل","disable":"تعطيل","block":"حظر"},"confirm":{"approve":{"title":"الموافقة على هذا المالك؟","message":"ستتم الموافقة على {{name}} وتفعيل حسابه."},"reject":{"title":"رفض هذا المالك؟","message":"سيتم رفض التحقق من {{name}}."},"activate":{"title":"تفعيل هذا المالك؟","message":"سيستعيد {{name}} الوصول فورًا."},"disable":{"title":"تعطيل هذا المالك؟","message":"سيفقد {{name}} الوصول حتى إعادة التفعيل."},"block":{"title":"حظر هذا المالك؟","message":"سيتم حظر {{name}} من المنصة."}},"toast":{"approve":"تمت الموافقة على المالك","reject":"تم رفض المالك","activate":"تم تفعيل المالك","disable":"تم تعطيل المالك","block":"تم حظر المالك"},"profile":{"title":"ملف المالك","subtitle":"مراجعة تفاصيل التسجيل وحالة التحقق والمستندات","notFound":"المالك غير موجود","statusSection":"الحالة","documents":"مستندات التحقق","noDocuments":"لم يتم رفع أي مستندات تحقق.","preview":"معاينة"}},
+  "region": {"title":"إدارة المناطق","subtitle":"إدارة المدن والأحياء وإسناد التغطية إلى المشرفين.","create":"إنشاء منطقة","search":"البحث في المناطق...","col":{"name":"الاسم","type":"النوع","assignedAdmin":"المشرف المُسند","status":"الحالة"},"type":{"city":"مدينة","neighborhood":"حي"},"status":{"active":"نشطة","inactive":"غير نشطة"},"filter":{"all":"كل الأنواع"},"empty":{"title":"لا توجد مناطق بعد","desc":"أنشئ مدينة أو حياً للبدء."},"form":{"createTitle":"إنشاء منطقة","editTitle":"تعديل المنطقة","name":"الاسم","type":"النوع","city":"المدينة","cityPlaceholder":"اختر مدينة","createSubmit":"إنشاء","saveSubmit":"حفظ التغييرات"},"assign":{"title":"إسناد مشرف","admin":"المشرف","placeholder":"اختر مشرفاً","submit":"إسناد"},"actions":{"edit":"تعديل","assign":"إسناد مشرف","activate":"تفعيل","deactivate":"إلغاء التفعيل","delete":"حذف"},"activate":{"title":"تفعيل المنطقة","message":"ستصبح هذه المنطقة نشطة وظاهرة.","confirm":"تفعيل"},"deactivate":{"title":"إلغاء تفعيل المنطقة","message":"سيتم إخفاء هذه المنطقة ووضع علامة غير نشطة عليها.","confirm":"إلغاء التفعيل"},"delete":{"title":"حذف المنطقة","message":"سيتم حذف هذه المنطقة نهائياً. لا يمكن التراجع عن هذا الإجراء.","confirm":"حذف"},"toast":{"created":"تم إنشاء المنطقة","updated":"تم تحديث المنطقة","activated":"تم تفعيل المنطقة","deactivated":"تم إلغاء تفعيل المنطقة","assigned":"تم إسناد المشرف","deleted":"تم حذف المنطقة"},"errors":{"nameRequired":"يجب أن يتكوّن الاسم من حرفين على الأقل","cityRequired":"يرجى اختيار مدينة","adminRequired":"يرجى اختيار مشرف"}}
+}
