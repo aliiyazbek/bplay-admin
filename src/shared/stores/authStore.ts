@@ -8,6 +8,10 @@ export interface AuthUser {
   email: string;
   name?: string;
   role: UserRole;
+  /** Data URL or remote URL of the profile photo; undefined = initials fallback. */
+  avatarUrl?: string;
+  /** Scope-region ids for regional admins; empty/undefined admin = general oversight. */
+  assignedRegionIds?: string[];
 }
 
 export interface AuthSession {
@@ -27,19 +31,22 @@ interface AuthState {
   logout: () => void;
   /** Set/refresh the token and re-derive the role from its JWT payload. */
   setToken: (token: string) => void;
+  /** Patch the current user's editable profile fields (name / avatar). */
+  updateProfile: (patch: Partial<Pick<AuthUser, 'name' | 'avatarUrl'>>) => void;
 }
 
 interface JwtPayload {
   role?: UserRole;
   email?: string;
   name?: string;
+  assignedRegionIds?: string[];
 }
 
-function decodeRole(token: string, fallback: UserRole | null): UserRole | null {
+function decodePayload(token: string): JwtPayload {
   try {
-    return jwtDecode<JwtPayload>(token).role ?? fallback;
+    return jwtDecode<JwtPayload>(token);
   } catch {
-    return fallback;
+    return {};
   }
 }
 
@@ -60,11 +67,22 @@ export const useAuthStore = create<AuthState>()(
       logout: () =>
         set({ accessToken: null, user: null, role: null, isAuthenticated: false }),
       setToken: (token) =>
-        set((state) => ({
-          accessToken: token,
-          role: decodeRole(token, state.role),
-          isAuthenticated: true,
-        })),
+        set((state) => {
+          const payload = decodePayload(token);
+          return {
+            accessToken: token,
+            role: payload.role ?? state.role,
+            user: state.user
+              ? {
+                  ...state.user,
+                  assignedRegionIds: payload.assignedRegionIds ?? state.user.assignedRegionIds,
+                }
+              : state.user,
+            isAuthenticated: true,
+          };
+        }),
+      updateProfile: (patch) =>
+        set((state) => (state.user ? { user: { ...state.user, ...patch } } : {})),
     }),
     { name: 'bplay-admin-auth' },
   ),
@@ -75,3 +93,5 @@ export const useAccessToken = (): string | null => useAuthStore((s) => s.accessT
 export const useAuthUser = (): AuthUser | null => useAuthStore((s) => s.user);
 export const useAuthRole = (): UserRole | null => useAuthStore((s) => s.role);
 export const useIsAuthenticated = (): boolean => useAuthStore((s) => s.isAuthenticated);
+export const useAssignedRegionIds = (): string[] | undefined =>
+  useAuthStore((s) => s.user?.assignedRegionIds);

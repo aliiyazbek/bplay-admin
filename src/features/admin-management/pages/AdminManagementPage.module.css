@@ -1,0 +1,70 @@
+/* Clickable person cell: avatar + name (link) over the email. */
+.userLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  min-inline-size: 0;
+}
+.userText {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+.userName {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.userLink:hover .userName {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+.userLink:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+.userEmail {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.regions {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+.muted {
+  color: var(--color-text-subtle);
+}
+
+/* Show-deleted (trash) toggle in the toolbar. */
+.deletedToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.deletedToggle:hover {
+  color: var(--color-text);
+}
+.deletedCheckbox {
+  inline-size: 18px;
+  block-size: 18px;
+  flex-shrink: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}

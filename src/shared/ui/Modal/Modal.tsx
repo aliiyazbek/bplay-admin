@@ -65,12 +65,16 @@ export function Modal({
     };
 
     document.addEventListener('keydown', onKeyDown);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    // Lock scroll on the viewport scroller (<html>). Because html reserves the
+    // scrollbar gutter (globals.css), hiding overflow keeps the gutter in place —
+    // so the page and the fixed sidebar never shift when the modal opens.
+    const root = document.documentElement;
+    const previousOverflow = root.style.overflow;
+    root.style.overflow = 'hidden';
 
     return () => {
       document.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = previousOverflow;
+      root.style.overflow = previousOverflow;
       previouslyFocused?.focus?.();
     };
   }, [isOpen, onClose]);

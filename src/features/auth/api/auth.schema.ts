@@ -1,9 +1,13 @@
 import { z } from 'zod';
+import { strongPassword } from '@shared/lib/validation';
 
 // Error messages are i18n keys, resolved with t() at render time.
+// The strong-password rule lives in shared/lib/validation so auth and profile
+// never drift apart.
+
 export const loginSchema = z.object({
   email: z.string().min(1, 'auth.errors.emailRequired').email('auth.errors.emailInvalid'),
-  password: z.string().min(1, 'auth.errors.passwordRequired'),
+  password: strongPassword,
 });
 export type LoginValues = z.infer<typeof loginSchema>;
 
@@ -14,7 +18,7 @@ export type ForgotValues = z.infer<typeof forgotSchema>;
 
 export const resetSchema = z
   .object({
-    password: z.string().min(8, 'auth.errors.passwordShort'),
+    password: strongPassword,
     confirmPassword: z.string().min(1, 'auth.errors.passwordRequired'),
   })
   .refine((data) => data.password === data.confirmPassword, {

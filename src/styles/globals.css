@@ -14,6 +14,10 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* Always reserve the scrollbar gutter on the viewport. Combined with locking
+     scroll on <html> (see Modal), opening a dialog never hides the scrollbar, so
+     neither the page content nor the fixed sidebar shifts sideways. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -43,6 +47,15 @@ select,
 textarea {
   font: inherit;
   color: inherit;
+}
+
+/* Cairo's Arabic glyphs need a taller line-box than the default; form controls
+   clip their overflow, so a tight line-height cuts off descenders (ـن ـم ـر …).
+   A relaxed line-height gives every field room in both EN and AR. */
+input,
+textarea,
+select {
+  line-height: var(--leading-relaxed);
 }
 
 a {

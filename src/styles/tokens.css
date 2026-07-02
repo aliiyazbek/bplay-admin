@@ -126,6 +126,12 @@
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 25px 80px rgba(0, 0, 0, 0.4);
 
+  /* ---------- Ambient glow (luminous mint + forest depth — hero / CTA surfaces) ---------- */
+  --color-glow-primary: rgba(205, 236, 198, 0.16); /* mint halo / orb */
+  --color-glow-forest: rgba(47, 85, 68, 0.5);      /* deep-green orb */
+  --shadow-glow-sm: 0 8px 24px rgba(205, 236, 198, 0.14);
+  --shadow-glow: 0 18px 48px rgba(205, 236, 198, 0.22);
+
   /* ---------- Transitions ---------- */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
@@ -149,6 +155,7 @@
   /* ---------- Layout + modal widths ---------- */
   --sidebar-width: 250px;
   --header-height: 64px;
+  --container-max: 1200px;  /* centered content width (landing + future marketing) */
   --modal-sm: 420px;
   --modal-md: 560px;
   --modal-lg: 800px;

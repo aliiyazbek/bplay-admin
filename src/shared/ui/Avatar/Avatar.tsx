@@ -4,7 +4,7 @@ import styles from './Avatar.module.css';
 export interface AvatarProps {
   src?: string;
   name: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 export function Avatar({ src, name, size = 'md' }: AvatarProps) {

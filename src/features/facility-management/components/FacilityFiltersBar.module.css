@@ -1,0 +1,44 @@
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.search {
+  flex: 1 1 260px;
+  min-inline-size: 200px;
+}
+
+.collapse {
+  overflow: hidden;
+}
+
+.panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--gradient-glass);
+}
+
+.filter {
+  flex: 1 1 170px;
+  min-inline-size: 150px;
+  max-inline-size: 240px;
+}
+
+@media (max-width: 640px) {
+  .filter {
+    flex-basis: 100%;
+    max-inline-size: none;
+  }
+}

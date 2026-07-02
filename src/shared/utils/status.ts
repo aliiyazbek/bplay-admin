@@ -12,7 +12,7 @@ export function statusToBadgeVariant(status: string | null | undefined): BadgeVa
   if (['pending', 'review', 'under_review', 'processing', 'in_review'].includes(s)) {
     return 'warning';
   }
-  if (['rejected', 'suspended', 'blocked', 'failed', 'banned', 'expired'].includes(s)) {
+  if (['rejected', 'suspended', 'owner_suspended', 'blocked', 'failed', 'banned', 'expired'].includes(s)) {
     return 'danger';
   }
   if (['inactive', 'maintenance', 'cancelled', 'canceled', 'disabled', 'archived'].includes(s)) {

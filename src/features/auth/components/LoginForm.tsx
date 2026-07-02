@@ -1,9 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { Field, Input, Button } from '@ui';
-import { PATHS } from '@app/router/paths';
+import { Field, Input, PasswordInput, Button } from '@ui';
 import { loginSchema, type LoginValues } from '../api/auth.schema';
 import { useLoginMutation } from '../hooks/useAuthMutations';
 import styles from './authForm.module.css';
@@ -36,20 +34,18 @@ export function LoginForm() {
         htmlFor="password"
         error={errors.password ? t(errors.password.message ?? '') : undefined}
       >
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           autoComplete="current-password"
           placeholder="••••••••"
+          showLabel={t('auth.showPassword')}
+          hideLabel={t('auth.hidePassword')}
           {...register('password')}
         />
       </Field>
       <Button type="submit" fullWidth isLoading={mutation.isPending}>
         {t('auth.signIn')}
       </Button>
-      <Link className={styles.link} to={PATHS.forgotPassword}>
-        {t('auth.forgotPassword')}
-      </Link>
     </form>
   );
 }

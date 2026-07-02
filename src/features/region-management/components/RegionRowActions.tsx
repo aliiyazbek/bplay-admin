@@ -1,26 +1,102 @@
 import { useTranslation } from 'react-i18next';
-import { IconButton, ConfirmDialog, EditIcon, TrashIcon, UserPlusIcon, PowerIcon } from '@ui';
+import {
+  IconButton,
+  ConfirmDialog,
+  EditIcon,
+  TrashIcon,
+  UserPlusIcon,
+  PowerIcon,
+  MapPinIcon,
+  EyeIcon,
+} from '@ui';
 import { useDisclosure } from '@shared/hooks/useDisclosure';
-import { useDeleteRegion, useToggleRegion } from '../hooks/useRegionMutations';
+import { googleMapsLink } from '@shared/lib/geo';
+import { useDeleteRegion, useRestoreRegion, useToggleRegion } from '../hooks/useRegionMutations';
 import type { Region } from '../api/region.types';
 import styles from './RegionRowActions.module.css';
 
 interface Props {
   region: Region;
+  onView: (region: Region) => void;
   onEdit: (region: Region) => void;
   onAssign: (region: Region) => void;
 }
 
-export function RegionRowActions({ region, onEdit, onAssign }: Props) {
+export function RegionRowActions({ region, onView, onEdit, onAssign }: Props) {
   const { t } = useTranslation();
   const toggle = useToggleRegion();
   const remove = useDeleteRegion();
+  const restore = useRestoreRegion();
   const toggleConfirm = useDisclosure();
   const deleteConfirm = useDisclosure();
+  const restoreConfirm = useDisclosure();
   const isActive = region.isActive;
+
+  const openOnMap = () => {
+    window.open(googleMapsLink(region.centerLat, region.centerLng), '_blank', 'noopener');
+  };
+
+  // A soft-deleted region only offers "view details" + "view on map" + "restore".
+  if (region.isDeleted) {
+    return (
+      <div className={styles.actions}>
+        <IconButton
+          size="sm"
+          variant="ghost"
+          label={t('region.actions.viewDetails')}
+          icon={<EyeIcon />}
+          onClick={() => onView(region)}
+          data-testid={`region-view-${region.id}`}
+        />
+        <IconButton
+          size="sm"
+          variant="ghost"
+          label={t('region.actions.viewOnMap')}
+          icon={<MapPinIcon />}
+          onClick={openOnMap}
+        />
+        <IconButton
+          size="sm"
+          variant="ghost"
+          label={t('region.actions.restore')}
+          icon={<PowerIcon />}
+          onClick={restoreConfirm.open}
+          data-testid={`region-restore-${region.id}`}
+        />
+        <ConfirmDialog
+          isOpen={restoreConfirm.isOpen}
+          onClose={restoreConfirm.close}
+          onConfirm={async () => {
+            await restore.mutateAsync(region.id);
+            restoreConfirm.close();
+          }}
+          title={t('region.restore.title')}
+          message={t('region.restore.message')}
+          confirmText={t('region.restore.confirm')}
+          variant="primary"
+          isLoading={restore.isPending}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.actions}>
+      <IconButton
+        size="sm"
+        variant="ghost"
+        label={t('region.actions.viewDetails')}
+        icon={<EyeIcon />}
+        onClick={() => onView(region)}
+        data-testid={`region-view-${region.id}`}
+      />
+      <IconButton
+        size="sm"
+        variant="ghost"
+        label={t('region.actions.viewOnMap')}
+        icon={<MapPinIcon />}
+        onClick={openOnMap}
+      />
       <IconButton
         size="sm"
         variant="ghost"

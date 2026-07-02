@@ -5,8 +5,11 @@ import * as mock from './region.api.mock';
 const impl = USE_MOCKS ? mock : real;
 
 export const getRegions = impl.getRegions;
+export const getRegionById = impl.getRegionById;
+export const getScopeRegions = impl.getScopeRegions;
 export const createRegion = impl.createRegion;
 export const updateRegion = impl.updateRegion;
 export const toggleRegionActive = impl.toggleRegionActive;
-export const assignAdmin = impl.assignAdmin;
+export const assignAdmins = impl.assignAdmins;
 export const deleteRegion = impl.deleteRegion;
+export const restoreRegion = impl.restoreRegion;

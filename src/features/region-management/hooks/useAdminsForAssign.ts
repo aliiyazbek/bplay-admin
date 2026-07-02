@@ -6,6 +6,12 @@ export function useAdminsForAssign() {
   return useQuery({
     queryKey: ['admins', 'for-assign'],
     queryFn: () => getAdmins({ pageSize: 1000 }),
-    select: (result) => result.items.map((admin) => ({ id: admin.id, name: admin.name })),
+    select: (result) =>
+      result.items.map((admin) => ({
+        id: admin.id,
+        name: admin.name,
+        email: admin.email,
+        isActive: admin.isActive,
+      })),
   });
 }

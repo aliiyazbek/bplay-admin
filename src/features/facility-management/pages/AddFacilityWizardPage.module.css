@@ -1,0 +1,21 @@
+.stepperWrap {
+  inline-size: min(100%, 760px);
+  margin-inline: auto;
+}
+
+/* One centered glass panel hosting the active step form. */
+.panel {
+  inline-size: min(100%, 760px);
+  margin-inline: auto;
+  padding: var(--space-6);
+  background: var(--gradient-glass);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 640px) {
+  .panel {
+    padding: var(--space-4);
+  }
+}

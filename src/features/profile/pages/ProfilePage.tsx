@@ -1,6 +1,21 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PageContainer, PageHeader, Card, Avatar, Badge } from '@ui';
+import {
+  PageContainer,
+  PageHeader,
+  Card,
+  Avatar,
+  Badge,
+  Button,
+  IconButton,
+  CameraIcon,
+  EditIcon,
+  LockIcon,
+} from '@ui';
 import { useAuthUser, useAuthRole } from '@shared/stores/authStore';
+import { EditProfileModal } from '../components/EditProfileModal';
+import { ChangePasswordModal } from '../components/ChangePasswordModal';
+import { AvatarViewerModal } from '../components/AvatarViewerModal';
 import styles from './ProfilePage.module.css';
 
 export default function ProfilePage() {
@@ -8,31 +23,84 @@ export default function ProfilePage() {
   const user = useAuthUser();
   const role = useAuthRole();
   const displayName = user?.name ?? user?.email?.split('@')[0] ?? 'Admin';
+  const email = user?.email ?? '';
+  const avatarUrl = user?.avatarUrl;
+  const roleKey = role ?? 'admin';
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
 
   return (
     <PageContainer>
       <PageHeader title={t('profile.title')} subtitle={t('profile.subtitle')} />
+
       <Card padding="lg">
         <div className={styles.head}>
-          <Avatar name={displayName} size="lg" />
-          <div>
+          <div className={styles.avatarWrap}>
+            <button
+              type="button"
+              className={styles.avatarBtn}
+              onClick={() => setViewerOpen(true)}
+              aria-label={t('profile.viewPhoto')}
+              data-testid="profile-view-photo"
+            >
+              <Avatar src={avatarUrl} name={displayName} size="xl" />
+            </button>
+            <IconButton
+              className={styles.camera}
+              variant="primary"
+              size="sm"
+              label={t('profile.editPhoto')}
+              icon={<CameraIcon />}
+              onClick={() => setEditOpen(true)}
+              data-testid="profile-edit-photo"
+            />
+          </div>
+
+          <div className={styles.identity}>
             <h2 className={styles.name}>{displayName}</h2>
-            <p className={styles.email}>{user?.email}</p>
+            <p className={styles.email}>{email}</p>
+            <div className={styles.badges}>
+              <Badge variant="info">{t(`profile.roles.${roleKey}`, roleKey)}</Badge>
+            </div>
+          </div>
+
+          <div className={styles.actions}>
+            <Button
+              variant="secondary"
+              leftIcon={<EditIcon />}
+              onClick={() => setEditOpen(true)}
+              data-testid="profile-edit"
+            >
+              {t('profile.editProfile')}
+            </Button>
+            <Button
+              variant="ghost"
+              leftIcon={<LockIcon />}
+              onClick={() => setPasswordOpen(true)}
+              data-testid="profile-change-password"
+            >
+              {t('profile.changePassword')}
+            </Button>
           </div>
         </div>
-        <dl className={styles.grid}>
-          <div className={styles.row}>
-            <dt>{t('profile.role')}</dt>
-            <dd>
-              <Badge variant="info">{t(`status.${role ?? 'admin'}`, role ?? 'admin')}</Badge>
-            </dd>
-          </div>
-          <div className={styles.row}>
-            <dt>{t('profile.email')}</dt>
-            <dd>{user?.email}</dd>
-          </div>
-        </dl>
       </Card>
+
+      <EditProfileModal
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+        name={displayName}
+        email={email}
+        avatarUrl={avatarUrl}
+      />
+      <ChangePasswordModal isOpen={passwordOpen} onClose={() => setPasswordOpen(false)} />
+      <AvatarViewerModal
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+        src={avatarUrl}
+        name={displayName}
+      />
     </PageContainer>
   );
 }

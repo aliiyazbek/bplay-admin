@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Spinner } from '@ui';
 import { useAuthRole } from '@shared/stores/authStore';
-import { RequireAuth, RequireRole } from './guards';
+import { RequireAnyRole, RequireAuth, RequireRole } from './guards';
 import { PATHS } from './paths';
 
 // Code-split every route.
@@ -12,15 +12,28 @@ const ForgotPasswordPage = lazy(() => import('@features/auth/pages/ForgotPasswor
 const ResetPasswordPage = lazy(() => import('@features/auth/pages/ResetPasswordPage'));
 const ProfilePage = lazy(() => import('@features/profile/pages/ProfilePage'));
 const AdminManagementPage = lazy(() => import('@features/admin-management/pages/AdminManagementPage'));
+const AdminDetailPage = lazy(() => import('@features/admin-management/pages/AdminDetailPage'));
 const RegionManagementPage = lazy(() => import('@features/region-management/pages/RegionManagementPage'));
+const RegionDetailPage = lazy(() => import('@features/region-management/pages/RegionDetailPage'));
 const OwnerManagementPage = lazy(() => import('@features/owner-management/pages/OwnerManagementPage'));
 const OwnerProfilePage = lazy(() => import('@features/owner-management/pages/OwnerProfilePage'));
+const FacilityManagementPage = lazy(
+  () => import('@features/facility-management/pages/FacilityManagementPage'),
+);
+const AddFacilityWizardPage = lazy(
+  () => import('@features/facility-management/pages/AddFacilityWizardPage'),
+);
+const FacilityProfilePage = lazy(
+  () => import('@features/facility-management/pages/FacilityProfilePage'),
+);
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const DashboardLayout = lazy(() => import('@app/layouts/DashboardLayout'));
 
 function DashboardIndexRedirect() {
   const role = useAuthRole();
-  return <Navigate replace to={role === 'super_admin' ? PATHS.adminManagement : PATHS.profile} />;
+  if (role === 'super_admin') return <Navigate replace to={PATHS.adminManagement} />;
+  if (role === 'admin') return <Navigate replace to={PATHS.facilityManagement} />;
+  return <Navigate replace to={PATHS.profile} />;
 }
 
 export default function AppRouter() {
@@ -62,10 +75,26 @@ export default function AppRouter() {
               }
             />
             <Route
+              path="admin-management/:adminId"
+              element={
+                <RequireRole role="super_admin">
+                  <AdminDetailPage />
+                </RequireRole>
+              }
+            />
+            <Route
               path="region-management"
               element={
                 <RequireRole role="super_admin">
                   <RegionManagementPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="region-management/:regionId"
+              element={
+                <RequireRole role="super_admin">
+                  <RegionDetailPage />
                 </RequireRole>
               }
             />
@@ -83,6 +112,30 @@ export default function AppRouter() {
                 <RequireRole role="super_admin">
                   <OwnerProfilePage />
                 </RequireRole>
+              }
+            />
+            <Route
+              path="facility-management"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <FacilityManagementPage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
+              path="facility-management/new"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <AddFacilityWizardPage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
+              path="facility-management/:facilityId"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <FacilityProfilePage />
+                </RequireAnyRole>
               }
             />
           </Route>

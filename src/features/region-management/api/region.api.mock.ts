@@ -9,45 +9,90 @@ import type {
 } from './region.types';
 
 // In-memory mutable db: mutations persist for the session and a refetch sees them.
+// New ids are r{seq}; the seeded cities keep ids c1..c6 (auth demo seeds depend on
+// c1/c2, and the facility scope reads these circles).
 let seq = 500;
 
-interface CitySeed {
+interface RegionSeed {
   id: string;
   name: string;
+  centerLat: number;
+  centerLng: number;
+  radiusKm: number;
   isActive: boolean;
-  adminId?: string;
-  adminName?: string;
+  /** Assigned admins — id/name pairs MUST match admin-management seeds. */
+  admins: Array<{ id: string; name: string }>;
+  /** Seeded already soft-deleted (populates the "show deleted" view). */
+  isDeleted?: boolean;
 }
 
-const CITIES: CitySeed[] = [
-  { id: 'c1', name: 'Damascus', isActive: true, adminId: '100', adminName: 'Sara Haddad' },
-  { id: 'c2', name: 'Aleppo', isActive: true, adminId: '101', adminName: 'Omar Khoury' },
-  { id: 'c3', name: 'Homs', isActive: true },
-  { id: 'c4', name: 'Latakia', isActive: true, adminId: '102', adminName: 'Lina Nasser' },
-  { id: 'c5', name: 'Hama', isActive: false },
-  { id: 'c6', name: 'Tartus', isActive: true },
-];
-
-interface NeighborhoodSeed {
-  id: string;
-  name: string;
-  cityId: string;
-  isActive: boolean;
-  adminId?: string;
-  adminName?: string;
-}
-
-const NEIGHBORHOODS: NeighborhoodSeed[] = [
-  { id: 'n1', name: 'Mezzeh', cityId: 'c1', isActive: true, adminId: '104', adminName: 'Rana Suleiman' },
-  { id: 'n2', name: 'Malki', cityId: 'c1', isActive: true },
-  { id: 'n3', name: 'Bab Touma', cityId: 'c1', isActive: false },
-  { id: 'n4', name: 'Al-Aziziyah', cityId: 'c2', isActive: true, adminId: '105', adminName: 'Tarek Mansour' },
-  { id: 'n5', name: 'Al-Sabil', cityId: 'c2', isActive: true },
-  { id: 'n6', name: 'Al-Waer', cityId: 'c3', isActive: true },
-  { id: 'n7', name: 'Al-Ziraa', cityId: 'c4', isActive: true, adminId: '107', adminName: 'Ziad Halabi' },
-  { id: 'n8', name: 'Al-Suwayqah', cityId: 'c5', isActive: false },
-  { id: 'n9', name: 'Al-Rawda', cityId: 'c6', isActive: true },
-  { id: 'n10', name: 'Al-Qusour', cityId: 'c1', isActive: true },
+// Admin seed pairs (see admin.api.mock.ts): 100 Sara Haddad, 101 Omar Khoury,
+// 102 Lina Nasser, 103 Karim Aziz, …
+const SEEDS: RegionSeed[] = [
+  {
+    id: 'c1',
+    name: 'Damascus',
+    centerLat: 33.5138,
+    centerLng: 36.2765,
+    radiusKm: 25,
+    isActive: true,
+    admins: [{ id: '100', name: 'Sara Haddad' }],
+  },
+  {
+    id: 'c2',
+    name: 'Aleppo',
+    centerLat: 36.2021,
+    centerLng: 37.1343,
+    radiusKm: 25,
+    isActive: true,
+    admins: [{ id: '101', name: 'Omar Khoury' }],
+  },
+  {
+    id: 'c3',
+    name: 'Homs',
+    centerLat: 34.7324,
+    centerLng: 36.7137,
+    radiusKm: 20,
+    isActive: true,
+    admins: [],
+  },
+  {
+    id: 'c4',
+    name: 'Latakia',
+    centerLat: 35.5307,
+    centerLng: 35.7822,
+    radiusKm: 18,
+    isActive: true,
+    admins: [{ id: '102', name: 'Lina Nasser' }],
+  },
+  {
+    id: 'c5',
+    name: 'Hama',
+    centerLat: 35.1318,
+    centerLng: 36.7578,
+    radiusKm: 18,
+    isActive: false,
+    admins: [],
+  },
+  {
+    id: 'c6',
+    name: 'Tartus',
+    centerLat: 34.889,
+    centerLng: 35.8866,
+    radiusKm: 15,
+    isActive: true,
+    admins: [],
+  },
+  {
+    id: 'c7',
+    name: 'Idlib',
+    centerLat: 35.9333,
+    centerLng: 36.6333,
+    radiusKm: 15,
+    isActive: false,
+    admins: [],
+    isDeleted: true,
+  },
 ];
 
 let dateCounter = 0;
@@ -56,44 +101,52 @@ function seedDate(): string {
   return new Date(2025, 0, dateCounter).toISOString();
 }
 
-const db: Region[] = [
-  ...CITIES.map<Region>((city) => ({
-    id: city.id,
-    name: city.name,
-    type: 'city',
-    isActive: city.isActive,
-    status: city.isActive ? 'active' : 'inactive',
-    assignedAdminId: city.adminId,
-    assignedAdminName: city.adminName,
-    createdAt: seedDate(),
-  })),
-  ...NEIGHBORHOODS.map<Region>((n) => ({
-    id: n.id,
-    name: n.name,
-    type: 'neighborhood',
-    cityId: n.cityId,
-    isActive: n.isActive,
-    status: n.isActive ? 'active' : 'inactive',
-    assignedAdminId: n.adminId,
-    assignedAdminName: n.adminName,
-    createdAt: seedDate(),
-  })),
-];
+const db: Region[] = SEEDS.map<Region>((seed) => ({
+  id: seed.id,
+  name: seed.name,
+  centerLat: seed.centerLat,
+  centerLng: seed.centerLng,
+  radiusKm: seed.radiusKm,
+  isActive: seed.isActive,
+  status: seed.isActive ? 'active' : 'inactive',
+  isDeleted: seed.isDeleted ?? false,
+  assignedAdminIds: seed.admins.map((admin) => admin.id),
+  assignedAdminNames: seed.admins.map((admin) => admin.name),
+  createdAt: seedDate(),
+}));
 
 export async function getRegions(params: RegionListParams): Promise<RegionListResult> {
   await mockDelay();
   return filterAndPaginateRegions([...db], params);
 }
 
+/** Find a single region by id INCLUDING soft-deleted ones (the detail page can show a deleted region). */
+export async function getRegionById(id: string): Promise<Region> {
+  await mockDelay();
+  const region = db.find((item) => item.id === id);
+  if (!region) throw new Error('Region not found');
+  return { ...region };
+}
+
+/** Live regions only (deleted ones never scope facilities); callers filter isActive. */
+export async function getScopeRegions(): Promise<Region[]> {
+  await mockDelay();
+  return db.filter((region) => !region.isDeleted).map((region) => ({ ...region }));
+}
+
 export async function createRegion(input: CreateRegionInput): Promise<Region> {
   await mockDelay();
   const region: Region = {
-    id: String((seq += 1)),
+    id: `r${(seq += 1)}`,
     name: input.name,
-    type: input.type,
-    cityId: input.type === 'neighborhood' ? input.cityId : undefined,
+    centerLat: input.centerLat,
+    centerLng: input.centerLng,
+    radiusKm: input.radiusKm,
     isActive: true,
     status: 'active',
+    isDeleted: false,
+    assignedAdminIds: [],
+    assignedAdminNames: [],
     createdAt: new Date().toISOString(),
   };
   db.unshift(region);
@@ -105,8 +158,9 @@ export async function updateRegion(id: string, input: UpdateRegionInput): Promis
   const region = db.find((item) => item.id === id);
   if (!region) throw new Error('Region not found');
   region.name = input.name;
-  region.type = input.type;
-  region.cityId = input.type === 'neighborhood' ? input.cityId : undefined;
+  region.centerLat = input.centerLat;
+  region.centerLng = input.centerLng;
+  region.radiusKm = input.radiusKm;
   return region;
 }
 
@@ -119,21 +173,30 @@ export async function toggleRegionActive(id: string, isActive: boolean): Promise
   }
 }
 
-export async function assignAdmin(
+/** Replace the whole admin assignment (many-to-many). Empty arrays = unassign all. */
+export async function assignAdmins(
   id: string,
-  adminId: string,
-  adminName?: string,
+  adminIds: string[],
+  adminNames: string[],
 ): Promise<void> {
   await mockDelay();
   const region = db.find((item) => item.id === id);
   if (region) {
-    region.assignedAdminId = adminId;
-    region.assignedAdminName = adminName;
+    region.assignedAdminIds = [...adminIds];
+    region.assignedAdminNames = [...adminNames];
   }
 }
 
+/** Soft delete — the region is hidden and drops out of facility scope, but kept for restore. */
 export async function deleteRegion(id: string): Promise<void> {
   await mockDelay();
-  const index = db.findIndex((item) => item.id === id);
-  if (index !== -1) db.splice(index, 1);
+  const region = db.find((item) => item.id === id);
+  if (region) region.isDeleted = true;
+}
+
+/** Restore a soft-deleted region back into the live list. */
+export async function restoreRegion(id: string): Promise<void> {
+  await mockDelay();
+  const region = db.find((item) => item.id === id);
+  if (region) region.isDeleted = false;
 }

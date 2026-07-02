@@ -72,7 +72,12 @@ export function Select({
       const target = event.target as Node;
       if (!rootRef.current?.contains(target) && !listRef.current?.contains(target)) close();
     };
-    const onReflow = () => close();
+    const onReflow = (event: Event) => {
+      // Scrolling INSIDE the menu must not close it — only an ancestor/page scroll
+      // (which would detach the fixed-positioned menu from its trigger) should.
+      if (event.type === 'scroll' && listRef.current?.contains(event.target as Node)) return;
+      close();
+    };
     document.addEventListener('mousedown', onPointerDown);
     window.addEventListener('scroll', onReflow, true);
     window.addEventListener('resize', onReflow);

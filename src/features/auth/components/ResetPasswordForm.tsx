@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Field, Input, Button } from '@ui';
+import { Field, PasswordInput, Button } from '@ui';
 import { PATHS } from '@app/router/paths';
 import { resetSchema, type ResetValues } from '../api/auth.schema';
 import { useResetPasswordMutation } from '../hooks/useAuthMutations';
@@ -31,17 +31,24 @@ export function ResetPasswordForm() {
         htmlFor="password"
         error={errors.password ? t(errors.password.message ?? '') : undefined}
       >
-        <Input id="password" type="password" autoComplete="new-password" {...register('password')} />
+        <PasswordInput
+          id="password"
+          autoComplete="new-password"
+          showLabel={t('auth.showPassword')}
+          hideLabel={t('auth.hidePassword')}
+          {...register('password')}
+        />
       </Field>
       <Field
         label={t('auth.confirmPassword')}
         htmlFor="confirmPassword"
         error={errors.confirmPassword ? t(errors.confirmPassword.message ?? '') : undefined}
       >
-        <Input
+        <PasswordInput
           id="confirmPassword"
-          type="password"
           autoComplete="new-password"
+          showLabel={t('auth.showPassword')}
+          hideLabel={t('auth.hidePassword')}
           {...register('confirmPassword')}
         />
       </Field>

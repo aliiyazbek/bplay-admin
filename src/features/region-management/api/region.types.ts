@@ -1,40 +1,67 @@
-export type RegionType = 'city' | 'neighborhood';
+/**
+ * Region Management — domain types.
+ *
+ * Per admin SRS 05 (RG1/RG7) a region is a GEOGRAPHIC CIRCLE: a name + a map
+ * center (lat/lng) + a radius in km. Entity (facility/player) membership is
+ * computed from coordinates (distance ≤ radius), never assigned by hand.
+ * Assignment to admins is many-to-many (FR-ADM-REGION-007).
+ */
+
 export type RegionStatus = 'active' | 'inactive';
 
 export interface Region {
   id: string;
   name: string;
-  type: RegionType;
-  /** Parent city id — set for neighborhoods. */
-  cityId?: string;
+  /** Circle center — the map picker writes these. */
+  centerLat: number;
+  centerLng: number;
+  /** Radius in kilometres (> 0). */
+  radiusKm: number;
   isActive: boolean;
   status: RegionStatus;
-  assignedAdminId?: string;
-  assignedAdminName?: string;
+  /** Soft-deleted: hidden from lists/scope by default, restorable. */
+  isDeleted: boolean;
+  /** Admins managing this region (many-to-many, FR-007). */
+  assignedAdminIds: string[];
+  assignedAdminNames: string[];
   createdAt?: string;
 }
 
-/** The raw backend shape (field names vary — normalised by toRegion). */
+/** Raw backend shape (snake_case, tolerant to alternate keys) — normalised by toRegion. */
 export interface RegionDto {
   id?: string | number;
   _id?: string;
   region_id?: string | number;
   name?: string;
-  city_name?: string;
-  neighborhood_name?: string;
-  type?: string;
-  city_id?: string | number;
-  cityId?: string;
+  center_lat?: number;
+  centerLat?: number;
+  lat?: number;
+  center_lng?: number;
+  centerLng?: number;
+  lng?: number;
+  radius_km?: number;
+  radiusKm?: number;
+  radius?: number;
   is_active?: boolean;
   isActive?: boolean;
   active?: boolean;
   status?: string;
-  assigned_admin_id?: string | number;
-  assignedAdminId?: string;
-  assigned_admin_name?: string;
-  assignedAdminName?: string;
+  is_deleted?: boolean;
+  isDeleted?: boolean;
+  deleted_at?: string | null;
+  assigned_admin_ids?: Array<string | number>;
+  assignedAdminIds?: string[];
+  assigned_admin_names?: string[];
+  assignedAdminNames?: string[];
   created_at?: string;
   createdAt?: string;
+}
+
+function num(...values: Array<number | undefined>): number {
+  for (const value of values) {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+  }
+  return 0;
 }
 
 export function toRegion(dto: RegionDto): Region {
@@ -48,31 +75,31 @@ export function toRegion(dto: RegionDto): Region {
           : dto.status
             ? dto.status.toLowerCase() === 'active'
             : true;
-  const type: RegionType = dto.type === 'neighborhood' ? 'neighborhood' : 'city';
-  const cityId =
-    dto.city_id !== undefined && dto.city_id !== null
-      ? String(dto.city_id)
-      : (dto.cityId ?? undefined);
-  const assignedAdminId =
-    dto.assigned_admin_id !== undefined && dto.assigned_admin_id !== null
-      ? String(dto.assigned_admin_id)
-      : (dto.assignedAdminId ?? undefined);
+  const adminIds = (dto.assigned_admin_ids ?? dto.assignedAdminIds ?? []).map(String);
+  const adminNames = dto.assigned_admin_names ?? dto.assignedAdminNames ?? [];
   return {
     id: String(dto.id ?? dto._id ?? dto.region_id ?? ''),
-    name: dto.name ?? dto.city_name ?? dto.neighborhood_name ?? '',
-    type,
-    cityId: type === 'neighborhood' ? cityId : undefined,
+    name: dto.name ?? '',
+    centerLat: num(dto.center_lat, dto.centerLat, dto.lat),
+    centerLng: num(dto.center_lng, dto.centerLng, dto.lng),
+    radiusKm: num(dto.radius_km, dto.radiusKm, dto.radius),
     isActive,
     status: isActive ? 'active' : 'inactive',
-    assignedAdminId,
-    assignedAdminName: dto.assigned_admin_name ?? dto.assignedAdminName ?? undefined,
+    isDeleted:
+      dto.is_deleted ?? dto.isDeleted ?? (dto.deleted_at != null ? true : false),
+    assignedAdminIds: adminIds,
+    assignedAdminNames: adminNames,
     createdAt: dto.createdAt ?? dto.created_at,
   };
 }
 
 export interface RegionListParams {
   q?: string;
-  type?: 'all' | RegionType;
+  status?: 'all' | RegionStatus;
+  /** Filter by whether the region has any admin assigned. */
+  assignment?: 'all' | 'assigned' | 'unassigned';
+  /** When true, list ONLY soft-deleted regions (the trash view); default hides them. */
+  showDeleted?: boolean;
   page?: number;
   pageSize?: number;
 }
@@ -86,13 +113,19 @@ export interface RegionListResult {
 
 export interface CreateRegionInput {
   name: string;
-  type: RegionType;
-  /** Required when type is 'neighborhood'. */
-  cityId?: string;
+  centerLat: number;
+  centerLng: number;
+  radiusKm: number;
 }
 
 export interface UpdateRegionInput {
   name: string;
-  type: RegionType;
-  cityId?: string;
+  centerLat: number;
+  centerLng: number;
+  radiusKm: number;
+}
+
+/** Many-to-many admin assignment for a region (replaces the whole set). */
+export interface AssignAdminsInput {
+  adminIds: string[];
 }

@@ -11,57 +11,71 @@ import {
   type UpdateRegionInput,
 } from './region.types';
 
-const CITIES_PATH = '/admin/regions/cities';
-const NEIGHBORHOODS_PATH = '/admin/regions/neighborhoods';
-const CITY_PATH = '/admin/regions/city';
-const NEIGHBORHOOD_PATH = '/admin/regions/neighborhood';
+const REGIONS_PATH = '/admin/regions';
 
 export async function getRegions(params: RegionListParams): Promise<RegionListResult> {
-  const [citiesRes, neighborhoodsRes] = await Promise.all([
-    apiClient.get(CITIES_PATH),
-    apiClient.get(NEIGHBORHOODS_PATH),
-  ]);
-  const cities = unwrapList<RegionDto>(citiesRes.data, ['cities']).map((dto) =>
-    toRegion({ ...dto, type: 'city' }),
-  );
-  const neighborhoods = unwrapList<RegionDto>(neighborhoodsRes.data, ['neighborhoods']).map((dto) =>
-    toRegion({ ...dto, type: 'neighborhood' }),
-  );
-  return filterAndPaginateRegions([...cities, ...neighborhoods], params);
+  const res = await apiClient.get(REGIONS_PATH);
+  const regions = unwrapList<RegionDto>(res.data, ['regions']).map(toRegion);
+  return filterAndPaginateRegions(regions, params);
+}
+
+/** Fetch a single region by id (may be soft-deleted — the detail page still shows it). */
+export async function getRegionById(id: string): Promise<Region> {
+  const res = await apiClient.get(`${REGIONS_PATH}/${id}`);
+  return toRegion(unwrap<RegionDto>(res.data));
+}
+
+/** Live regions with a geo circle (deleted ones never scope); callers filter isActive. */
+export async function getScopeRegions(): Promise<Region[]> {
+  const res = await apiClient.get(REGIONS_PATH);
+  return unwrapList<RegionDto>(res.data, ['regions'])
+    .map(toRegion)
+    .filter(
+      (region) =>
+        !region.isDeleted &&
+        typeof region.centerLat === 'number' &&
+        typeof region.centerLng === 'number' &&
+        typeof region.radiusKm === 'number',
+    );
 }
 
 export async function createRegion(input: CreateRegionInput): Promise<Region> {
-  const path = input.type === 'neighborhood' ? NEIGHBORHOOD_PATH : CITY_PATH;
-  const body =
-    input.type === 'neighborhood'
-      ? { name: input.name, city_id: input.cityId }
-      : { name: input.name };
-  const res = await apiClient.post(path, body);
-  return toRegion({ ...unwrap<RegionDto>(res.data), type: input.type });
+  const res = await apiClient.post(REGIONS_PATH, {
+    name: input.name,
+    center_lat: input.centerLat,
+    center_lng: input.centerLng,
+    radius_km: input.radiusKm,
+  });
+  return toRegion(unwrap<RegionDto>(res.data));
 }
 
 export async function updateRegion(id: string, input: UpdateRegionInput): Promise<Region> {
-  const path = input.type === 'neighborhood' ? NEIGHBORHOOD_PATH : CITY_PATH;
-  const body =
-    input.type === 'neighborhood'
-      ? { id, name: input.name, city_id: input.cityId }
-      : { id, name: input.name };
-  const res = await apiClient.post(`${path}/${id}`, body);
-  return toRegion({ ...unwrap<RegionDto>(res.data), type: input.type });
+  const res = await apiClient.patch(`${REGIONS_PATH}/${id}`, {
+    name: input.name,
+    center_lat: input.centerLat,
+    center_lng: input.centerLng,
+    radius_km: input.radiusKm,
+  });
+  return toRegion(unwrap<RegionDto>(res.data));
 }
 
 export async function toggleRegionActive(id: string, isActive: boolean): Promise<void> {
-  await apiClient.post(`/admin/regions/is_active/${id}`, { is_active: isActive });
+  await apiClient.post(`${REGIONS_PATH}/is_active/${id}`, { is_active: isActive });
 }
 
-export async function assignAdmin(
+/** Replace the whole admin assignment (many-to-many). Names are display-only here. */
+export async function assignAdmins(
   id: string,
-  adminId: string,
-  _adminName?: string,
+  adminIds: string[],
+  _adminNames: string[],
 ): Promise<void> {
-  await apiClient.post(`/admin/regions/assign/${id}`, { admin_id: adminId });
+  await apiClient.post(`${REGIONS_PATH}/assign/${id}`, { admin_ids: adminIds });
 }
 
 export async function deleteRegion(id: string): Promise<void> {
-  await apiClient.delete(`/admin/regions/${id}`);
+  await apiClient.delete(`${REGIONS_PATH}/${id}`);
+}
+
+export async function restoreRegion(id: string): Promise<void> {
+  await apiClient.post(`${REGIONS_PATH}/restore/${id}`);
 }

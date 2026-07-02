@@ -13,7 +13,8 @@ export function useLoginMutation() {
     mutationFn: login,
     onSuccess: (session) => {
       setSession(session);
-      navigate(session.role === 'super_admin' ? PATHS.adminManagement : PATHS.profile, {
+      // Admins land on their review desk; super admins on admin management.
+      navigate(session.role === 'super_admin' ? PATHS.adminManagement : PATHS.facilityManagement, {
         replace: true,
       });
     },

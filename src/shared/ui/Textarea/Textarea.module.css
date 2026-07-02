@@ -9,7 +9,7 @@
   border-radius: var(--radius-md);
   font-family: var(--font-sans);
   font-size: var(--text-base);
-  line-height: var(--leading-normal);
+  line-height: var(--leading-relaxed);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 .textarea::placeholder { color: var(--color-text-subtle); }
