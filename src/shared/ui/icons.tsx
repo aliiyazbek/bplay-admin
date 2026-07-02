@@ -1,0 +1,276 @@
+import type { SVGProps } from 'react';
+
+type IconProps = SVGProps<SVGSVGElement>;
+
+function Icon({ children, ...props }: IconProps) {
+  return (
+    <svg
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      {...props}
+    >
+      {children}
+    </svg>
+  );
+}
+
+export const PlusIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 5v14M5 12h14" />
+  </Icon>
+);
+
+export const SearchIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m21 21-4.35-4.35" />
+  </Icon>
+);
+
+export const XIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M18 6 6 18M6 6l12 12" />
+  </Icon>
+);
+
+export const CheckIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M20 6 9 17l-5-5" />
+  </Icon>
+);
+
+/** Points to the inline-start; add className="flipInRtl" to mirror in RTL. */
+export const ArrowStartIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M19 12H5M12 19l-7-7 7-7" />
+  </Icon>
+);
+
+export const ChevronEndIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m9 18 6-6-6-6" />
+  </Icon>
+);
+
+export const ChevronDownIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m6 9 6 6 6-6" />
+  </Icon>
+);
+
+export const AlertTriangleIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+    <path d="M12 9v4M12 17h.01" />
+  </Icon>
+);
+
+export const InfoIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 16v-4M12 8h.01" />
+  </Icon>
+);
+
+export const TrashIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+  </Icon>
+);
+
+export const EditIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" />
+  </Icon>
+);
+
+export const InboxIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+    <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z" />
+  </Icon>
+);
+
+export const MenuIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 12h18M3 6h18M3 18h18" />
+  </Icon>
+);
+
+export const EyeIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </Icon>
+);
+
+export const EyeOffIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+    <path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+    <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+    <path d="M2 2l20 20" />
+  </Icon>
+);
+
+export const UserPlusIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M19 8v6M22 11h-6" />
+  </Icon>
+);
+
+export const PowerIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 2v10" />
+    <path d="M18.4 6.6a9 9 0 1 1-12.77.04" />
+  </Icon>
+);
+
+export const BanIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="m4.9 4.9 14.2 14.2" />
+  </Icon>
+);
+
+export const UsersIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+  </Icon>
+);
+
+export const GlobeIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+  </Icon>
+);
+
+export const BuildingIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 21h18M6 21V7l6-4 6 4v14" />
+    <path d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01" />
+  </Icon>
+);
+
+export const UserIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </Icon>
+);
+
+export const LogoutIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+  </Icon>
+);
+
+export const StadiumIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="7" width="18" height="10" rx="2" />
+    <path d="M12 7v10" />
+    <circle cx="12" cy="12" r="2.5" />
+  </Icon>
+);
+
+/** Outline by default; pass `fill="currentColor"` for a solid star (RatingStars). */
+export const StarIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" />
+  </Icon>
+);
+
+export const MapPinIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+    <circle cx="12" cy="10" r="3" />
+  </Icon>
+);
+
+export const ClockIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 6v6l4 2" />
+  </Icon>
+);
+
+export const PhoneIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z" />
+  </Icon>
+);
+
+export const DocumentIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+  </Icon>
+);
+
+export const ImageIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <path d="m21 15-5-5L5 21" />
+  </Icon>
+);
+
+export const FilterIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3Z" />
+  </Icon>
+);
+
+export const CalendarIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M16 2v4M8 2v4M3 10h18" />
+  </Icon>
+);
+
+export const CameraIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z" />
+    <circle cx="12" cy="13" r="4" />
+  </Icon>
+);
+
+export const LockIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="11" width="18" height="11" rx="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </Icon>
+);
+
+/** The Bplay brand mark — a mint gradient tile (a legitimate brand asset, so brand hexes live here). */
+export function BrandMark({ size = 34 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden role="img">
+      <defs>
+        <linearGradient id="bplay-mark" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#ECFBE8" />
+          <stop offset="0.55" stopColor="#CDECC6" />
+          <stop offset="1" stopColor="#8BA888" />
+        </linearGradient>
+      </defs>
+      <rect x="3" y="3" width="34" height="34" rx="11" fill="url(#bplay-mark)" />
+      <path
+        d="M15 12.5h6.2c2.4 0 4 1.35 4 3.45 0 1.5-.85 2.55-2.1 2.95 1.55.35 2.6 1.5 2.6 3.2 0 2.25-1.75 3.65-4.45 3.65H15zm3.15 5.35h2.5c1.05 0 1.7-.5 1.7-1.4 0-.85-.65-1.35-1.7-1.35h-2.5zm0 5.4h2.7c1.15 0 1.85-.5 1.85-1.5 0-.95-.7-1.45-1.9-1.45h-2.65z"
+        fill="#0C1F17"
+      />
+    </svg>
+  );
+}

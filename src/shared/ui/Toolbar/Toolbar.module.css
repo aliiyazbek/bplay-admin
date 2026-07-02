@@ -1,0 +1,14 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+/* Search (first child) grows; filters keep a compact fixed width beside it. */
+.toolbar > :first-child {
+  flex: 1 1 260px;
+}
+.toolbar > :not(:first-child) {
+  flex: 0 0 auto;
+  inline-size: 200px;
+}
