@@ -22,6 +22,7 @@
 .sm { max-inline-size: var(--modal-sm); }
 .md { max-inline-size: var(--modal-md); }
 .lg { max-inline-size: var(--modal-lg); }
+.xl { max-inline-size: var(--modal-xl); }
 
 .header {
   display: flex;

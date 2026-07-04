@@ -22,16 +22,19 @@ export function OwnerStatusActions({ owner }: Props) {
 
   return (
     <div className={styles.actions}>
-      {actions.map((action) => (
-        <Button
-          key={action}
-          size="sm"
-          variant={actionVariant(action) === 'danger' ? 'danger' : 'secondary'}
-          onClick={() => setPending(action)}
-        >
-          {t(`owner.actions.${action}`)}
-        </Button>
-      ))}
+      {actions.map((action) => {
+        const variant = actionVariant(action);
+        return (
+          <Button
+            key={action}
+            size="sm"
+            variant={variant === 'primary' ? 'secondary' : variant}
+            onClick={() => setPending(action)}
+          >
+            {t(`owner.actions.${action}`)}
+          </Button>
+        );
+      })}
 
       <OwnerActionConfirm owner={owner} action={pending} onClose={() => setPending(null)} />
     </div>

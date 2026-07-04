@@ -15,15 +15,18 @@ interface ToastState {
 }
 
 let seq = 0;
-const AUTO_DISMISS_MS = 4000;
+
+/**
+ * Auto-dismiss length. Each <ToastCard> owns its own countdown (so it can pause
+ * on hover/focus/drag and animate out), while this store just holds the live
+ * list. Keep in sync with `--toast-duration` in Toaster.module.css.
+ */
+export const TOAST_DURATION_MS = 5000;
 
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
-  push: (variant, message) => {
-    const id = ++seq;
-    set((state) => ({ toasts: [...state.toasts, { id, variant, message }] }));
-    setTimeout(() => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })), AUTO_DISMISS_MS);
-  },
+  push: (variant, message) =>
+    set((state) => ({ toasts: [...state.toasts, { id: ++seq, variant, message }] })),
   dismiss: (id) => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
 }));
 

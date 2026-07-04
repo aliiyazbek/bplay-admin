@@ -19,6 +19,23 @@
   }
 }
 
+/* Initial-password row: the password input flexes, the Suggest button sits
+   alongside (wraps under it on very narrow screens). */
+.passwordRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.passwordRow > span {
+  flex: 1;
+  min-inline-size: 0;
+}
+@media (max-width: 480px) {
+  .passwordRow {
+    flex-wrap: wrap;
+  }
+}
+
 /* ---- Region multi-select picker ---- */
 .picker {
   display: flex;

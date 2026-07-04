@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { StatCard, BuildingIcon, StadiumIcon, MapPinIcon, UsersIcon, StarIcon } from '@ui';
+import { StatCard, BuildingIcon, MapPinIcon, UsersIcon, StarIcon } from '@ui';
 import type { RegionFacility } from '@features/facility-management/api';
 import type { Region } from '../api/region.types';
 import styles from './RegionStatCards.module.css';
@@ -10,17 +10,16 @@ interface Props {
 }
 
 /**
- * The KPI row for a region: total facilities, active/pending counts, managing
- * admins, summed monthly revenue (pre-formatted per locale) and the mean
- * rating across facilities that carry one.
+ * The KPI row for a region: total facilities, managing admins, summed monthly
+ * revenue (pre-formatted per locale) and the mean rating across facilities that
+ * carry one. The active/pending split lives in the "Facilities by status"
+ * breakdown below — kept out of here to avoid duplicating those counts.
  */
 export function RegionStatCards({ region, facilities }: Props) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language.startsWith('ar') ? 'ar-SY' : 'en-US';
 
   const total = facilities.length;
-  const activeCount = facilities.filter((facility) => facility.status === 'active').length;
-  const pendingCount = facilities.filter((facility) => facility.status === 'pending').length;
   const adminCount = region.assignedAdminIds.length;
 
   const revenue = facilities.reduce((sum, facility) => sum + facility.statistics.revenueSyp, 0);
@@ -51,20 +50,6 @@ export function RegionStatCards({ region, facilities }: Props) {
         value={total}
         icon={<BuildingIcon />}
         accent="primary"
-        countUp
-      />
-      <StatCard
-        label={t('region.detail.stats.activeFacilities')}
-        value={activeCount}
-        icon={<StadiumIcon />}
-        accent="info"
-        countUp
-      />
-      <StatCard
-        label={t('region.detail.stats.pendingFacilities')}
-        value={pendingCount}
-        icon={<StadiumIcon />}
-        accent="warning"
         countUp
       />
       <StatCard

@@ -28,7 +28,11 @@ export function availableActions(status: FacilityStatus): FacilityAction[] {
   }
 }
 
-/** The dialog/button variant for a given action (destructive ones are danger). */
-export function actionVariant(action: FacilityAction): 'primary' | 'danger' {
+/**
+ * The dialog/button variant for a given action: 'suspend' moves a facility into the
+ * Suspended state, so it uses the caution (orange) tone; 'reject' is danger.
+ */
+export function actionVariant(action: FacilityAction): 'primary' | 'danger' | 'caution' {
+  if (action === 'suspend') return 'caution';
   return action === 'approve' || action === 'reactivate' ? 'primary' : 'danger';
 }

@@ -45,6 +45,8 @@
 .secondary:hover:not(:disabled) { border-color: var(--color-primary-accent); box-shadow: var(--shadow-sm); }
 .danger { background: var(--color-danger); color: var(--color-on-primary); }
 .danger:hover:not(:disabled) { background: var(--color-danger-hover); }
+.caution { background: var(--color-caution); color: var(--color-on-primary); }
+.caution:hover:not(:disabled) { background: var(--color-caution-hover); }
 .ghost { background: transparent; color: var(--color-text-subtle); }
 .ghost:hover:not(:disabled) { background: var(--color-surface-2); color: var(--color-text); }
 

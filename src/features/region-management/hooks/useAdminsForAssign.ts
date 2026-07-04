@@ -12,6 +12,7 @@ export function useAdminsForAssign() {
         name: admin.name,
         email: admin.email,
         isActive: admin.isActive,
+        photoUrl: admin.photoUrl,
       })),
   });
 }

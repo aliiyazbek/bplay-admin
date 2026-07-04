@@ -30,6 +30,8 @@
 .ghost { background: transparent; }
 .danger { color: var(--color-danger); }
 .danger:hover:not(:disabled) { background: var(--status-danger-bg); color: var(--status-danger-text); }
+.caution { color: var(--status-caution-text); }
+.caution:hover:not(:disabled) { background: var(--status-caution-bg); color: var(--status-caution-text); }
 
 /* Tactile press for every icon button (kept last so it wins over variant hovers). */
 .iconBtn:active:not(:disabled) { transform: scale(0.92); }

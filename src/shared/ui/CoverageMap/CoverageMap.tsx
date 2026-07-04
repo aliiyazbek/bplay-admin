@@ -203,7 +203,10 @@ export function CoverageMap({
   return (
     <div className={clsx(styles.wrap, className)}>
       <div ref={containerRef} className={styles.map} data-testid={testId} />
-      {(legend || emptyLabel) && (
+      {/* Show the caption row only when it has content: the empty-state caption
+          when there are no pins, or the status legend when a caller supplies one.
+          Omitting `legend` while pins exist renders no empty strip. */}
+      {((pins.length === 0 && emptyLabel) || (pins.length > 0 && legend && legend.length > 0)) && (
         <div className={styles.legend}>
           {pins.length === 0 ? (
             <span className={styles.legendEmpty}>{emptyLabel}</span>

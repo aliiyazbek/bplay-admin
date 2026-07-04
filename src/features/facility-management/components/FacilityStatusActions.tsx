@@ -79,7 +79,7 @@ export function FacilityActionDialogs({
         }
         confirmText={reasonAction ? t(`facility.reason.${reasonAction}.confirm`) : ''}
         cancelText={t('common.cancel')}
-        variant="danger"
+        variant={reasonAction === 'suspend' ? 'caution' : 'danger'}
         minLength={10}
         isLoading={reasonMutation.isPending}
       />

@@ -41,6 +41,13 @@
 .row:hover .td {
   background: var(--color-surface-2);
 }
+.clickable {
+  cursor: pointer;
+}
+.clickable:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
 .center {
   text-align: center;
 }

@@ -16,3 +16,4 @@
 .warning { color: var(--status-warning-text); background: var(--status-warning-bg); border-color: var(--status-warning-border); }
 .neutral { color: var(--status-neutral-text); background: var(--status-neutral-bg); border-color: var(--status-neutral-border); }
 .info { color: var(--status-info-text); background: var(--status-info-bg); border-color: var(--status-info-border); }
+.caution { color: var(--status-caution-text); background: var(--status-caution-bg); border-color: var(--status-caution-border); }

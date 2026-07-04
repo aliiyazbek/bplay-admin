@@ -24,6 +24,9 @@ export function ChangePasswordModal({ isOpen, onClose }: Props) {
     formState: { errors },
   } = useForm<ChangePasswordValues>({
     resolver: zodResolver(changePasswordSchema),
+    // Validate after a field is touched (then live), so strength / mismatch /
+    // "same as current" errors surface as the user types — not only on submit.
+    mode: 'onTouched',
     defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
   });
 
@@ -72,7 +75,12 @@ export function ChangePasswordModal({ isOpen, onClose }: Props) {
           required
           error={errors.currentPassword ? t(errors.currentPassword.message ?? '') : undefined}
         >
-          <PasswordInput id="cp-current" autoComplete="current-password" {...toggles} {...register('currentPassword')} />
+          <PasswordInput
+            id="cp-current"
+            autoComplete="current-password"
+            {...toggles}
+            {...register('currentPassword', { deps: ['newPassword'] })}
+          />
         </Field>
         <Field
           label={t('profile.password.new')}
@@ -81,7 +89,12 @@ export function ChangePasswordModal({ isOpen, onClose }: Props) {
           hint={t('profile.password.hint')}
           error={errors.newPassword ? t(errors.newPassword.message ?? '') : undefined}
         >
-          <PasswordInput id="cp-new" autoComplete="new-password" {...toggles} {...register('newPassword')} />
+          <PasswordInput
+            id="cp-new"
+            autoComplete="new-password"
+            {...toggles}
+            {...register('newPassword', { deps: ['confirmPassword'] })}
+          />
         </Field>
         <Field
           label={t('profile.password.confirm')}

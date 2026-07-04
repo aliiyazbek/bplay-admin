@@ -94,7 +94,7 @@ export function RegionDetailActions({ region, onEdit, onAssign, onAddFacility }:
         {t('region.actions.edit')}
       </Button>
       <Button
-        variant={isActive ? 'danger' : 'primary'}
+        variant={isActive ? 'caution' : 'primary'}
         leftIcon={<PowerIcon />}
         onClick={toggleConfirm.open}
         data-testid="region-detail-toggle"
@@ -120,7 +120,7 @@ export function RegionDetailActions({ region, onEdit, onAssign, onAddFacility }:
         title={t(isActive ? 'region.deactivate.title' : 'region.activate.title')}
         message={t(isActive ? 'region.deactivate.message' : 'region.activate.message')}
         confirmText={t(isActive ? 'region.deactivate.confirm' : 'region.activate.confirm')}
-        variant={isActive ? 'danger' : 'primary'}
+        variant={isActive ? 'caution' : 'primary'}
         isLoading={toggle.isPending}
       />
 

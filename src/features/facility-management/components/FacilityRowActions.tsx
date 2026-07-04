@@ -27,17 +27,20 @@ export function FacilityRowActions({ item, onView }: FacilityRowActionsProps) {
         onClick={() => onView(item)}
         data-testid={`facility-row-view-${item.id}`}
       />
-      {actions.map((action) => (
-        <IconButton
-          key={action}
-          size="sm"
-          variant={actionVariant(action) === 'danger' ? 'danger' : 'ghost'}
-          label={t(`facility.actions.${action}`)}
-          icon={FACILITY_ACTION_ICONS[action]}
-          onClick={() => setPending(action)}
-          data-testid={`facility-row-${action}-${item.id}`}
-        />
-      ))}
+      {actions.map((action) => {
+        const variant = actionVariant(action);
+        return (
+          <IconButton
+            key={action}
+            size="sm"
+            variant={variant === 'primary' ? 'ghost' : variant}
+            label={t(`facility.actions.${action}`)}
+            icon={FACILITY_ACTION_ICONS[action]}
+            onClick={() => setPending(action)}
+            data-testid={`facility-row-${action}-${item.id}`}
+          />
+        );
+      })}
 
       <FacilityActionDialogs
         facility={{ id: item.id, name: item.name, status: item.status }}

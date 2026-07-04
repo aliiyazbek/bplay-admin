@@ -27,6 +27,8 @@
   --color-warning-bg: #33271c;
   --color-info: #7fb4e0;
   --color-info-bg: #1b2a36;
+  --color-caution: #fb923c;           /* suspend / deactivate action fill (orange) */
+  --color-caution-hover: #ea7a28;
 
   /* ---------- Surfaces (Pitch-Forest greens) ---------- */
   --color-bg: #0a1b13;                /* pitchDeepest — the stage the app floats on */
@@ -76,6 +78,9 @@
   --status-info-text: #93c5fd;        /* new / recurring (blue) */
   --status-info-bg: rgba(147, 197, 253, 0.12);
   --status-info-border: rgba(147, 197, 253, 0.35);
+  --status-caution-text: #fb923c;     /* suspended / paused — attention, reversible (orange) */
+  --status-caution-bg: rgba(251, 146, 60, 0.12);
+  --status-caution-border: rgba(251, 146, 60, 0.35);
 
   /* ---------- Spacing (4px base) ---------- */
   --space-1: 4px;
@@ -159,4 +164,5 @@
   --modal-sm: 420px;
   --modal-md: 560px;
   --modal-lg: 800px;
+  --modal-xl: 1040px;
 }

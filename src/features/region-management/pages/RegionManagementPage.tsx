@@ -11,6 +11,7 @@ import {
   Pagination,
   Badge,
   Button,
+  ClearFiltersBar,
   EmptyState,
   PlusIcon,
   InboxIcon,
@@ -44,6 +45,22 @@ export default function RegionManagementPage() {
   });
   const { data, isLoading, isError, refetch } = useRegionsQuery(params);
   const { data: facilityCounts } = useRegionFacilityCounts();
+
+  const hasActiveFilters =
+    (params.q ?? '') !== '' ||
+    (params.status ?? 'all') !== 'all' ||
+    (params.assignment ?? 'all') !== 'all' ||
+    (params.showDeleted ?? false);
+
+  const clearFilters = () =>
+    setParams((prev) => ({
+      ...prev,
+      q: '',
+      status: 'all',
+      assignment: 'all',
+      showDeleted: false,
+      page: 1,
+    }));
 
   const renderAdmins = (region: Region) => {
     const names = region.assignedAdminNames;
@@ -124,7 +141,17 @@ export default function RegionManagementPage() {
         }
       />
 
-      <Toolbar>
+      <Toolbar
+        end={
+          hasActiveFilters ? (
+            <ClearFiltersBar
+              count={data?.total ?? 0}
+              onClear={clearFilters}
+              testId="region-clear-filters"
+            />
+          ) : null
+        }
+      >
         <SearchInput
           value={params.q ?? ''}
           onChange={(q) => setParams((prev) => ({ ...prev, q, page: 1 }))}
