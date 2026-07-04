@@ -69,7 +69,7 @@ export function AppSidebar() {
       </div>
 
       <NavLink to={PATHS.profile} className={styles.profile} onClick={closeSidebar}>
-        <Avatar name={displayName} size="md" />
+        <Avatar src={user?.avatarUrl} name={displayName} size="md" />
         <span className={styles.userInfo}>
           <span className={styles.userName}>{displayName}</span>
           <span className={styles.userEmail}>{user?.email}</span>

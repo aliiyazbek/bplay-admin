@@ -51,6 +51,32 @@
   background: var(--color-surface-2);
 }
 
+/* The assigned-admin row is a button that opens the admin profile. */
+.rowInteractive {
+  inline-size: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+.rowInteractive:hover {
+  border-color: var(--color-primary);
+  background: var(--color-surface-3);
+}
+.rowInteractive:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rowInteractive:active {
+    transform: scale(0.99);
+  }
+}
+
 .meta {
   display: flex;
   flex: 1;

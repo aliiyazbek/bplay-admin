@@ -300,6 +300,31 @@ export function toRegionFacility(facility: Facility): RegionFacility {
   };
 }
 
+/**
+ * The minimal region context passed to the Add-Facility wizard when it is
+ * opened from a region's detail page. The wizard seeds the new facility's
+ * coordinates from the region center (so it falls inside the region circle)
+ * and skips the standalone location step. Carried in router navigation state.
+ */
+export interface FacilityRegionSeed {
+  id: string;
+  name: string;
+  centerLat: number;
+  centerLng: number;
+  radiusKm: number;
+}
+
+/** Pick the wizard-relevant fields off a region (drops extra region fields). */
+export function facilityRegionSeed(region: FacilityRegionSeed): FacilityRegionSeed {
+  return {
+    id: region.id,
+    name: region.name,
+    centerLat: region.centerLat,
+    centerLng: region.centerLng,
+    radiusKm: region.radiusKm,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // List query params / result
 // ---------------------------------------------------------------------------

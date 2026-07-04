@@ -64,7 +64,7 @@ const db: AdminRecord[] = SEEDS.map<AdminRecord>((seed, index) => ({
   scope: seed.scope,
   phone: `963${seed.phoneLocal}`,
   nationalId: seed.nationalId,
-  photoUrl: seed.photo ? `https://i.pravatar.cc/160?img=${seed.photo}` : undefined,
+  photoUrl: seed.photo ? `https://i.pravatar.cc/512?img=${seed.photo}` : undefined,
   isDeleted: seed.isDeleted ?? false,
   assignedRegionIds: [],
   assignedRegionNames: [],

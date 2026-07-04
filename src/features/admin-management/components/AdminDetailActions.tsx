@@ -102,7 +102,7 @@ export function AdminDetailActions({ admin, onEdit, onAssign, onResetPassword }:
         {t(nextScope === 'general' ? 'admin.actions.promote' : 'admin.actions.demote')}
       </Button>
       <Button
-        variant={isActive ? 'danger' : 'primary'}
+        variant={isActive ? 'caution' : 'primary'}
         leftIcon={<PowerIcon />}
         onClick={toggleConfirm.open}
         data-testid="admin-detail-toggle"
@@ -142,7 +142,7 @@ export function AdminDetailActions({ admin, onEdit, onAssign, onResetPassword }:
         title={t(isActive ? 'admin.suspend.title' : 'admin.activate.title')}
         message={t(isActive ? 'admin.suspend.message' : 'admin.activate.message')}
         confirmText={t(isActive ? 'admin.suspend.confirm' : 'admin.activate.confirm')}
-        variant={isActive ? 'danger' : 'primary'}
+        variant={isActive ? 'caution' : 'primary'}
         isLoading={toggle.isPending}
       />
 

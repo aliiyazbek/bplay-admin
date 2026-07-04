@@ -62,8 +62,28 @@
   font-size: var(--text-sm);
 }
 
-.owner {
+/* Owner cell opens the owner profile — a link-styled button inside the row. */
+.ownerLink {
+  max-inline-size: 100%;
+  overflow: hidden;
+  padding: 0;
+  border: none;
+  background: none;
   color: var(--color-text-muted);
+  font: inherit;
   font-size: var(--text-sm);
+  text-align: start;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.ownerLink:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+.ownerLink:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }

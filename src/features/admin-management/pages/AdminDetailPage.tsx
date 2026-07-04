@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,6 +13,9 @@ import {
   ImageLightbox,
   CoverageMap,
   InboxIcon,
+  PhoneIcon,
+  DocumentIcon,
+  CalendarIcon,
   toLocalPhone,
   type BadgeVariant,
   type CoverageCircle,
@@ -211,23 +214,15 @@ function AdminDetailContent({ admin, editDisclosure, assignDisclosure, resetDisc
         </div>
 
         <div className={styles.rows}>
-          <span className={styles.row}>
-            <span className={styles.label}>{t('admin.form.phone')}</span>
-            <span className={styles.value} dir="ltr">
-              {phoneLabel}
-            </span>
-          </span>
-          <span className={styles.row}>
-            <span className={styles.label}>{t('admin.form.nationalId')}</span>
-            <span className={styles.value} dir="ltr">
-              {admin.nationalId || '—'}
-            </span>
-          </span>
+          <MetaItem icon={<PhoneIcon />} label={t('admin.form.phone')} value={phoneLabel} ltr />
+          <MetaItem
+            icon={<DocumentIcon />}
+            label={t('admin.form.nationalId')}
+            value={admin.nationalId || '—'}
+            ltr
+          />
           {createdLabel && (
-            <span className={styles.row}>
-              <span className={styles.label}>{t('admin.detail.createdAt')}</span>
-              <span className={styles.value}>{createdLabel}</span>
-            </span>
+            <MetaItem icon={<CalendarIcon />} label={t('admin.detail.createdAt')} value={createdLabel} />
           )}
         </div>
       </Card>
@@ -274,8 +269,38 @@ function AdminDetailContent({ admin, editDisclosure, assignDisclosure, resetDisc
         alt={admin.name}
         title={admin.name}
         closeLabel={t('common.close')}
+        zoomInLabel={t('common.zoomIn')}
+        zoomOutLabel={t('common.zoomOut')}
+        resetLabel={t('common.resetZoom')}
         fallback={<Avatar name={admin.name} size="xl" />}
       />
     </div>
+  );
+}
+
+/** One contact meta item in the hero: an icon chip + stacked label / value. */
+function MetaItem({
+  icon,
+  label,
+  value,
+  ltr,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  ltr?: boolean;
+}) {
+  return (
+    <span className={styles.row}>
+      <span className={styles.rowIcon} aria-hidden>
+        {icon}
+      </span>
+      <span className={styles.rowText}>
+        <span className={styles.label}>{label}</span>
+        <span className={styles.value} dir={ltr ? 'ltr' : undefined}>
+          {value}
+        </span>
+      </span>
+    </span>
   );
 }

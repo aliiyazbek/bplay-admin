@@ -6,7 +6,7 @@ export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonEle
   icon: ReactNode;
   /** Required accessible name (icon-only buttons must be labelled). */
   label: string;
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'caution';
   size?: 'sm' | 'md' | 'lg';
 }
 

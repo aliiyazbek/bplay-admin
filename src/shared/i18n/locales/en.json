@@ -12,11 +12,17 @@
     "retry": "Retry",
     "back": "Back",
     "close": "Close",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetZoom": "Reset zoom",
     "clearFilters": "Clear filters",
+    "resultsCount": "{{count}} results",
     "loadError": "Failed to load. Please try again.",
     "signOut": "Sign out",
     "language": "Language",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "dismiss": "Dismiss",
+    "notifications": "Notifications"
   },
   "nav": {
     "adminManagement": "Admins",
@@ -34,7 +40,7 @@
     "pending": "Pending",
     "approved": "Approved",
     "rejected": "Rejected",
-    "inactive": "Inactive",
+    "inactive": "Suspended",
     "blocked": "Blocked",
     "review": "Under review",
     "verified": "Verified"
@@ -98,6 +104,8 @@
       "phone": "Phone",
       "nationalId": "National number",
       "password": "Initial password",
+      "passwordHint": "At least 8 characters with an uppercase letter, a number and a symbol.",
+      "suggestPassword": "Suggest",
       "scope": "Role",
       "scopeHint": "General oversight sees the whole platform; a region admin manages the regions you assign.",
       "regions": "Assigned regions",
@@ -384,7 +392,7 @@
       "courtsCount": "{{count}} courts",
       "pitchSelf": "This facility is a single bookable pitch.",
       "courtActive": "Active",
-      "courtInactive": "Inactive",
+      "courtInactive": "Suspended",
       "photos": "Photos",
       "documents": "Documents",
       "noPhotos": "No photos uploaded yet.",
@@ -423,6 +431,10 @@
       "back": "Back",
       "next": "Next",
       "create": "Create facility",
+      "regionSeed": {
+        "title": "Adding to {{region}}",
+        "hint": "Location is set from this region — the location step is skipped."
+      },
       "owner": {
         "label": "Facility owner",
         "placeholder": "Choose an owner…",
@@ -503,7 +515,7 @@
       "facilities": "Facilities",
       "status": "Status"
     },
-    "status": { "active": "Active", "inactive": "Inactive" },
+    "status": { "active": "Active", "inactive": "Suspended" },
     "filter": {
       "all": "All",
       "assignment": "Admin assignment",
@@ -556,7 +568,7 @@
       "activeOnly": "Only active admins",
       "noMatch": "No admins match your filters",
       "freeTag": "Unassigned",
-      "inactiveTag": "Inactive"
+      "inactiveTag": "Suspended"
     },
     "actions": {
       "edit": "Edit",
@@ -602,12 +614,14 @@
       },
       "admins": {
         "empty": "No admins assigned to this region yet.",
-        "manage": "Manage admins"
+        "manage": "Manage admins",
+        "view": "Open {{name}}'s profile"
       },
       "facilities": {
         "empty": "No facilities fall inside this region yet.",
         "add": "Add facility",
-        "view": "View facility"
+        "view": "View facility",
+        "viewOwner": "Open owner {{name}}"
       },
       "map": {
         "legend": "Facility status",
@@ -621,7 +635,7 @@
     },
     "deactivate": {
       "title": "Deactivate region",
-      "message": "This region becomes inactive and stops covering facilities — the ones inside it move to “outside regions” for the super admin. This is reversible.",
+      "message": "This region becomes suspended and stops covering facilities — the ones inside it move to “outside regions” for the super admin. This is reversible.",
       "confirm": "Deactivate"
     },
     "delete": {

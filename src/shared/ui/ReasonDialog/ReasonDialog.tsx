@@ -15,7 +15,7 @@ export interface ReasonDialogProps {
   reasonPlaceholder?: string;
   confirmText: string;
   cancelText?: string;
-  variant?: 'primary' | 'danger';
+  variant?: 'primary' | 'danger' | 'caution';
   minLength?: number;
   isLoading?: boolean;
 }

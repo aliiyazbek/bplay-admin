@@ -1,8 +1,19 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm, Controller, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { Modal, Field, Input, PasswordInput, PhoneInput, Select, Button, toLocalPhone } from '@ui';
+import {
+  Modal,
+  Field,
+  Input,
+  PasswordInput,
+  PhoneInput,
+  Select,
+  Button,
+  SparklesIcon,
+  toLocalPhone,
+} from '@ui';
+import { generateStrongPassword } from '@shared/lib/password';
 import {
   createAdminSchema,
   editAdminSchema,
@@ -56,6 +67,8 @@ export function AdminFormModal({ isOpen, onClose, admin }: Props) {
     [admin, isOpen],
   );
 
+  const [passwordVisible, setPasswordVisible] = useState(false);
+
   const {
     control,
     register,
@@ -68,11 +81,24 @@ export function AdminFormModal({ isOpen, onClose, admin }: Props) {
     resolver: zodResolver(
       isEditing ? editAdminSchema : createAdminSchema,
     ) as unknown as Resolver<AdminFormValues>,
+    // Validate on blur then live — errors surface as the user moves through the
+    // form (identical UX for Add and Edit), not only on submit.
+    mode: 'onTouched',
     defaultValues: BLANK,
     values,
   });
 
   const scope = watch('scope');
+
+  /** Fill a strong, rule-compliant initial password and reveal it. */
+  const suggestPassword = () => {
+    setValue('password', generateStrongPassword(), {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+    setPasswordVisible(true);
+  };
 
   const submit = handleSubmit(async (data) => {
     const regionIds = data.scope === 'regional' ? data.regionIds : [];
@@ -153,28 +179,58 @@ export function AdminFormModal({ isOpen, onClose, admin }: Props) {
             />
           </Field>
           <Field label={t('admin.form.nationalId')} htmlFor="admin-national" error={err('nationalId')}>
-            <Input
-              id="admin-national"
-              inputMode="numeric"
-              maxLength={11}
-              dir="ltr"
-              placeholder="XXXXXXXXXXX"
-              data-testid="admin-national"
-              {...register('nationalId')}
+            <Controller
+              control={control}
+              name="nationalId"
+              render={({ field }) => (
+                <Input
+                  id="admin-national"
+                  inputMode="numeric"
+                  maxLength={11}
+                  dir="ltr"
+                  placeholder="XXXXXXXXXXX"
+                  data-testid="admin-national"
+                  value={field.value}
+                  onBlur={field.onBlur}
+                  // Digits only — strip anything else (also handles pasted text).
+                  onChange={(event) =>
+                    field.onChange(event.target.value.replace(/\D/g, '').slice(0, 11))
+                  }
+                />
+              )}
             />
           </Field>
         </div>
 
         {!isEditing && (
-          <Field label={t('admin.form.password')} htmlFor="admin-password" error={err('password')}>
-            <PasswordInput
-              id="admin-password"
-              autoComplete="new-password"
-              showLabel={t('auth.showPassword')}
-              hideLabel={t('auth.hidePassword')}
-              data-testid="admin-password"
-              {...register('password')}
-            />
+          <Field
+            label={t('admin.form.password')}
+            htmlFor="admin-password"
+            error={err('password')}
+            hint={t('admin.form.passwordHint')}
+          >
+            <div className={styles.passwordRow}>
+              <PasswordInput
+                id="admin-password"
+                autoComplete="new-password"
+                showLabel={t('auth.showPassword')}
+                hideLabel={t('auth.hidePassword')}
+                visible={passwordVisible}
+                onVisibleChange={setPasswordVisible}
+                data-testid="admin-password"
+                {...register('password')}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                leftIcon={<SparklesIcon />}
+                onClick={suggestPassword}
+                data-testid="admin-suggest-password"
+              >
+                {t('admin.form.suggestPassword')}
+              </Button>
+            </div>
           </Field>
         )}
 
@@ -201,7 +257,7 @@ export function AdminFormModal({ isOpen, onClose, admin }: Props) {
         </Field>
 
         {scope === 'regional' && (
-          <Field label={t('admin.form.regions')} error={err('regionIds')}>
+          <Field label={t('admin.form.regions')} error={err('regionIds')} tintControl={false}>
             <Controller
               control={control}
               name="regionIds"

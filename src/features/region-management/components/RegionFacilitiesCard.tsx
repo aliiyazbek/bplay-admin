@@ -18,7 +18,7 @@ import {
 } from '@ui';
 import { statusToBadgeVariant } from '@shared/utils/status';
 import { PATHS } from '@app/router/paths';
-import type { RegionFacility } from '@features/facility-management/api';
+import { facilityRegionSeed, type RegionFacility } from '@features/facility-management/api';
 import type { Region } from '../api/region.types';
 import styles from './RegionFacilitiesCard.module.css';
 
@@ -34,7 +34,7 @@ interface Props {
  * fall inside the region circle. Each row links to the facility profile; the
  * header carries an "Add facility" button.
  */
-export function RegionFacilitiesCard({ facilities, isLoading }: Props) {
+export function RegionFacilitiesCard({ region, facilities, isLoading }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -67,7 +67,20 @@ export function RegionFacilitiesCard({ facilities, isLoading }: Props) {
       {
         key: 'owner',
         header: t('facility.col.owner'),
-        render: (facility) => <span className={styles.owner}>{facility.ownerName}</span>,
+        render: (facility) => (
+          <button
+            type="button"
+            className={styles.ownerLink}
+            onClick={(event) => {
+              event.stopPropagation();
+              navigate(`${PATHS.ownerManagement}/${facility.ownerId}`);
+            }}
+            aria-label={t('region.detail.facilities.viewOwner', { name: facility.ownerName })}
+            data-testid={`region-facility-owner-${facility.id}`}
+          >
+            {facility.ownerName}
+          </button>
+        ),
       },
       {
         key: 'kind',
@@ -102,7 +115,11 @@ export function RegionFacilitiesCard({ facilities, isLoading }: Props) {
           variant="secondary"
           size="sm"
           leftIcon={<PlusIcon />}
-          onClick={() => navigate(PATHS.facilityManagementNew)}
+          onClick={() =>
+            navigate(PATHS.facilityManagementNew, {
+              state: { region: facilityRegionSeed(region) },
+            })
+          }
         >
           {t('region.detail.facilities.add')}
         </Button>
@@ -113,6 +130,7 @@ export function RegionFacilitiesCard({ facilities, isLoading }: Props) {
         data={facilities}
         isLoading={isLoading}
         getRowId={(facility) => facility.id}
+        onRowClick={(facility) => navigate(`${PATHS.facilityManagement}/${facility.id}`)}
         emptyState={
           <EmptyState icon={<InboxIcon />} title={t('region.detail.facilities.empty')} />
         }

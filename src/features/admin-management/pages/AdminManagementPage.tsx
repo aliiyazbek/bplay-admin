@@ -11,6 +11,7 @@ import {
   Pagination,
   Badge,
   Button,
+  ClearFiltersBar,
   Avatar,
   EmptyState,
   PlusIcon,
@@ -48,6 +49,24 @@ export default function AdminManagementPage() {
     page: 1,
   });
   const { data, isLoading, isError, refetch } = useAdminsQuery(params);
+
+  const hasActiveFilters =
+    (params.q ?? '') !== '' ||
+    (params.status ?? 'all') !== 'all' ||
+    (params.scope ?? 'all') !== 'all' ||
+    (params.assignment ?? 'all') !== 'all' ||
+    (params.showDeleted ?? false);
+
+  const clearFilters = () =>
+    setParams((prev) => ({
+      ...prev,
+      q: '',
+      status: 'all',
+      scope: 'all',
+      assignment: 'all',
+      showDeleted: false,
+      page: 1,
+    }));
 
   const openDetail = (admin: Admin) => navigate(`${PATHS.adminManagement}/${admin.id}`);
 
@@ -115,7 +134,17 @@ export default function AdminManagementPage() {
         }
       />
 
-      <Toolbar>
+      <Toolbar
+        end={
+          hasActiveFilters ? (
+            <ClearFiltersBar
+              count={data?.total ?? 0}
+              onClear={clearFilters}
+              testId="admin-clear-filters"
+            />
+          ) : null
+        }
+      >
         <SearchInput
           value={params.q ?? ''}
           onChange={(q) => setParams((prev) => ({ ...prev, q, page: 1 }))}

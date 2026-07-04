@@ -95,7 +95,7 @@ export function AdminRowActions({ admin, onView, onEdit, onAssign }: Props) {
       )}
       <IconButton
         size="sm"
-        variant={isActive ? 'danger' : 'ghost'}
+        variant={isActive ? 'caution' : 'ghost'}
         label={t(isActive ? 'admin.actions.suspend' : 'admin.actions.activate')}
         icon={<PowerIcon />}
         onClick={suspendConfirm.open}
@@ -118,7 +118,7 @@ export function AdminRowActions({ admin, onView, onEdit, onAssign }: Props) {
         title={t(isActive ? 'admin.suspend.title' : 'admin.activate.title')}
         message={t(isActive ? 'admin.suspend.message' : 'admin.activate.message')}
         confirmText={t(isActive ? 'admin.suspend.confirm' : 'admin.activate.confirm')}
-        variant={isActive ? 'danger' : 'primary'}
+        variant={isActive ? 'caution' : 'primary'}
         isLoading={toggle.isPending}
       />
 

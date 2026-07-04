@@ -11,12 +11,14 @@ export type {
   FacilityLocation,
   FacilityStatistics,
   RegionFacility,
+  FacilityRegionSeed,
 } from './facility.types';
 export {
   FACILITY_STATUSES,
   FACILITY_KINDS,
   FACILITY_LEGEND_STATUSES,
   facilityStatusTone,
+  facilityRegionSeed,
 } from './facility.types';
 
 export const getFacilities = impl.getFacilities;

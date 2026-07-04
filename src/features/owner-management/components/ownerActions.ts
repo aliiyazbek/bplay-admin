@@ -21,7 +21,11 @@ export function availableActions(owner: Owner): OwnerAction[] {
   return actions;
 }
 
-/** The ConfirmDialog variant for a given action (destructive ones are danger). */
-export function actionVariant(action: OwnerAction): 'primary' | 'danger' {
-  return action === 'reject' || action === 'block' || action === 'disable' ? 'danger' : 'primary';
+/**
+ * The ConfirmDialog variant for a given action: 'disable' pauses an owner into the
+ * Suspended state, so it uses the caution (orange) tone; reject/block are danger.
+ */
+export function actionVariant(action: OwnerAction): 'primary' | 'danger' | 'caution' {
+  if (action === 'disable') return 'caution';
+  return action === 'reject' || action === 'block' ? 'danger' : 'primary';
 }

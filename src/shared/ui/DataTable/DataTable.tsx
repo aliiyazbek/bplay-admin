@@ -22,6 +22,12 @@ export interface DataTableProps<T> {
   emptyState?: ReactNode;
   getRowId: (row: T) => string;
   rowActions?: (row: T) => ReactNode;
+  /**
+   * Makes each row clickable (e.g. open a detail page). Rows become keyboard
+   * focusable and respond to Enter/Space; nested buttons/links should call
+   * `event.stopPropagation()` to run their own action instead.
+   */
+  onRowClick?: (row: T) => void;
 }
 
 const SKELETON_ROWS = 6;
@@ -35,6 +41,7 @@ export function DataTable<T>({
   emptyState,
   getRowId,
   rowActions,
+  onRowClick,
 }: DataTableProps<T>) {
   const colCount = columns.length + (rowActions ? 1 : 0);
 
@@ -83,7 +90,23 @@ export function DataTable<T>({
             data.map((row) => {
               const id = getRowId(row);
               return (
-                <tr key={id} className={styles.row} data-testid={`row-${id}`}>
+                <tr
+                  key={id}
+                  className={clsx(styles.row, onRowClick && styles.clickable)}
+                  data-testid={`row-${id}`}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  onKeyDown={
+                    onRowClick
+                      ? (event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            onRowClick(row);
+                          }
+                        }
+                      : undefined
+                  }
+                >
                   {columns.map((column) => (
                     <td key={column.key} className={clsx(styles.td, column.align && styles[column.align])}>
                       {column.render
@@ -92,7 +115,12 @@ export function DataTable<T>({
                     </td>
                   ))}
                   {rowActions && (
-                    <td className={clsx(styles.td, styles.end, styles.actions)}>{rowActions(row)}</td>
+                    <td
+                      className={clsx(styles.td, styles.end, styles.actions)}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {rowActions(row)}
+                    </td>
                   )}
                 </tr>
               );

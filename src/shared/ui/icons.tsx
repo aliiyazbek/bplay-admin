@@ -248,6 +248,19 @@ export const CameraIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const MinusIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M5 12h14" />
+  </Icon>
+);
+
+export const SparklesIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z" />
+    <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14Z" />
+  </Icon>
+);
+
 export const LockIcon = (p: IconProps) => (
   <Icon {...p}>
     <rect x="3" y="11" width="18" height="11" rx="2" />

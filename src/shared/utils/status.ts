@@ -12,10 +12,16 @@ export function statusToBadgeVariant(status: string | null | undefined): BadgeVa
   if (['pending', 'review', 'under_review', 'processing', 'in_review'].includes(s)) {
     return 'warning';
   }
-  if (['rejected', 'suspended', 'owner_suspended', 'blocked', 'failed', 'banned', 'expired'].includes(s)) {
+  // "Suspended" family — a reversible, attention-worthy paused state. Its own
+  // (orange) colour so it never reads as terminal red (deleted/blocked/rejected)
+  // nor as calm neutral grey. Both 'suspended' and 'inactive' surface as Suspended.
+  if (['suspended', 'inactive'].includes(s)) {
+    return 'caution';
+  }
+  if (['rejected', 'owner_suspended', 'blocked', 'failed', 'banned', 'expired'].includes(s)) {
     return 'danger';
   }
-  if (['inactive', 'maintenance', 'cancelled', 'canceled', 'disabled', 'archived'].includes(s)) {
+  if (['maintenance', 'cancelled', 'canceled', 'disabled', 'archived'].includes(s)) {
     return 'neutral';
   }
   return 'info';

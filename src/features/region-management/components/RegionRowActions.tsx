@@ -113,7 +113,7 @@ export function RegionRowActions({ region, onView, onEdit, onAssign }: Props) {
       />
       <IconButton
         size="sm"
-        variant={isActive ? 'danger' : 'ghost'}
+        variant={isActive ? 'caution' : 'ghost'}
         label={t(isActive ? 'region.actions.deactivate' : 'region.actions.activate')}
         icon={<PowerIcon />}
         onClick={toggleConfirm.open}
@@ -136,7 +136,7 @@ export function RegionRowActions({ region, onView, onEdit, onAssign }: Props) {
         title={t(isActive ? 'region.deactivate.title' : 'region.activate.title')}
         message={t(isActive ? 'region.deactivate.message' : 'region.activate.message')}
         confirmText={t(isActive ? 'region.deactivate.confirm' : 'region.activate.confirm')}
-        variant={isActive ? 'danger' : 'primary'}
+        variant={isActive ? 'caution' : 'primary'}
         isLoading={toggle.isPending}
       />
 

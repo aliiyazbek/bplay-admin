@@ -15,7 +15,7 @@ import { useDisclosure, type Disclosure } from '@shared/hooks/useDisclosure';
 import { statusToBadgeVariant } from '@shared/utils/status';
 import { googleMapsLink, formatLatLng } from '@shared/lib/geo';
 import { PATHS } from '@app/router/paths';
-import { FACILITY_STATUSES } from '@features/facility-management/api';
+import { FACILITY_STATUSES, facilityRegionSeed } from '@features/facility-management/api';
 import type { FacilityStatus, RegionFacility } from '@features/facility-management/api';
 import { useRegionQuery } from '../hooks/useRegionQuery';
 import { useRegionFacilities } from '../hooks/useRegionFacilities';
@@ -69,7 +69,11 @@ export default function RegionDetailPage() {
               region={region}
               onEdit={editDisclosure.open}
               onAssign={assignDisclosure.open}
-              onAddFacility={() => navigate(PATHS.facilityManagementNew)}
+              onAddFacility={() =>
+                navigate(PATHS.facilityManagementNew, {
+                  state: { region: facilityRegionSeed(region) },
+                })
+              }
             />
           ) : undefined
         }

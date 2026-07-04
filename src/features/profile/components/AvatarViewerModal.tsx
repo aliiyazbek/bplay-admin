@@ -19,6 +19,9 @@ export function AvatarViewerModal({ isOpen, onClose, src, name }: Props) {
       alt={name}
       title={t('profile.viewer.title')}
       closeLabel={t('common.close')}
+      zoomInLabel={t('common.zoomIn')}
+      zoomOutLabel={t('common.zoomOut')}
+      resetLabel={t('common.resetZoom')}
       fallback={<Avatar name={name} size="xl" />}
     />
   );
