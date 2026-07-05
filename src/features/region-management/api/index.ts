@@ -6,6 +6,7 @@ const impl = USE_MOCKS ? mock : real;
 
 export const getRegions = impl.getRegions;
 export const getRegionById = impl.getRegionById;
+export const getRegionStats = impl.getRegionStats;
 export const getScopeRegions = impl.getScopeRegions;
 export const createRegion = impl.createRegion;
 export const updateRegion = impl.updateRegion;

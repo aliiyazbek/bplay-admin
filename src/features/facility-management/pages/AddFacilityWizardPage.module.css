@@ -3,8 +3,15 @@
   margin-inline: auto;
 }
 
+.loading {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--space-16);
+}
+
 /* Region-seeded banner: shown when the wizard is opened from a region's detail
-   page. Signals the location step is pre-filled and skipped. */
+   page. The location step is pre-centred on the region so the exact point is set
+   inside its circle. */
 .regionSeed {
   display: flex;
   align-items: center;

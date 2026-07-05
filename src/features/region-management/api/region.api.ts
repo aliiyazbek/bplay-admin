@@ -7,6 +7,7 @@ import {
   type RegionDto,
   type RegionListParams,
   type RegionListResult,
+  type RegionStats,
   type CreateRegionInput,
   type UpdateRegionInput,
 } from './region.types';
@@ -23,6 +24,19 @@ export async function getRegions(params: RegionListParams): Promise<RegionListRe
 export async function getRegionById(id: string): Promise<Region> {
   const res = await apiClient.get(`${REGIONS_PATH}/${id}`);
   return toRegion(unwrap<RegionDto>(res.data));
+}
+
+/** Platform-wide region counts — derived client-side until a stats endpoint exists. */
+export async function getRegionStats(): Promise<RegionStats> {
+  const res = await apiClient.get(REGIONS_PATH);
+  const live = unwrapList<RegionDto>(res.data, ['regions'])
+    .map(toRegion)
+    .filter((region) => !region.isDeleted);
+  return {
+    total: live.length,
+    active: live.filter((region) => region.isActive).length,
+    unassigned: live.filter((region) => region.assignedAdminIds.length === 0).length,
+  };
 }
 
 /** Live regions with a geo circle (deleted ones never scope); callers filter isActive. */

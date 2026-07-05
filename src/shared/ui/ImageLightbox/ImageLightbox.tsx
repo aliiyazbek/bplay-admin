@@ -1,26 +1,39 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { Modal } from '../Modal/Modal';
 import { IconButton } from '../IconButton/IconButton';
-import { PlusIcon, MinusIcon } from '../icons';
+import { PlusIcon, MinusIcon, ChevronStartIcon, ChevronEndIcon } from '../icons';
 import styles from './ImageLightbox.module.css';
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
 const STEP = 0.5;
 
+/** One item in a media gallery — an image (zoom/pan) or a video (native controls). */
+export interface LightboxItem {
+  kind: 'image' | 'video';
+  src: string;
+  alt?: string;
+}
+
 export interface ImageLightboxProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Image source; when absent, `fallback` is shown instead. */
+  /** Single-image source (legacy API); when absent and `items` is empty, `fallback` shows. */
   src?: string;
+  /** Multi-item gallery (images + video). Takes precedence over `src` when non-empty. */
+  items?: LightboxItem[];
+  /** Starting gallery index when `items` is used. */
+  initialIndex?: number;
   alt: string;
   title?: string;
   closeLabel?: string;
-  /** Rendered when there is no `src` (e.g. an initials Avatar). */
+  /** Rendered when there is no media (e.g. an initials Avatar). */
   fallback?: ReactNode;
   zoomInLabel?: string;
   zoomOutLabel?: string;
   resetLabel?: string;
+  prevLabel?: string;
+  nextLabel?: string;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -28,15 +41,18 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 /**
- * A large, framed image viewer built on the shared Modal (focus-trap, Esc /
- * overlay close, theme chrome). The image fills the stage by default and can be
- * zoomed (buttons, scroll wheel, double-click) and panned by dragging when
- * zoomed. A fallback node is shown when there is no image.
+ * A large, framed media viewer built on the shared Modal (focus-trap, Esc /
+ * overlay close, theme chrome). Images fill the stage and can be zoomed (buttons,
+ * scroll wheel, double-click) and panned when zoomed; videos render native
+ * `<video controls>`. Passing `items` turns it into a gallery with prev/next
+ * navigation. The single-image `src` API is preserved and unchanged.
  */
 export function ImageLightbox({
   isOpen,
   onClose,
   src,
+  items,
+  initialIndex = 0,
   alt,
   title,
   closeLabel,
@@ -44,14 +60,24 @@ export function ImageLightbox({
   zoomInLabel = 'Zoom in',
   zoomOutLabel = 'Zoom out',
   resetLabel = 'Reset zoom',
+  prevLabel = 'Previous',
+  nextLabel = 'Next',
 }: ImageLightboxProps) {
+  const gallery: LightboxItem[] =
+    items && items.length > 0 ? items : src ? [{ kind: 'image', src, alt }] : [];
+  const hasMany = gallery.length > 1;
+
   const stageRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
   const scaleRef = useRef(scale);
   scaleRef.current = scale;
+
+  const current = gallery[index];
+  const isImage = current?.kind === 'image';
 
   const reset = useCallback(() => {
     setScale(1);
@@ -64,25 +90,39 @@ export function ImageLightbox({
     if (clamped === MIN_SCALE) setOffset({ x: 0, y: 0 });
   }, []);
 
-  // Reset zoom/pan whenever the viewer opens or the image changes.
+  // On open, jump to the requested item and clear any prior zoom/pan.
   useEffect(() => {
-    if (isOpen) reset();
-  }, [isOpen, src, reset]);
+    if (isOpen) {
+      setIndex(clamp(initialIndex, 0, Math.max(0, gallery.length - 1)));
+      reset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
-  // Scroll-to-zoom. Attached non-passively so preventDefault stops page scroll.
+  // Reset zoom/pan whenever the shown item changes.
+  useEffect(() => {
+    reset();
+  }, [index, reset]);
+
+  // Scroll-to-zoom (images only). Attached non-passively so preventDefault stops page scroll.
   useEffect(() => {
     const stage = stageRef.current;
-    if (!stage || !isOpen || !src) return;
+    if (!stage || !isOpen || !isImage) return;
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       applyScale(scaleRef.current + (event.deltaY < 0 ? STEP : -STEP));
     };
     stage.addEventListener('wheel', onWheel, { passive: false });
     return () => stage.removeEventListener('wheel', onWheel);
-  }, [isOpen, src, applyScale]);
+  }, [isOpen, isImage, index, applyScale]);
+
+  const step = (delta: number) => {
+    if (gallery.length === 0) return;
+    setIndex((i) => (i + delta + gallery.length) % gallery.length);
+  };
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (scale <= MIN_SCALE) return;
+    if (!isImage || scale <= MIN_SCALE) return;
     dragRef.current = { x: event.clientX, y: event.clientY, ox: offset.x, oy: offset.y };
     setDragging(true);
     event.currentTarget.setPointerCapture?.(event.pointerId);
@@ -105,30 +145,58 @@ export function ImageLightbox({
         <div
           ref={stageRef}
           className={styles.stage}
-          data-zoomed={zoomed ? '' : undefined}
+          data-zoomed={isImage && zoomed ? '' : undefined}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerLeave={endDrag}
-          onDoubleClick={() => (zoomed ? reset() : applyScale(2))}
+          onDoubleClick={isImage ? () => (zoomed ? reset() : applyScale(2)) : undefined}
         >
-          {src ? (
-            <img
-              className={styles.image}
-              src={src}
-              alt={alt}
-              draggable={false}
-              style={{
-                transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
-                transition: dragging ? 'none' : undefined,
-              }}
-            />
+          {current ? (
+            current.kind === 'video' ? (
+              <video key={current.src} className={styles.video} src={current.src} controls />
+            ) : (
+              <img
+                className={styles.image}
+                src={current.src}
+                alt={current.alt ?? alt}
+                draggable={false}
+                style={{
+                  transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
+                  transition: dragging ? 'none' : undefined,
+                }}
+              />
+            )
           ) : (
             <div className={styles.fallback}>{fallback}</div>
           )}
+
+          {hasMany && (
+            <>
+              <IconButton
+                size="sm"
+                variant="secondary"
+                className={`${styles.navBtn} ${styles.navPrev}`}
+                label={prevLabel}
+                icon={<ChevronStartIcon className="flipInRtl" />}
+                onClick={() => step(-1)}
+              />
+              <IconButton
+                size="sm"
+                variant="secondary"
+                className={`${styles.navBtn} ${styles.navNext}`}
+                label={nextLabel}
+                icon={<ChevronEndIcon className="flipInRtl" />}
+                onClick={() => step(1)}
+              />
+              <span className={styles.counter} aria-hidden>
+                {index + 1} / {gallery.length}
+              </span>
+            </>
+          )}
         </div>
 
-        {src && (
+        {isImage && (
           <div className={styles.controls}>
             <IconButton
               size="sm"

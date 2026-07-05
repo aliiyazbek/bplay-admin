@@ -1,6 +1,6 @@
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Button, CheckIcon } from '@ui';
+import { Avatar, Button, CheckIcon, clsx } from '@ui';
 import { PhotoStrip } from './PhotoStrip';
 import { RegionTag } from './RegionTag';
 import { AgeBadge } from './AgeBadge';
@@ -23,14 +23,27 @@ export interface FacilityReviewCardProps {
   onView: (item: FacilityListItem) => void;
   onApprove: (item: FacilityListItem) => void;
   onReject: (item: FacilityListItem) => void;
+  /** When true, a selection checkbox is shown for bulk review. */
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: (item: FacilityListItem) => void;
 }
 
 /**
  * One pending submission on the review desk. Purely presentational — the page
- * owns the confirm/reason dialogs and mutations behind the three callbacks.
- * Rendered as a motion item so a `queueGridVariants` parent staggers it in.
+ * owns the confirm/reason dialogs and mutations behind the callbacks. Rendered as
+ * a motion item so a `queueGridVariants` parent staggers it in; an optional
+ * checkbox drives bulk selection.
  */
-export function FacilityReviewCard({ item, onView, onApprove, onReject }: FacilityReviewCardProps) {
+export function FacilityReviewCard({
+  item,
+  onView,
+  onApprove,
+  onReject,
+  selectable = false,
+  selected = false,
+  onToggleSelect,
+}: FacilityReviewCardProps) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
@@ -41,10 +54,21 @@ export function FacilityReviewCard({ item, onView, onApprove, onReject }: Facili
 
   return (
     <motion.article
-      className={styles.card}
+      className={clsx(styles.card, selected && styles.selected)}
       variants={cardVariants}
       data-testid={`facility-card-${item.id}`}
     >
+      {selectable && (
+        <label className={styles.select}>
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={() => onToggleSelect?.(item)}
+            aria-label={t('facility.bulk.selectOne', { name: item.name })}
+            data-testid={`facility-select-${item.id}`}
+          />
+        </label>
+      )}
       <PhotoStrip images={item.images} kind={item.kind} name={item.name} />
 
       <div className={styles.body}>

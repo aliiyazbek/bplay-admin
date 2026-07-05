@@ -10,79 +10,159 @@ import {
   DataTable,
   Pagination,
   Badge,
-  EmptyState,
   UserCell,
+  Button,
+  ClearFiltersBar,
+  EmptyState,
+  PlusIcon,
   InboxIcon,
   type Column,
 } from '@ui';
-import { statusToBadgeVariant } from '@shared/utils/status';
+import { useDisclosure } from '@shared/hooks/useDisclosure';
 import { PATHS } from '@app/router/paths';
 import { useOwnersQuery } from '../hooks/useOwnersQuery';
+import { useOwnerStats } from '../hooks/useOwnerStats';
+import { OwnerStatCards } from '../components/OwnerStatCards';
 import { OwnerRowActions } from '../components/OwnerRowActions';
-import type { Owner, OwnerListParams } from '../api/owner.types';
+import { OwnerFormModal } from '../components/OwnerFormModal';
+import {
+  ownerState,
+  ownerStateBadgeVariant,
+  ownerTrustTier,
+  OWNER_TRUST_VARIANT,
+  type Owner,
+  type OwnerListParams,
+} from '../api/owner.types';
+
+const INITIAL: OwnerListParams = {
+  q: '',
+  status: 'all',
+  facilities: 'all',
+  joined: 'all',
+  page: 1,
+};
 
 export default function OwnerManagementPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [params, setParams] = useState<OwnerListParams>({ q: '', status: 'all', page: 1 });
+  const create = useDisclosure();
+  const [params, setParams] = useState<OwnerListParams>(INITIAL);
   const { data, isLoading, isError, refetch } = useOwnersQuery(params);
+  const { data: stats } = useOwnerStats();
 
   const openProfile = (owner: Owner) => navigate(`${PATHS.ownerManagement}/${owner.id}`);
+  const patch = (next: Partial<OwnerListParams>) =>
+    setParams((prev) => ({ ...prev, ...next, page: 1 }));
+
+  const hasActiveFilters =
+    (params.q ?? '') !== '' ||
+    (params.status ?? 'all') !== 'all' ||
+    (params.facilities ?? 'all') !== 'all' ||
+    (params.joined ?? 'all') !== 'all';
 
   const columns: Column<Owner>[] = [
     {
       key: 'name',
       header: t('owner.col.name'),
-      render: (owner) => <UserCell name={owner.name} email={owner.email} />,
-    },
-    { key: 'phone', header: t('owner.col.phone') },
-    { key: 'region', header: t('owner.col.region'), render: (owner) => owner.region || '—' },
-    {
-      key: 'verificationStatus',
-      header: t('owner.col.verification'),
       render: (owner) => (
-        <Badge variant={statusToBadgeVariant(owner.verificationStatus)}>
-          {t(`status.${owner.verificationStatus}`)}
+        <UserCell
+          name={owner.name}
+          email={owner.email}
+          photoUrl={owner.photoUrl}
+          onClick={() => openProfile(owner)}
+          testId={`owner-name-${owner.id}`}
+        />
+      ),
+    },
+    {
+      key: 'trust',
+      header: t('owner.col.trust'),
+      align: 'center',
+      render: (owner) => (
+        <Badge variant={OWNER_TRUST_VARIANT[ownerTrustTier(owner.trustScore)]}>
+          {owner.trustScore}
         </Badge>
       ),
     },
     {
+      key: 'facilities',
+      header: t('owner.col.facilities'),
+      align: 'center',
+      render: (owner) => owner.facilitiesCount ?? 0,
+    },
+    {
       key: 'status',
       header: t('owner.col.status'),
-      render: (owner) => (
-        <Badge variant={statusToBadgeVariant(owner.status)}>{t(`status.${owner.status}`)}</Badge>
-      ),
+      render: (owner) => {
+        const state = ownerState(owner);
+        return <Badge variant={ownerStateBadgeVariant(state)}>{t(`owner.state.${state}`)}</Badge>;
+      },
     },
   ];
 
   return (
     <PageContainer>
-      <PageHeader title={t('owner.title')} subtitle={t('owner.subtitle')} />
+      <PageHeader
+        title={t('owner.title')}
+        subtitle={t('owner.subtitle')}
+        actions={
+          <Button leftIcon={<PlusIcon />} onClick={create.open} data-testid="owner-create">
+            {t('owner.create.title')}
+          </Button>
+        }
+      />
 
-      <Toolbar>
+      <OwnerStatCards stats={stats} />
+
+      <Toolbar
+        end={
+          hasActiveFilters ? (
+            <ClearFiltersBar
+              count={data?.total ?? 0}
+              onClear={() => setParams(INITIAL)}
+              testId="owner-clear-filters"
+            />
+          ) : null
+        }
+      >
         <SearchInput
           value={params.q ?? ''}
-          onChange={(q) => setParams((prev) => ({ ...prev, q, page: 1 }))}
+          onChange={(q) => patch({ q })}
           placeholder={t('owner.search')}
         />
         <Select
           aria-label={t('owner.col.status')}
-          value={params.status}
-          onChange={(value) =>
-            setParams((prev) => ({
-              ...prev,
-              status: value as OwnerListParams['status'],
-              page: 1,
-            }))
-          }
+          value={params.status ?? 'all'}
+          onChange={(value) => patch({ status: value as OwnerListParams['status'] })}
           options={[
-            { value: 'all', label: t('status.all') },
-            { value: 'pending', label: t('status.pending') },
-            { value: 'approved', label: t('status.approved') },
-            { value: 'active', label: t('status.active') },
-            { value: 'inactive', label: t('status.inactive') },
-            { value: 'rejected', label: t('status.rejected') },
-            { value: 'blocked', label: t('status.blocked') },
+            { value: 'all', label: t('owner.filter.allStatus') },
+            { value: 'under_review', label: t('owner.state.under_review') },
+            { value: 'active', label: t('owner.state.active') },
+            { value: 'rejected', label: t('owner.state.rejected') },
+            { value: 'suspended', label: t('owner.state.suspended') },
+            { value: 'blocked', label: t('owner.state.blocked') },
+          ]}
+        />
+        <Select
+          aria-label={t('owner.col.facilities')}
+          value={params.facilities ?? 'all'}
+          onChange={(value) => patch({ facilities: value as OwnerListParams['facilities'] })}
+          options={[
+            { value: 'all', label: t('owner.filter.allFacilities') },
+            { value: 'has', label: t('owner.filter.hasFacilities') },
+            { value: 'none', label: t('owner.filter.noFacilities') },
+          ]}
+        />
+        <Select
+          aria-label={t('owner.filter.joined')}
+          value={params.joined ?? 'all'}
+          onChange={(value) => patch({ joined: value as OwnerListParams['joined'] })}
+          options={[
+            { value: 'all', label: t('owner.filter.joinedAll') },
+            { value: '7d', label: t('owner.filter.joined7d') },
+            { value: '30d', label: t('owner.filter.joined30d') },
+            { value: '90d', label: t('owner.filter.joined90d') },
+            { value: 'year', label: t('owner.filter.joinedYear') },
           ]}
         />
       </Toolbar>
@@ -109,6 +189,8 @@ export default function OwnerManagementPage() {
         pageCount={data?.pageCount ?? 1}
         onPageChange={(page) => setParams((prev) => ({ ...prev, page }))}
       />
+
+      <OwnerFormModal isOpen={create.isOpen} onClose={create.close} />
     </PageContainer>
   );
 }

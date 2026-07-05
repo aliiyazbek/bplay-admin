@@ -17,6 +17,10 @@ const RegionManagementPage = lazy(() => import('@features/region-management/page
 const RegionDetailPage = lazy(() => import('@features/region-management/pages/RegionDetailPage'));
 const OwnerManagementPage = lazy(() => import('@features/owner-management/pages/OwnerManagementPage'));
 const OwnerProfilePage = lazy(() => import('@features/owner-management/pages/OwnerProfilePage'));
+const PlayerManagementPage = lazy(
+  () => import('@features/player-management/pages/PlayerManagementPage'),
+);
+const PlayerProfilePage = lazy(() => import('@features/player-management/pages/PlayerProfilePage'));
 const FacilityManagementPage = lazy(
   () => import('@features/facility-management/pages/FacilityManagementPage'),
 );
@@ -26,6 +30,10 @@ const AddFacilityWizardPage = lazy(
 const FacilityProfilePage = lazy(
   () => import('@features/facility-management/pages/FacilityProfilePage'),
 );
+const CommunityManagementPage = lazy(
+  () => import('@features/community-management/pages/CommunityManagementPage'),
+);
+const PostDetailPage = lazy(() => import('@features/community-management/pages/PostDetailPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const DashboardLayout = lazy(() => import('@app/layouts/DashboardLayout'));
 
@@ -115,6 +123,22 @@ export default function AppRouter() {
               }
             />
             <Route
+              path="player-management"
+              element={
+                <RequireRole role="super_admin">
+                  <PlayerManagementPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="player-management/:playerId"
+              element={
+                <RequireRole role="super_admin">
+                  <PlayerProfilePage />
+                </RequireRole>
+              }
+            />
+            <Route
               path="facility-management"
               element={
                 <RequireAnyRole roles={['super_admin', 'admin']}>
@@ -131,10 +155,34 @@ export default function AppRouter() {
               }
             />
             <Route
+              path="facility-management/:facilityId/edit"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <AddFacilityWizardPage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
               path="facility-management/:facilityId"
               element={
                 <RequireAnyRole roles={['super_admin', 'admin']}>
                   <FacilityProfilePage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
+              path="community-management"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <CommunityManagementPage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
+              path="community-management/:postId"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <PostDetailPage />
                 </RequireAnyRole>
               }
             />

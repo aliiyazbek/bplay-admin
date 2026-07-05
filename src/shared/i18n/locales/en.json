@@ -15,6 +15,7 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "resetZoom": "Reset zoom",
+    "actions": "Actions",
     "clearFilters": "Clear filters",
     "resultsCount": "{{count}} results",
     "loadError": "Failed to load. Please try again.",
@@ -28,9 +29,203 @@
     "adminManagement": "Admins",
     "regionManagement": "Regions",
     "ownerManagement": "Owners",
+    "playerManagement": "Players",
     "facilityManagement": "Facilities",
+    "communityManagement": "Community",
     "profile": "Profile",
     "dashboard": "Dashboard"
+  },
+  "player": {
+    "title": "Player Management",
+    "subtitle": "View and moderate the players on the platform",
+    "search": "Search players…",
+    "stats": {
+      "total": "Total players",
+      "active": "Active",
+      "suspended": "Suspended",
+      "blocked": "Blocked"
+    },
+    "col": {
+      "name": "Player",
+      "city": "City",
+      "plan": "Plan",
+      "rating": "Rating",
+      "status": "Status",
+      "phone": "Phone",
+      "joined": "Joined"
+    },
+    "state": { "active": "Active", "suspended": "Suspended", "blocked": "Blocked" },
+    "accountType": { "free": "Free", "paid": "Paid" },
+    "filter": {
+      "allStatus": "All statuses",
+      "allPlans": "All accounts",
+      "allCities": "All cities",
+      "sport": "Sport",
+      "allSports": "All sports",
+      "joined": "Joined",
+      "joinedAll": "Any time",
+      "joined7d": "Last 7 days",
+      "joined30d": "Last 30 days",
+      "joined90d": "Last 90 days",
+      "joinedYear": "Last year"
+    },
+    "actions": {
+      "view": "View details",
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "block": "Block",
+      "unblock": "Unblock"
+    },
+    "confirm": {
+      "suspend": { "title": "Suspend this player?", "message": "{{name}} will lose access until reactivated." },
+      "activate": { "title": "Activate this player?", "message": "{{name}} will regain access immediately." },
+      "block": { "title": "Block this player?", "message": "{{name}} will be permanently banned from the platform." },
+      "unblock": { "title": "Unblock this player?", "message": "{{name}} will be able to use the platform again." },
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Explain the reason for this action (at least 10 characters)…"
+    },
+    "toast": {
+      "suspend": "Player suspended",
+      "activate": "Player activated",
+      "block": "Player blocked",
+      "unblock": "Player unblocked",
+      "ratingHidden": "Review hidden",
+      "ratingShown": "Review restored",
+      "reportResolved": "Report resolved",
+      "reportDismissed": "Report dismissed",
+      "suspensionLifted": "Booking suspension lifted"
+    },
+    "empty": { "title": "No players found", "desc": "No players match the current filters." },
+    "profile": {
+      "title": "Player",
+      "subtitle": "Player profile & activity",
+      "viewPhoto": "View photo",
+      "notFound": "Player not found"
+    },
+    "tabs": {
+      "aria": "Player sections",
+      "overview": "Overview",
+      "posts": "Posts",
+      "bookings": "Bookings",
+      "subscriptions": "Subscriptions",
+      "rooms": "Play Rooms",
+      "ratings": "Ratings",
+      "reports": "Reports"
+    },
+    "detail": {
+      "stats": {
+        "bookings": "Total bookings",
+        "spent": "Total spent",
+        "rooms": "Play rooms",
+        "rating": "Rating",
+        "currency": "SYP"
+      },
+      "attention": {
+        "title": "Needs attention",
+        "blocked": "This player is blocked and cannot use the platform.",
+        "suspended": "This player is suspended and cannot sign in.",
+        "unverified": "This player's email is not verified yet.",
+        "bookingSuspended": "This player is temporarily suspended from booking (no-show violations).",
+        "openReports": "{{count}} open report(s) filed against this player."
+      }
+    },
+    "about": {
+      "title": "Profile",
+      "gender": "Gender",
+      "dob": "Date of birth",
+      "city": "City",
+      "joined": "Member since",
+      "sports": "Sports"
+    },
+    "location": {
+      "title": "Location",
+      "viewOnMap": "View on Google Maps",
+      "empty": "This player hasn't shared a location."
+    },
+    "gender": { "male": "Male", "female": "Female" },
+    "sport": {
+      "football": "Football",
+      "padel": "Padel",
+      "tennis": "Tennis",
+      "basketball": "Basketball",
+      "volleyball": "Volleyball",
+      "swimming": "Swimming"
+    },
+    "skill": { "beginner": "Beginner", "intermediate": "Intermediate", "advanced": "Advanced", "pro": "Pro" },
+    "account": {
+      "title": "Account & security",
+      "type": "Membership",
+      "email": "Email",
+      "twoFactor": "Two-factor auth",
+      "noShow": "No-show violations",
+      "bookingSuspended": "Booking status",
+      "verified": "Verified",
+      "unverified": "Unverified",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "violations": "{{count}} violation(s)",
+      "suspendedUntil": "Suspended until {{date}}",
+      "suspendedActive": "Suspended",
+      "liftSuspension": "Lift booking suspension"
+    },
+    "bookings": {
+      "facility": "Facility",
+      "sport": "Sport",
+      "date": "Date",
+      "amount": "Amount",
+      "payment": "Payment",
+      "status": "Status",
+      "empty": "No bookings yet."
+    },
+    "bookingStatus": { "upcoming": "Upcoming", "completed": "Completed", "cancelled": "Cancelled", "no_show": "No-show" },
+    "payment": { "cash": "Cash", "transfer": "Transfer" },
+    "rooms": {
+      "match": "Match",
+      "date": "Date",
+      "role": "Role",
+      "players": "Players",
+      "status": "Status",
+      "empty": "No play rooms yet."
+    },
+    "matchStyle": { "friendly": "Friendly", "competitive": "Competitive", "training": "Training" },
+    "roomType": { "public": "Public", "private": "Private" },
+    "roomRole": { "leader": "Leader", "member": "Member" },
+    "roomStatus": { "open": "Open", "full": "Full", "ended": "Ended", "cancelled": "Cancelled" },
+    "memberships": {
+      "title": "Club memberships",
+      "club": "Club",
+      "price": "Price",
+      "period": "Period",
+      "autoRenew": "Auto-renew",
+      "status": "Status",
+      "empty": "No club memberships.",
+      "autoOn": "On",
+      "autoOff": "Off"
+    },
+    "membershipStatus": { "active": "Active", "expired": "Expired", "suspended": "Suspended", "cancelled": "Cancelled" },
+    "subscription": {
+      "title": "Bplay subscription",
+      "free": "Free account",
+      "freeDesc": "This player has no active paid Bplay plan.",
+      "price": "Price",
+      "started": "Started",
+      "renews": "Renews",
+      "autoRenew": "Auto-renew",
+      "invoices": "Invoice history"
+    },
+    "subscriptionStatus": { "active": "Active", "expired": "Expired" },
+    "billing": { "monthly": "Monthly", "annual": "Annual" },
+    "ratings": { "empty": "No ratings left yet.", "hiddenTag": "Hidden", "show": "Show review", "hide": "Hide review" },
+    "ratingTarget": { "facility": "Facility", "club": "Club", "player": "Player" },
+    "reports": {
+      "empty": "No reports.",
+      "resolve": "Resolve",
+      "dismiss": "Dismiss",
+      "resolution": "Resolution",
+      "direction": { "filed": "Filed by player", "against": "Against player" },
+      "context": { "room": "Play room", "chat": "Chat", "community": "Community", "booking": "Booking" }
+    },
+    "reportStatus": { "open": "Open", "reviewing": "Reviewing", "resolved": "Resolved", "dismissed": "Dismissed" }
   },
   "status": {
     "all": "All",
@@ -80,6 +275,12 @@
     "invite": "Add admin",
     "search": "Search admins…",
     "deletedTag": "Deleted",
+    "stats": {
+      "total": "Total admins",
+      "active": "Active",
+      "regional": "Region admins",
+      "unassigned": "Unassigned"
+    },
     "col": { "name": "Name", "scope": "Role", "regions": "Regions", "status": "Status" },
     "scope": {
       "general": "General oversight",
@@ -244,7 +445,186 @@
       "wrongCurrent": "Current password is incorrect"
     }
   },
-  "owner": {"title":"Owner Management","subtitle":"Review owner requests, manage verification, and maintain owner access","search":"Search owners…","col":{"name":"Owner","email":"Email","phone":"Phone","region":"Region","status":"Status","verification":"Verification","trustTier":"Trust tier","active":"Active","created":"Created"},"empty":{"title":"No owners found","desc":"No owners match the current filters."},"value":{"yes":"Yes","no":"No"},"tier":{"basic":"Basic","verified":"Verified","premium":"Premium"},"actions":{"view":"View","approve":"Approve","reject":"Reject","activate":"Activate","disable":"Disable","block":"Block"},"confirm":{"approve":{"title":"Approve this owner?","message":"{{name}} will be approved and their account activated."},"reject":{"title":"Reject this owner?","message":"{{name}}'s verification will be rejected."},"activate":{"title":"Activate this owner?","message":"{{name}} will regain access immediately."},"disable":{"title":"Disable this owner?","message":"{{name}} will lose access until reactivated."},"block":{"title":"Block this owner?","message":"{{name}} will be blocked from the platform."}},"toast":{"approve":"Owner approved","reject":"Owner rejected","activate":"Owner activated","disable":"Owner disabled","block":"Owner blocked"},"profile":{"title":"Owner Profile","subtitle":"Review registration details, verification status, and documents","notFound":"Owner not found","statusSection":"Status","documents":"Verification documents","noDocuments":"No verification documents uploaded.","preview":"Preview"}},
+  "owner": {
+    "title": "Owner Management",
+    "subtitle": "Review owner requests, manage verification, and maintain owner access",
+    "search": "Search owners…",
+    "tabs": {
+      "aria": "Owner sections",
+      "overview": "Overview",
+      "posts": "Posts"
+    },
+    "col": {
+      "name": "Owner",
+      "phone": "Phone",
+      "status": "Account",
+      "trust": "Trust",
+      "facilities": "Facilities",
+      "nationalId": "National number",
+      "created": "Joined"
+    },
+    "stats": {
+      "total": "Total owners",
+      "pending": "Under review",
+      "active": "Active",
+      "blocked": "Blocked"
+    },
+    "state": {
+      "under_review": "Under review",
+      "active": "Active",
+      "rejected": "Rejected",
+      "suspended": "Suspended",
+      "blocked": "Blocked"
+    },
+    "trust": { "basic": "Basic", "verified": "Verified", "trusted": "Trusted" },
+    "intent": { "sports_club": "Sports club", "independent_court": "Independent court" },
+    "filter": {
+      "allStatus": "All statuses",
+      "allFacilities": "All owners",
+      "hasFacilities": "Has facilities",
+      "noFacilities": "No facilities",
+      "joined": "Joined",
+      "joinedAll": "Any time",
+      "joined7d": "Last 7 days",
+      "joined30d": "Last 30 days",
+      "joined90d": "Last 90 days",
+      "joinedYear": "This year"
+    },
+    "empty": { "title": "No owners found", "desc": "No owners match the current filters." },
+    "actions": {
+      "view": "View",
+      "approve": "Approve",
+      "reject": "Reject",
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "block": "Block",
+      "unblock": "Unblock"
+    },
+    "confirm": {
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Explain the decision — the owner is notified.",
+      "approve": { "title": "Approve this owner?", "message": "{{name}} will be approved and their account activated." },
+      "reject": { "title": "Reject this owner?", "message": "{{name}}'s account will be rejected. They are notified with the reason." },
+      "suspend": { "title": "Suspend this owner?", "message": "{{name}} will lose access until reactivated." },
+      "activate": { "title": "Activate this owner?", "message": "{{name}} will regain access immediately." },
+      "block": { "title": "Block this owner?", "message": "{{name}} will be permanently blocked; all their facilities are disabled and future bookings cancelled." },
+      "unblock": { "title": "Unblock this owner?", "message": "{{name}} will regain access to the platform." }
+    },
+    "toast": {
+      "approve": "Owner approved",
+      "reject": "Owner rejected",
+      "suspend": "Owner suspended",
+      "activate": "Owner activated",
+      "block": "Owner blocked",
+      "unblock": "Owner unblocked",
+      "created": "Owner created"
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email",
+      "phoneInvalid": "Enter a valid Syrian mobile (9 digits, e.g. 9XXXXXXXX)",
+      "nationalIdInvalid": "The national number must be exactly 11 digits"
+    },
+    "create": {
+      "title": "Add owner",
+      "submit": "Create owner",
+      "name": "Full name",
+      "email": "Business email",
+      "phone": "Phone",
+      "nationalId": "National number",
+      "intent": "Intended facility",
+      "hint": "A one-time temporary password is generated. The owner must change it on first sign-in.",
+      "done": "{{name}} was created. Share the temporary password below — it is shown once.",
+      "tempPassword": "Temporary password",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copiedToast": "Temporary password copied",
+      "warn": "This password is shown once. The owner is forced to change it on first sign-in; there is no admin reset."
+    },
+    "doc": {
+      "view": "View",
+      "accept": "Accept",
+      "reject": "Reject",
+      "openTab": "Open in a new tab",
+      "noPreview": "No document to display.",
+      "pdfHint": "If the file doesn't preview here, use “Open in a new tab” above.",
+      "rejectTitle": "Reject document?",
+      "rejectMessage": "The {{type}} will be rejected. The owner is notified and can re-upload.",
+      "type": {
+        "national_id": "National ID",
+        "business_license": "Business license",
+        "tax_certificate": "Tax certificate",
+        "ownership_proof": "Ownership proof",
+        "other": "Other document"
+      },
+      "status": { "under_review": "Under review", "accepted": "Accepted", "rejected": "Rejected" },
+      "toast": { "accepted": "Document accepted", "rejected": "Document rejected" }
+    },
+    "about": {
+      "title": "Details",
+      "legalName": "Legal name",
+      "dob": "Date of birth",
+      "city": "City",
+      "address": "Address",
+      "intent": "Intended facility",
+      "trust": "Trust score",
+      "revenue": "Monthly revenue",
+      "currency": "SYP"
+    },
+    "sub": {
+      "title": "Subscription",
+      "upgrade": "Upgrade",
+      "currency": "SYP",
+      "expiringSoon": "Expiring soon",
+      "status": { "trial": "Trial", "active": "Active", "expired": "Expired", "pending_activation": "Pending" },
+      "price": "Price",
+      "freePrice": "Free",
+      "per": { "monthly": "month", "yearly": "year" },
+      "period": { "monthly": "Monthly", "yearly": "Yearly" },
+      "started": "Started",
+      "trialEnds": "Trial ends",
+      "renews": "Renews",
+      "expiredOn": "Expired on",
+      "daysLeft": "{{count}} days left",
+      "history": "Payment history",
+      "noHistory": "No payments yet.",
+      "invoiceStatus": { "paid": "Paid", "pending": "Pending", "failed": "Failed" },
+      "changeTitle": "Change subscription",
+      "changeSubtitle": "Current plan: {{tier}}. Upgrade to a higher tier or renew — you can't downgrade or cancel.",
+      "billing": "Billing period",
+      "renewTag": "Renew / extend",
+      "upgradeTag": "Upgrade",
+      "maxFacilities": "Up to {{max}} facilities",
+      "prioritySupport": "Priority support",
+      "campaigns": "Campaigns",
+      "confirmRenew": "Renew {{tier}}",
+      "confirmUpgrade": "Upgrade to {{tier}}",
+      "toast": { "upgraded": "Subscription upgraded", "renewed": "Subscription renewed" }
+    },
+    "profile": {
+      "title": "Owner Profile",
+      "subtitle": "Review registration details, verification status, and documents",
+      "notFound": "Owner not found",
+      "viewPhoto": "View photo",
+      "documents": "Verification documents",
+      "noDocuments": "No verification documents uploaded."
+    },
+    "detail": {
+      "sections": { "facilities": "Owned facilities" },
+      "stats": { "facilities": "Facilities", "active": "Active", "pending": "Pending", "rating": "Avg rating" },
+      "facilities": { "location": "Location", "empty": "This owner has no facilities yet." },
+      "attention": {
+        "title": "Needs attention",
+        "blocked": "This owner is blocked and cannot access the platform.",
+        "rejected": "This owner's account was rejected.",
+        "suspended": "This owner's account is suspended.",
+        "underReview": "The account is awaiting review.",
+        "rejectedDocs": "{{count}} document(s) were rejected — awaiting re-upload.",
+        "noDocuments": "No verification documents have been uploaded yet."
+      }
+    }
+  },
   "facility": {
     "title": "Facility Management",
     "subtitle": "Review, browse and govern every club and pitch on the platform.",
@@ -269,11 +649,25 @@
       "owner": "Owner",
       "rating": "Rating",
       "all": "All",
+      "allStatus": "All",
       "orphansOption": "Outside regions",
       "ratingAny": "Any rating",
       "rating3": "3.0+",
       "rating4": "4.0+",
-      "rating45": "4.5+"
+      "rating45": "4.5+",
+      "governorate": "Governorate",
+      "city": "City",
+      "cityPlaceholder": "Filter by city…",
+      "verification": "Verification",
+      "amenities": "Amenities",
+      "dateAdded": "Date added",
+      "dateAll": "Any time",
+      "date7": "Last 7 days",
+      "date30": "Last 30 days",
+      "date90": "Last 90 days",
+      "dateCustom": "Custom range",
+      "dateFrom": "From",
+      "dateTo": "To"
     },
     "col": {
       "name": "Facility",
@@ -317,6 +711,47 @@
       "al_hasakah": "Al-Hasakah",
       "raqqa": "Raqqa"
     },
+    "verification": {
+      "verified": "Verified",
+      "unverified": "Pending docs",
+      "no_docs": "No documents"
+    },
+    "amenity": {
+      "indoor": "Indoor",
+      "lighting": "Lighting",
+      "parking": "Parking",
+      "lockerRoom": "Locker room",
+      "cafe": "Café"
+    },
+    "stats": {
+      "total": "Total facilities",
+      "active": "Active",
+      "pending": "Pending review",
+      "suspended": "Suspended",
+      "rating": "Avg. rating",
+      "aged": "Needs attention"
+    },
+    "map": {
+      "search": "Search a place…",
+      "myLocation": "My location",
+      "street": "Map",
+      "satellite": "Satellite",
+      "searching": "Searching…",
+      "noResults": "No places found",
+      "geoError": "Couldn't get your location. Check browser permissions.",
+      "hint": "Click the map, drag the pin or search to set the exact location."
+    },
+    "bulk": {
+      "selectOne": "Select {{name}}",
+      "selectAll": "Select all",
+      "selectedCount": "{{count}} selected",
+      "clear": "Clear",
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectTitle": "Reject {{count}} facilities",
+      "reasonLabel": "Rejection reason",
+      "reasonPlaceholder": "Explain clearly what needs to be fixed…"
+    },
     "queue": {
       "empty": { "title": "The review queue is clear", "desc": "New facility submissions will appear here as soon as they arrive." },
       "viewProfile": "View profile",
@@ -359,7 +794,12 @@
       "rejected": "Facility rejected",
       "suspended": "Facility suspended",
       "reactivated": "Facility reactivated",
-      "created": "Facility created and sent to the review queue"
+      "created": "Facility created and sent to the review queue",
+      "updated": "Facility updated",
+      "error": "Something went wrong. Please try again.",
+      "bulkApproved": "{{count}} facilities approved",
+      "bulkRejected": "{{count}} facilities rejected",
+      "bulkSkipped": "{{count}} skipped (not pending)"
     },
     "profile": {
       "title": "Facility profile",
@@ -400,6 +840,8 @@
       "openDocument": "Open",
       "owner": "Owner",
       "viewOwner": "View owner profile",
+      "edit": "Edit",
+      "manageCourts": "Manage courts",
       "indoor": "Indoor",
       "outdoor": "Outdoor",
       "lighting": "Lighting",
@@ -426,14 +868,18 @@
         "basics": "Basics",
         "location": "Location",
         "details": "Details",
+        "courts": "Courts",
         "media": "Media"
       },
       "back": "Back",
       "next": "Next",
       "create": "Create facility",
+      "save": "Save changes",
+      "editTitle": "Edit facility",
+      "editSubtitle": "Update this facility's details, location, courts and media.",
       "regionSeed": {
         "title": "Adding to {{region}}",
-        "hint": "Location is set from this region — the location step is skipped."
+        "hint": "The map is centred on this region — drop the exact facility point inside it."
       },
       "owner": {
         "label": "Facility owner",
@@ -453,13 +899,25 @@
         "contactPhone": "Contact phone"
       },
       "location": {
+        "pick": "Location on the map",
+        "pickHint": "Click the map, drag the pin or search — the address fills in automatically and stays editable.",
         "governorate": "Governorate",
         "city": "City",
         "district": "District",
-        "address": "Address",
-        "lat": "Latitude",
-        "lng": "Longitude",
-        "hint": "The facility's region is derived automatically from these coordinates."
+        "address": "Address"
+      },
+      "courts": {
+        "title": "Courts",
+        "hint": "Add every bookable court in this club.",
+        "court": "Court",
+        "add": "Add court",
+        "remove": "Remove court",
+        "name": "Court name",
+        "sport": "Sport",
+        "price": "Price / hour (SYP)",
+        "surface": "Surface",
+        "capacity": "Capacity",
+        "active": "Bookable"
       },
       "details": {
         "pitchTitle": "Pitch details",
@@ -476,14 +934,20 @@
       },
       "media": {
         "images": "Photos",
-        "imagesHint": "Add up to 6 photo URLs — the first becomes the cover.",
-        "imageUrl": "Image URL",
-        "addImage": "Add",
-        "addSample": "Add sample photo",
+        "imagesHint": "Upload up to 6 photos — the first is the cover.",
+        "drop": "Drag photos here or browse",
+        "browse": "Browse files",
+        "imageTypes": "PNG or JPG · up to 6 photos",
         "remove": "Remove",
-        "document": "Verification document (optional)",
-        "documentName": "Document name",
-        "documentUrl": "Document URL"
+        "cover": "Cover",
+        "moveEarlier": "Move earlier",
+        "moveLater": "Move later",
+        "imagesMax": "Maximum of 6 photos reached.",
+        "documents": "Verification documents",
+        "documentsHint": "Optional — business license, ownership proof, etc.",
+        "docDrop": "Drag documents here or browse",
+        "docTypes": "PDF or image files",
+        "photo": "Photo"
       },
       "errors": {
         "owner": "Choose an owner",
@@ -495,10 +959,11 @@
         "city": "City is required",
         "district": "District is required",
         "address": "Address must be at least 5 characters",
-        "lat": "Latitude must be between -90 and 90",
-        "lng": "Longitude must be between -180 and 180",
+        "location": "Pick the facility location on the map",
         "price": "Price per hour must be greater than 0",
-        "document": "Provide both a document name and URL, or neither"
+        "courtName": "Court name must be at least 2 characters",
+        "courts": "Add at least one court",
+        "document": "Enter a valid document URL"
       }
     }
   },
@@ -507,6 +972,12 @@
     "subtitle": "Draw geographic regions on the map and assign them to admins.",
     "create": "Create region",
     "search": "Search by name or admin…",
+    "stats": {
+      "total": "Total regions",
+      "active": "Active",
+      "unassigned": "Without admin",
+      "facilities": "Facilities"
+    },
     "col": {
       "name": "Name",
       "location": "Location",
@@ -667,6 +1138,157 @@
       "title": "Outside regions",
       "desc": "Facilities that fall outside every active region.",
       "count": "{{count}} outside regions"
+    }
+  },
+  "community": {
+    "title": "Community Management",
+    "subtitle": "Moderate posts, comments, and reactions across the Bplay community",
+    "search": "Search posts or authors…",
+    "noBody": "(No text)",
+    "stats": {
+      "totalPosts": "Total posts",
+      "totalComments": "Comments",
+      "totalReactions": "Reactions",
+      "removed": "Removed"
+    },
+    "col": {
+      "post": "Post",
+      "author": "Author",
+      "reactions": "Reactions",
+      "comments": "Comments",
+      "created": "Posted",
+      "status": "Status",
+      "media": "Media",
+      "visibility": "Visibility",
+      "actions": "Actions"
+    },
+    "filter": {
+      "allAuthorTypes": "All authors",
+      "allStatus": "All statuses",
+      "allMedia": "All posts",
+      "hasMedia": "With media",
+      "noMedia": "Text only",
+      "allVisibility": "All visibility",
+      "date": "Posted date",
+      "dateAll": "Any time",
+      "date7d": "Last 7 days",
+      "date30d": "Last 30 days",
+      "date90d": "Last 90 days",
+      "dateCustom": "Custom range",
+      "dateFrom": "From",
+      "dateTo": "To"
+    },
+    "view": {
+      "label": "View mode",
+      "grid": "Grid view",
+      "table": "Table view"
+    },
+    "actorType": {
+      "player": "Player",
+      "facility": "Facility"
+    },
+    "status": {
+      "published": "Published",
+      "removed": "Removed"
+    },
+    "visibility": {
+      "public": "Public",
+      "private": "Private"
+    },
+    "reaction": {
+      "like": "Like",
+      "love": "Love",
+      "celebrate": "Celebrate",
+      "support": "Support",
+      "insightful": "Insightful"
+    },
+    "reactions": {
+      "none": "No reactions yet",
+      "viewAll": "View all reactors ({{count}})"
+    },
+    "reactors": {
+      "title": "Reactors",
+      "filter": "Filter by reaction",
+      "all": "All reactions",
+      "empty": "No reactors to show"
+    },
+    "metrics": {
+      "comments": "{{count}} comments",
+      "shares": "{{count}} shares"
+    },
+    "comments": {
+      "title": "Comments",
+      "empty": "No comments on this post yet"
+    },
+    "actions": {
+      "view": "View",
+      "viewProfile": "View profile",
+      "remove": "Remove",
+      "restore": "Restore",
+      "delete": "Delete"
+    },
+    "moderation": {
+      "removedTitle": "This content was removed",
+      "removedReason": "Reason",
+      "removedBy": "Removed by {{name}} · {{date}}"
+    },
+    "confirm": {
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Explain why this is being removed (at least 10 characters)…",
+      "post": {
+        "remove": {
+          "title": "Remove this post?",
+          "message": "The post will be hidden from the community. You can restore it later."
+        },
+        "restore": {
+          "title": "Restore this post?",
+          "message": "The post will be visible in the community again."
+        },
+        "delete": {
+          "title": "Delete this post permanently?",
+          "message": "This permanently deletes the post and all of its comments. This cannot be undone."
+        }
+      },
+      "comment": {
+        "remove": {
+          "title": "Remove this comment?",
+          "message": "The comment will be hidden. You can restore it later."
+        },
+        "restore": {
+          "title": "Restore this comment?",
+          "message": "The comment will be visible again."
+        },
+        "delete": {
+          "title": "Delete this comment permanently?",
+          "message": "This permanently deletes the comment. This cannot be undone."
+        }
+      }
+    },
+    "toast": {
+      "postRemoved": "Post removed",
+      "postRestored": "Post restored",
+      "postDeleted": "Post deleted",
+      "commentRemoved": "Comment removed",
+      "commentRestored": "Comment restored",
+      "commentDeleted": "Comment deleted"
+    },
+    "empty": {
+      "title": "No posts found",
+      "desc": "Try adjusting your search or filters."
+    },
+    "detail": {
+      "title": "Post details",
+      "subtitle": "Review the post, its reactions, and its comments",
+      "notFound": "Post not found",
+      "viewMedia": "View media"
+    },
+    "media": {
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "authorPanel": {
+      "title": "Posts",
+      "empty": "No posts yet"
     }
   },
   "landing": {

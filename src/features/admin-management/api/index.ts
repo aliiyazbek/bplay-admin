@@ -6,6 +6,7 @@ const impl = USE_MOCKS ? mock : real;
 
 export const getAdmins = impl.getAdmins;
 export const getAdminById = impl.getAdminById;
+export const getAdminStats = impl.getAdminStats;
 export const createAdmin = impl.createAdmin;
 export const updateAdmin = impl.updateAdmin;
 export const toggleAdminActive = impl.toggleAdminActive;

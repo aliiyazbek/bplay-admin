@@ -10,8 +10,10 @@ import {
   GlobeIcon,
   BuildingIcon,
   StadiumIcon,
+  TrophyIcon,
   UserIcon,
   LogoutIcon,
+  MessageCircleIcon,
 } from '@ui';
 import { useAuthStore, useAuthUser, useAuthRole, type UserRole } from '@shared/stores/authStore';
 import { useUiStore } from '@shared/stores/uiStore';
@@ -32,7 +34,9 @@ const NAV_ITEMS: NavItem[] = [
   { to: PATHS.adminManagement, key: 'nav.adminManagement', Icon: UsersIcon, superAdminOnly: true },
   { to: PATHS.regionManagement, key: 'nav.regionManagement', Icon: GlobeIcon, superAdminOnly: true },
   { to: PATHS.ownerManagement, key: 'nav.ownerManagement', Icon: BuildingIcon, superAdminOnly: true },
+  { to: PATHS.playerManagement, key: 'nav.playerManagement', Icon: TrophyIcon, superAdminOnly: true },
   { to: PATHS.facilityManagement, key: 'nav.facilityManagement', Icon: StadiumIcon, superAdminOnly: false },
+  { to: PATHS.communityManagement, key: 'nav.communityManagement', Icon: MessageCircleIcon, superAdminOnly: false },
   { to: PATHS.profile, key: 'nav.profile', Icon: UserIcon, superAdminOnly: false },
 ];
 

@@ -133,6 +133,16 @@ export interface AdminListResult {
   pageCount: number;
 }
 
+/** Platform-wide admin counts for the list KPI row. */
+export interface AdminStats {
+  total: number;
+  active: number;
+  /** Region-scoped admins. */
+  regional: number;
+  /** Region admins holding no region yet (needs attention). */
+  unassigned: number;
+}
+
 export interface CreateAdminInput {
   name: string;
   email: string;

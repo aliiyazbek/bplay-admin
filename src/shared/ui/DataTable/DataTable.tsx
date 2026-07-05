@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react';
 import { ErrorState } from '../ErrorState/ErrorState';
 import { EmptyState } from '../EmptyState/EmptyState';
+import { ArrowUpDownIcon, ChevronUpIcon, ChevronDownIcon } from '../icons';
 import { clsx } from '../clsx';
 import styles from './DataTable.module.css';
+
+export type SortDir = 'asc' | 'desc';
 
 export interface Column<T> {
   key: string;
@@ -11,6 +14,8 @@ export interface Column<T> {
   align?: 'start' | 'center' | 'end';
   /** Runtime column width (e.g. "160px" | "20%"); applied as an inline style. */
   width?: string;
+  /** When true (and `onSortChange` is provided) the header becomes a sort toggle. */
+  sortable?: boolean;
 }
 
 export interface DataTableProps<T> {
@@ -28,6 +33,12 @@ export interface DataTableProps<T> {
    * `event.stopPropagation()` to run their own action instead.
    */
   onRowClick?: (row: T) => void;
+  /** Current sort state — highlights the active column header + sets aria-sort. */
+  sort?: { key: string; dir: SortDir };
+  /** Called with a sortable column's key when its header is activated. */
+  onSortChange?: (key: string) => void;
+  /** Localized accessible label for the row-actions column header. */
+  actionsLabel?: string;
 }
 
 const SKELETON_ROWS = 6;
@@ -42,6 +53,9 @@ export function DataTable<T>({
   getRowId,
   rowActions,
   onRowClick,
+  sort,
+  onSortChange,
+  actionsLabel = 'Actions',
 }: DataTableProps<T>) {
   const colCount = columns.length + (rowActions ? 1 : 0);
 
@@ -50,17 +64,53 @@ export function DataTable<T>({
       <table className={styles.table}>
         <thead>
           <tr>
-            {columns.map((column) => (
-              <th
-                key={column.key}
-                scope="col"
-                className={clsx(styles.th, column.align && styles[column.align])}
-                style={column.width ? { inlineSize: column.width } : undefined}
-              >
-                {column.header}
-              </th>
-            ))}
-            {rowActions && <th scope="col" className={clsx(styles.th, styles.end)} aria-label="Actions" />}
+            {columns.map((column) => {
+              const isSortable = Boolean(column.sortable && onSortChange);
+              const isSorted = sort?.key === column.key;
+              return (
+                <th
+                  key={column.key}
+                  scope="col"
+                  className={clsx(styles.th, column.align && styles[column.align])}
+                  style={column.width ? { inlineSize: column.width } : undefined}
+                  aria-sort={
+                    isSortable
+                      ? isSorted
+                        ? sort?.dir === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                      : undefined
+                  }
+                >
+                  {isSortable ? (
+                    <button
+                      type="button"
+                      className={clsx(styles.sortBtn, isSorted && styles.sortActive)}
+                      onClick={() => onSortChange?.(column.key)}
+                    >
+                      <span>{column.header}</span>
+                      <span className={styles.sortIcon} aria-hidden>
+                        {isSorted ? (
+                          sort?.dir === 'asc' ? (
+                            <ChevronUpIcon />
+                          ) : (
+                            <ChevronDownIcon />
+                          )
+                        ) : (
+                          <ArrowUpDownIcon />
+                        )}
+                      </span>
+                    </button>
+                  ) : (
+                    column.header
+                  )}
+                </th>
+              );
+            })}
+            {rowActions && (
+              <th scope="col" className={clsx(styles.th, styles.end)} aria-label={actionsLabel} />
+            )}
           </tr>
         </thead>
         <tbody>

@@ -2,17 +2,24 @@ import { apiClient } from '@lib/apiClient';
 import { unwrap, unwrapList } from '@shared/types/api';
 import { useAuthStore } from '@shared/stores/authStore';
 import { getScopeRegions } from '@features/region-management/api';
-import { buildFacilityListResult, type AdminScope } from './facility.filter';
 import {
-  isAged,
+  buildFacilityListResult,
+  computeFacilityStats,
+  type AdminScope,
+} from './facility.filter';
+import {
   toFacility,
   toRegionFacility,
+  type BulkActionResult,
+  type BulkFacilityAction,
   type CreateFacilityInput,
   type Facility,
   type FacilityDto,
   type FacilityListParams,
   type FacilityListResult,
+  type FacilityStats,
   type RegionFacility,
+  type UpdateFacilityInput,
 } from './facility.types';
 
 const BASE = '/admin/facilities-management';
@@ -37,17 +44,6 @@ export async function getPendingFacilities(
   params: FacilityListParams,
 ): Promise<FacilityListResult> {
   return getFacilities({ ...params, status: 'pending' });
-}
-
-export async function getPendingCount(): Promise<number> {
-  const result = await getFacilities({ status: 'pending', page: 1, pageSize: 1 });
-  return result.total;
-}
-
-/** Scope-wide count of pending submissions older than the aged threshold. */
-export async function getAgedCount(): Promise<number> {
-  const result = await getFacilities({ status: 'pending', page: 1, pageSize: 500 });
-  return result.items.filter((item) => isAged(item.createdAt)).length;
 }
 
 export async function getFacilityById(id: string): Promise<Facility> {
@@ -84,8 +80,9 @@ export async function reactivateFacility(id: string): Promise<void> {
   await apiClient.patch(`${FACILITIES_PATH}/${id}/reactivate`);
 }
 
-export async function createFacility(input: CreateFacilityInput): Promise<Facility> {
-  const body = {
+/** The snake_case wire body shared by create (POST) and update (PUT). */
+function buildFacilityBody(input: CreateFacilityInput) {
+  return {
     owner_id: input.ownerId,
     type: input.kind,
     name: input.name,
@@ -112,6 +109,17 @@ export async function createFacility(input: CreateFacilityInput): Promise<Facili
           ]),
         )
       : undefined,
+    courts: input.courts?.map((court) => ({
+      id: court.id,
+      name: court.name,
+      sport: court.sport,
+      price_per_hour: court.pricePerHour,
+      surface: court.surface,
+      is_indoor: court.isIndoor,
+      has_lighting: court.hasLighting,
+      capacity: court.capacity,
+      is_active: court.isActive,
+    })),
     price_per_hour: input.pricePerHour,
     capacity: input.capacity,
     specs: input.specs
@@ -131,17 +139,64 @@ export async function createFacility(input: CreateFacilityInput): Promise<Facili
         }
       : undefined,
     images: input.images,
-    document_name: input.documentName,
-    document_url: input.documentUrl,
+    documents: (input.documents ?? []).map((doc) => ({ name: doc.name, url: doc.url })),
   };
-  const res = await apiClient.post(FACILITIES_PATH, body);
+}
+
+export async function createFacility(input: CreateFacilityInput): Promise<Facility> {
+  const res = await apiClient.post(FACILITIES_PATH, buildFacilityBody(input));
   return toFacility(unwrap<FacilityDto>(res.data));
+}
+
+export async function updateFacility(id: string, input: UpdateFacilityInput): Promise<Facility> {
+  const res = await apiClient.put(`${FACILITIES_PATH}/${id}`, buildFacilityBody(input));
+  return toFacility(unwrap<FacilityDto>(res.data));
+}
+
+export async function bulkAction(
+  ids: string[],
+  action: BulkFacilityAction,
+  reason?: string,
+): Promise<BulkActionResult> {
+  if (action === 'reject' && (!reason || reason.trim().length === 0)) {
+    throw new Error('Reason is required');
+  }
+  await apiClient.patch(`${PENDING_PATH}/bulk`, {
+    ids,
+    status: action === 'approve' ? 'approved' : 'rejected',
+    reason: reason?.trim(),
+  });
+  return { succeeded: ids.length, skipped: [] };
+}
+
+/** Scope-aware KPI figures — derived client-side over the visible facility set. */
+export async function getFacilityStats(): Promise<FacilityStats> {
+  const [res, regions] = await Promise.all([
+    apiClient.get(FACILITIES_PATH, { params: { pageSize: 1000 } }),
+    getScopeRegions(),
+  ]);
+  const all = unwrapList<FacilityDto>(res.data, ['facilities']).map(toFacility);
+  return computeFacilityStats(all, regions, currentScope());
 }
 
 /** Facility count per region (keyed by region id) for the region-management screen. */
 export async function getRegionFacilityCounts(): Promise<Record<string, number>> {
   const res = await apiClient.get(`${BASE}/region-counts`);
   return unwrap<Record<string, number>>(res.data) ?? {};
+}
+
+/** Facility count per owner id (for the owners list facility-count column/filter). */
+export async function getFacilityCountsByOwner(): Promise<Record<string, number>> {
+  const res = await apiClient.get(`${BASE}/owner-counts`);
+  return unwrap<Record<string, number>>(res.data) ?? {};
+}
+
+/**
+ * The owner block/suspend cascade is applied server-side (the admin only calls
+ * the owner status endpoint), so this is a no-op against a real backend.
+ */
+export function suspendFacilitiesByOwner(_ownerId: string): Promise<void> {
+  return Promise.resolve();
 }
 
 /**

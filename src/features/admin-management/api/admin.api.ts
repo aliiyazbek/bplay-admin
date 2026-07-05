@@ -8,6 +8,7 @@ import {
   type AdminListParams,
   type AdminListResult,
   type AdminScope,
+  type AdminStats,
   type CreateAdminInput,
   type UpdateAdminInput,
 } from './admin.types';
@@ -18,6 +19,22 @@ export async function getAdmins(params: AdminListParams): Promise<AdminListResul
   const res = await apiClient.get(PATH, { params });
   const all = unwrapList<AdminDto>(res.data, ['admins']).map(toAdmin);
   return filterAndPaginateAdmins(all, params);
+}
+
+/** Platform-wide admin counts — derived client-side until a stats endpoint exists. */
+export async function getAdminStats(): Promise<AdminStats> {
+  const res = await apiClient.get(PATH, { params: { pageSize: 1000 } });
+  const live = unwrapList<AdminDto>(res.data, ['admins'])
+    .map(toAdmin)
+    .filter((admin) => !admin.isDeleted);
+  return {
+    total: live.length,
+    active: live.filter((admin) => admin.status === 'active').length,
+    regional: live.filter((admin) => admin.scope === 'regional').length,
+    unassigned: live.filter(
+      (admin) => admin.scope === 'regional' && admin.assignedRegionIds.length === 0,
+    ).length,
+  };
 }
 
 /** Fetch a single admin by id (may be soft-deleted — the detail page still shows it). */

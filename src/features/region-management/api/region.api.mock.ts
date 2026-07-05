@@ -4,6 +4,7 @@ import type {
   Region,
   RegionListParams,
   RegionListResult,
+  RegionStats,
   CreateRegionInput,
   UpdateRegionInput,
 } from './region.types';
@@ -126,6 +127,17 @@ export async function getRegionById(id: string): Promise<Region> {
   const region = db.find((item) => item.id === id);
   if (!region) throw new Error('Region not found');
   return { ...region };
+}
+
+/** Platform-wide region counts for the list KPI row (live regions only). */
+export async function getRegionStats(): Promise<RegionStats> {
+  await mockDelay(200);
+  const live = db.filter((region) => !region.isDeleted);
+  return {
+    total: live.length,
+    active: live.filter((region) => region.isActive).length,
+    unassigned: live.filter((region) => region.assignedAdminIds.length === 0).length,
+  };
 }
 
 /** Live regions only (deleted ones never scope facilities); callers filter isActive. */

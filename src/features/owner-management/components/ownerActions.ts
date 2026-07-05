@@ -1,31 +1,38 @@
 import type { Owner, OwnerAction } from '../api/owner.types';
 
-/** Which status actions are valid for an owner given its current status. */
+/**
+ * Which account-level actions are valid for an owner. A blocked owner offers
+ * only "unblock"; otherwise the set follows the account status, plus "block".
+ */
 export function availableActions(owner: Owner): OwnerAction[] {
-  const actions: OwnerAction[] = [];
-  const pendingLike =
-    owner.verificationStatus === 'pending' || owner.verificationStatus === 'review';
+  if (owner.isBlocked) return ['unblock'];
 
-  if (pendingLike) {
-    actions.push('approve', 'reject');
+  const actions: OwnerAction[] = [];
+  switch (owner.accountStatus) {
+    case 'under_review':
+      actions.push('approve', 'reject');
+      break;
+    case 'rejected':
+      actions.push('approve');
+      break;
+    case 'active':
+      actions.push('suspend');
+      break;
+    case 'suspended':
+      actions.push('activate');
+      break;
   }
-  if (owner.status !== 'active' && owner.status !== 'blocked') {
-    actions.push('activate');
-  }
-  if (owner.status !== 'inactive' && owner.status !== 'blocked') {
-    actions.push('disable');
-  }
-  if (owner.status !== 'blocked') {
-    actions.push('block');
-  }
+  actions.push('block');
   return actions;
 }
 
-/**
- * The ConfirmDialog variant for a given action: 'disable' pauses an owner into the
- * Suspended state, so it uses the caution (orange) tone; reject/block are danger.
- */
+/** Actions that require a mandatory reason (opened via ReasonDialog). */
+export function actionNeedsReason(action: OwnerAction): boolean {
+  return action === 'reject' || action === 'suspend' || action === 'block';
+}
+
+/** ConfirmDialog / button variant per action. */
 export function actionVariant(action: OwnerAction): 'primary' | 'danger' | 'caution' {
-  if (action === 'disable') return 'caution';
+  if (action === 'suspend') return 'caution';
   return action === 'reject' || action === 'block' ? 'danger' : 'primary';
 }

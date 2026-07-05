@@ -6,7 +6,7 @@
  * Wire DTOs mirror the mobile snake_case contract so go-live is a flag flip.
  */
 
-import type { CoverageTone } from '@ui';
+import type { CoverageTone, DateRangeValue } from '@ui';
 
 // ---------------------------------------------------------------------------
 // Enums (wire values match the mobile app's apiValue strings)
@@ -99,6 +99,38 @@ export const SYRIAN_GOVERNORATES: SyrianGovernorate[] = [
   'raqqa',
 ];
 
+/**
+ * Ordered alias table for best-effort matching of a reverse-geocoded state string
+ * to a governorate. `rif_dimashq` precedes `damascus` so "ريف دمشق" never matches
+ * Damascus first.
+ */
+const GOVERNORATE_ALIASES: Array<[SyrianGovernorate, string[]]> = [
+  ['rif_dimashq', ['rif dimashq', 'rif-dimashq', 'ريف دمشق']],
+  ['damascus', ['damascus', 'دمشق']],
+  ['aleppo', ['aleppo', 'حلب']],
+  ['homs', ['homs', 'حمص']],
+  ['hama', ['hama', 'حماة', 'حماه']],
+  ['latakia', ['latakia', 'lattakia', 'اللاذقية', 'لاذقية']],
+  ['tartus', ['tartus', 'طرطوس']],
+  ['idlib', ['idlib', 'إدلب', 'ادلب']],
+  ['daraa', ['daraa', "dar'a", 'درعا']],
+  ['as_suwayda', ['suwayda', 'sweida', 'as-suwayda', 'السويداء', 'سويداء']],
+  ['quneitra', ['quneitra', 'القنيطرة', 'قنيطرة']],
+  ['deir_ez_zor', ['deir ez-zor', 'deir ez zor', 'deir', 'دير الزور']],
+  ['al_hasakah', ['hasakah', 'hasaka', 'al-hasakah', 'الحسكة', 'حسكة']],
+  ['raqqa', ['raqqa', 'ar-raqqah', 'الرقة', 'رقة']],
+];
+
+/** Best-effort map of a reverse-geocoded state/governorate string to the enum. */
+export function matchGovernorate(raw: string | undefined | null): SyrianGovernorate | undefined {
+  if (!raw) return undefined;
+  const value = raw.toLowerCase();
+  for (const [governorate, aliases] of GOVERNORATE_ALIASES) {
+    if (aliases.some((alias) => value.includes(alias))) return governorate;
+  }
+  return undefined;
+}
+
 export const SPORT_TYPES: SportType[] = [
   'tennis',
   'padel',
@@ -109,6 +141,25 @@ export const SPORT_TYPES: SportType[] = [
 ];
 
 export const PITCH_SURFACES: PitchSurface[] = ['grass', 'artificial', 'hardcourt', 'clay', 'sand'];
+
+/** Amenities a facility can offer — unified across pitches (specs) and clubs (courts). */
+export type FacilityAmenity = 'indoor' | 'lighting' | 'parking' | 'lockerRoom' | 'cafe';
+
+export const FACILITY_AMENITIES: FacilityAmenity[] = [
+  'indoor',
+  'lighting',
+  'parking',
+  'lockerRoom',
+  'cafe',
+];
+
+/** Document-verification state derived from a facility's documents. */
+export type FacilityVerification = 'verified' | 'unverified' | 'no_docs';
+
+export const FACILITY_VERIFICATIONS: FacilityVerification[] = ['verified', 'unverified', 'no_docs'];
+
+/** Sortable directory columns. */
+export type FacilitySortBy = 'createdAt' | 'name' | 'rating';
 
 // ---------------------------------------------------------------------------
 // Value objects
@@ -238,6 +289,41 @@ export interface FacilityListItem {
   images: string[];
   createdAt: string;
   documents: FacilityDocument[];
+  /** Amenities offered (derived) — powers the amenity filter chips. */
+  amenities: FacilityAmenity[];
+  /** Document-verification state (derived) — powers the verification filter + badge. */
+  verification: FacilityVerification;
+}
+
+/**
+ * Amenities a facility offers, unified across pitches (from specs) and clubs
+ * (from their courts). Club-level parking / locker room / cafe are inferred from
+ * the club's scale and mix — a mock-first heuristic a real backend replaces with
+ * explicit flags. Returned in the canonical FACILITY_AMENITIES order.
+ */
+export function facilityAmenities(facility: Facility): FacilityAmenity[] {
+  const set = new Set<FacilityAmenity>();
+  if (facility.kind === 'pitch') {
+    const s = facility.specs;
+    if (s.isIndoor) set.add('indoor');
+    if (s.hasLighting) set.add('lighting');
+    if (s.hasParking) set.add('parking');
+    if (s.hasLockerRoom) set.add('lockerRoom');
+    if (s.hasCafe) set.add('cafe');
+  } else {
+    if (facility.courts.some((c) => c.isIndoor)) set.add('indoor');
+    if (facility.courts.some((c) => c.hasLighting)) set.add('lighting');
+    if (facility.courts.length >= 3) set.add('parking');
+    if (facility.courts.some((c) => c.isIndoor)) set.add('lockerRoom');
+    if (facility.sports.includes('swimming') || facility.courts.length >= 4) set.add('cafe');
+  }
+  return FACILITY_AMENITIES.filter((amenity) => set.has(amenity));
+}
+
+/** All docs approved = verified; any still pending = unverified; none uploaded = no_docs. */
+export function facilityVerification(facility: Facility): FacilityVerification {
+  if (facility.documents.length === 0) return 'no_docs';
+  return facility.documents.every((doc) => doc.status === 'approved') ? 'verified' : 'unverified';
 }
 
 export function toFacilityListItem(
@@ -262,6 +348,8 @@ export function toFacilityListItem(
     images: facility.images,
     createdAt: facility.createdAt,
     documents: facility.documents,
+    amenities: facilityAmenities(facility),
+    verification: facilityVerification(facility),
   };
 }
 
@@ -340,8 +428,34 @@ export interface FacilityListParams {
   ownerId?: 'all' | string;
   /** Minimum rating (inclusive); undefined = any. */
   minRating?: number;
+  governorate?: 'all' | SyrianGovernorate;
+  /** Free-text city match (case-insensitive substring); empty = any. */
+  city?: string;
+  verification?: 'all' | FacilityVerification;
+  /** Every listed amenity must be present (AND semantics). */
+  amenities?: FacilityAmenity[];
+  /** Created-date window; preset 'all' = no date filter. */
+  dateRange?: DateRangeValue;
+  sortBy?: FacilitySortBy;
+  sortDir?: 'asc' | 'desc';
   page?: number;
   pageSize?: number;
+}
+
+/** Scope-aware KPI figures for the directory header (one lightweight call). */
+export interface FacilityStats {
+  total: number;
+  active: number;
+  pending: number;
+  /** Admin-suspended + owner-paused combined. */
+  suspended: number;
+  rejected: number;
+  /** Mean rating across rated facilities (0 when none rated). */
+  avgRating: number;
+  /** Pending submissions past the aged threshold — the "needs attention" figure. */
+  aged: number;
+  /** Facilities outside every active region (super_admin scope only). */
+  orphan: number;
 }
 
 export interface FacilityListResult {
@@ -355,6 +469,25 @@ export interface FacilityListResult {
 // Mutations
 // ---------------------------------------------------------------------------
 
+/** A court being authored in the wizard — id is assigned on save (absent = new). */
+export interface CourtInput {
+  id?: string;
+  name: string;
+  sport: SportType;
+  pricePerHour: number;
+  surface: PitchSurface;
+  isIndoor: boolean;
+  hasLighting: boolean;
+  capacity?: number;
+  isActive: boolean;
+}
+
+/** An uploaded verification document (name + resolvable URL). */
+export interface FacilityDocumentInput {
+  name: string;
+  url: string;
+}
+
 /** Wizard payload — kind-specific fields validated per step by facility.schema. */
 export interface CreateFacilityInput {
   ownerId: string;
@@ -367,14 +500,68 @@ export interface CreateFacilityInput {
   location: FacilityLocation;
   /** Club only. */
   workingHours?: WorkingHours;
+  /** Club only — the authored courts. */
+  courts?: CourtInput[];
   /** Pitch only. */
   pricePerHour?: number;
   capacity?: number;
   specs?: PitchSpecs;
   cancelPolicy?: CancelPolicy;
   images: string[];
-  documentName?: string;
-  documentUrl?: string;
+  /** Verification documents. */
+  documents?: FacilityDocumentInput[];
+}
+
+/** Editing reuses the create shape; the id is passed alongside. */
+export type UpdateFacilityInput = CreateFacilityInput;
+
+/** Seed the wizard draft from an existing facility (edit mode). */
+export function facilityToInput(facility: Facility): CreateFacilityInput {
+  const base: CreateFacilityInput = {
+    ownerId: facility.ownerId,
+    kind: facility.kind,
+    name: facility.name,
+    sports: facility.kind === 'club' ? [...facility.sports] : [facility.sport],
+    contactPhone: facility.kind === 'club' ? facility.contactPhone : undefined,
+    location: { ...facility.location },
+    images: [...facility.images],
+    documents: facility.documents.map((doc) => ({ name: doc.name, url: doc.url })),
+  };
+  if (facility.kind === 'club') {
+    return {
+      ...base,
+      description: facility.description,
+      workingHours: { ...facility.workingHours },
+      courts: facility.courts.map((court) => ({
+        id: court.id,
+        name: court.name,
+        sport: court.sport,
+        pricePerHour: court.pricePerHour,
+        surface: court.surface,
+        isIndoor: court.isIndoor,
+        hasLighting: court.hasLighting,
+        capacity: court.capacity,
+        isActive: court.isActive,
+      })),
+    };
+  }
+  return {
+    ...base,
+    pricePerHour: facility.pricePerHour,
+    capacity: facility.capacity,
+    specs: { ...facility.specs },
+    cancelPolicy: { ...facility.cancelPolicy },
+  };
+}
+
+/** The two review actions applicable in bulk from the queue. */
+export type BulkFacilityAction = 'approve' | 'reject';
+
+export interface BulkActionResult {
+  /** How many facilities the action actually applied to (invalid transitions skipped). */
+  succeeded: number;
+  /** Ids that were skipped (not in an actionable state). */
+  skipped: string[];
 }
 
 // ---------------------------------------------------------------------------

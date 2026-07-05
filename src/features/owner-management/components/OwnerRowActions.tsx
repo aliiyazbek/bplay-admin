@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IconButton, EyeIcon, CheckIcon, XIcon, BanIcon } from '@ui';
+import { IconButton, EyeIcon, CheckIcon, XIcon, BanIcon, PowerIcon } from '@ui';
 import { availableActions } from './ownerActions';
 import { OwnerActionConfirm } from './OwnerActionConfirm';
 import type { Owner, OwnerAction } from '../api/owner.types';
@@ -11,13 +11,22 @@ interface Props {
   onView: (owner: Owner) => void;
 }
 
-const ROW_ACTIONS: readonly OwnerAction[] = ['approve', 'reject', 'block'];
+const ACTION_ICON: Record<OwnerAction, ReactNode> = {
+  approve: <CheckIcon />,
+  reject: <XIcon />,
+  suspend: <PowerIcon />,
+  activate: <PowerIcon />,
+  block: <BanIcon />,
+  unblock: <PowerIcon />,
+};
 
-/** Row-level actions: View + the status actions valid for this owner (approve/reject/block). */
+const GHOST_ACTIONS: readonly OwnerAction[] = ['approve', 'activate', 'unblock'];
+
+/** Row-level actions: View + the account actions valid for this owner. */
 export function OwnerRowActions({ owner, onView }: Props) {
   const { t } = useTranslation();
   const [pending, setPending] = useState<OwnerAction | null>(null);
-  const actions = availableActions(owner).filter((action) => ROW_ACTIONS.includes(action));
+  const actions = availableActions(owner);
 
   return (
     <div className={styles.actions}>
@@ -27,15 +36,17 @@ export function OwnerRowActions({ owner, onView }: Props) {
         label={t('owner.actions.view')}
         icon={<EyeIcon />}
         onClick={() => onView(owner)}
+        data-testid={`owner-view-${owner.id}`}
       />
       {actions.map((action) => (
         <IconButton
           key={action}
           size="sm"
-          variant={action === 'approve' ? 'ghost' : 'danger'}
+          variant={GHOST_ACTIONS.includes(action) ? 'ghost' : action === 'suspend' ? 'caution' : 'danger'}
           label={t(`owner.actions.${action}`)}
-          icon={action === 'approve' ? <CheckIcon /> : action === 'reject' ? <XIcon /> : <BanIcon />}
+          icon={ACTION_ICON[action]}
           onClick={() => setPending(action)}
+          data-testid={`owner-${action}-${owner.id}`}
         />
       ))}
 
