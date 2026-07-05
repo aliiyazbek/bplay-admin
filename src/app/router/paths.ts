@@ -8,8 +8,10 @@ export const PATHS = {
   adminManagement: '/app/admin-management',
   regionManagement: '/app/region-management',
   ownerManagement: '/app/owner-management',
+  playerManagement: '/app/player-management',
   facilityManagement: '/app/facility-management',
   facilityManagementNew: '/app/facility-management/new',
+  communityManagement: '/app/community-management',
 } as const;
 
 export type AppPath = (typeof PATHS)[keyof typeof PATHS];

@@ -1,4 +1,4 @@
-import { useId, useRef, type KeyboardEvent, type ReactNode } from 'react';
+import { useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { clsx } from '../clsx';
 import styles from './Tabs.module.css';
@@ -16,15 +16,36 @@ export interface TabsProps {
   'aria-label'?: string;
 }
 
+interface IndicatorRect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
 /**
  * Pill tabs on a raised rail. Roving-tabindex tablist with full arrow-key
- * navigation (RTL-aware, Home/End). The active pill glides between tabs via a
- * framer-motion layoutId indicator (skipped under reduced motion).
+ * navigation (RTL-aware, Home/End). A SINGLE persistent indicator glides between
+ * tabs by animating its left/width — deliberately NOT a framer `layoutId` shared
+ * layout, whose first transition resets the document scroll to the top.
  */
 export function Tabs({ items, value, onChange, 'aria-label': ariaLabel }: TabsProps) {
   const reduceMotion = useReducedMotion();
-  const indicatorId = useId();
+  const tablistId = useId();
   const tabRefs = useRef(new Map<string, HTMLButtonElement>());
+  const [indicator, setIndicator] = useState<IndicatorRect | null>(null);
+
+  // Position the indicator over the active tab (relative to the positioned tablist).
+  useLayoutEffect(() => {
+    const btn = tabRefs.current.get(value);
+    if (!btn) return;
+    setIndicator({
+      left: btn.offsetLeft,
+      top: btn.offsetTop,
+      width: btn.offsetWidth,
+      height: btn.offsetHeight,
+    });
+  }, [value, items]);
 
   const selectAt = (index: number) => {
     const item = items[index];
@@ -64,7 +85,27 @@ export function Tabs({ items, value, onChange, 'aria-label': ariaLabel }: TabsPr
   };
 
   return (
-    <div role="tablist" aria-label={ariaLabel} className={styles.tablist} onKeyDown={onKeyDown}>
+    <div
+      key={tablistId}
+      role="tablist"
+      aria-label={ariaLabel}
+      className={styles.tablist}
+      onKeyDown={onKeyDown}
+    >
+      {!reduceMotion && indicator && (
+        <motion.span
+          className={styles.indicator}
+          aria-hidden
+          initial={false}
+          animate={{
+            left: indicator.left,
+            top: indicator.top,
+            width: indicator.width,
+            height: indicator.height,
+          }}
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+        />
+      )}
       {items.map((item) => {
         const isActive = item.key === value;
         return (
@@ -86,19 +127,9 @@ export function Tabs({ items, value, onChange, 'aria-label': ariaLabel }: TabsPr
             onClick={() => onChange(item.key)}
             data-testid={`tab-${item.key}`}
           >
-            {isActive && !reduceMotion && (
-              <motion.span
-                layoutId={indicatorId}
-                className={styles.indicator}
-                transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-                aria-hidden
-              />
-            )}
             <span className={styles.content}>
               {item.label}
-              {typeof item.badge === 'number' && (
-                <span className={styles.badge}>{item.badge}</span>
-              )}
+              {typeof item.badge === 'number' && <span className={styles.badge}>{item.badge}</span>}
             </span>
           </button>
         );

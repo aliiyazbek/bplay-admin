@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -11,6 +11,8 @@ import {
   ErrorState,
   EmptyState,
   ImageLightbox,
+  DetailHero,
+  MetaItem,
   CoverageMap,
   InboxIcon,
   PhoneIcon,
@@ -186,46 +188,42 @@ function AdminDetailContent({ admin, editDisclosure, assignDisclosure, resetDisc
 
   return (
     <div className={styles.page}>
-      <Card className={styles.hero} data-testid="admin-detail-hero">
-        <div className={styles.identity}>
-          <button
-            type="button"
-            className={styles.avatarButton}
-            onClick={lightbox.open}
-            aria-label={t('admin.detail.viewPhoto')}
-            data-testid="admin-detail-avatar"
-          >
-            <Avatar src={admin.photoUrl} name={admin.name} size="xl" />
-          </button>
-          <div className={styles.identityText}>
-            <p className={styles.name}>{admin.name}</p>
-            <span className={styles.email} dir="ltr">
-              {admin.email}
-            </span>
-            <div className={styles.badges}>
-              <Badge variant={scopeBadgeVariant(admin.scope)}>{t(`admin.scope.${admin.scope}`)}</Badge>
-              {admin.isDeleted ? (
-                <Badge variant="danger">{t('admin.deletedTag')}</Badge>
-              ) : (
-                <Badge variant={statusToBadgeVariant(admin.status)}>{t(`status.${admin.status}`)}</Badge>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.rows}>
-          <MetaItem icon={<PhoneIcon />} label={t('admin.form.phone')} value={phoneLabel} ltr />
-          <MetaItem
-            icon={<DocumentIcon />}
-            label={t('admin.form.nationalId')}
-            value={admin.nationalId || '—'}
-            ltr
-          />
-          {createdLabel && (
-            <MetaItem icon={<CalendarIcon />} label={t('admin.detail.createdAt')} value={createdLabel} />
-          )}
-        </div>
-      </Card>
+      <DetailHero
+        name={admin.name}
+        email={admin.email}
+        photoUrl={admin.photoUrl}
+        onPhotoClick={lightbox.open}
+        photoLabel={t('admin.detail.viewPhoto')}
+        testId="admin-detail-hero"
+        badges={
+          <>
+            <Badge variant={scopeBadgeVariant(admin.scope)}>{t(`admin.scope.${admin.scope}`)}</Badge>
+            {admin.isDeleted ? (
+              <Badge variant="danger">{t('admin.deletedTag')}</Badge>
+            ) : (
+              <Badge variant={statusToBadgeVariant(admin.status)}>{t(`status.${admin.status}`)}</Badge>
+            )}
+          </>
+        }
+        meta={
+          <>
+            <MetaItem icon={<PhoneIcon />} label={t('admin.form.phone')} value={phoneLabel} ltr />
+            <MetaItem
+              icon={<DocumentIcon />}
+              label={t('admin.form.nationalId')}
+              value={admin.nationalId || '—'}
+              ltr
+            />
+            {createdLabel && (
+              <MetaItem
+                icon={<CalendarIcon />}
+                label={t('admin.detail.createdAt')}
+                value={createdLabel}
+              />
+            )}
+          </>
+        }
+      />
 
       <AdminAttentionCard admin={admin} onManage={assignDisclosure.open} />
 
@@ -275,32 +273,5 @@ function AdminDetailContent({ admin, editDisclosure, assignDisclosure, resetDisc
         fallback={<Avatar name={admin.name} size="xl" />}
       />
     </div>
-  );
-}
-
-/** One contact meta item in the hero: an icon chip + stacked label / value. */
-function MetaItem({
-  icon,
-  label,
-  value,
-  ltr,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  ltr?: boolean;
-}) {
-  return (
-    <span className={styles.row}>
-      <span className={styles.rowIcon} aria-hidden>
-        {icon}
-      </span>
-      <span className={styles.rowText}>
-        <span className={styles.label}>{label}</span>
-        <span className={styles.value} dir={ltr ? 'ltr' : undefined}>
-          {value}
-        </span>
-      </span>
-    </span>
   );
 }

@@ -1,31 +1,61 @@
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   PageContainer,
   PageHeader,
-  Card,
+  DetailHero,
+  MetaItem,
   Badge,
   Avatar,
   Spinner,
   ErrorState,
   EmptyState,
+  ImageLightbox,
+  Tabs,
   InboxIcon,
+  PhoneIcon,
+  DocumentIcon,
+  CalendarIcon,
+  toLocalPhone,
 } from '@ui';
-import { statusToBadgeVariant } from '@shared/utils/status';
+import { useDisclosure } from '@shared/hooks/useDisclosure';
 import { useOwnerQuery } from '../hooks/useOwnerQuery';
+import { useOwnerFacilities } from '../hooks/useOwnerFacilities';
 import { OwnerStatusActions } from '../components/OwnerStatusActions';
-import type { Owner } from '../api/owner.types';
+import { OwnerAttentionCard } from '../components/OwnerAttentionCard';
+import { OwnerFacilityStats } from '../components/OwnerFacilityStats';
+import { OwnerFacilitiesCard } from '../components/OwnerFacilitiesCard';
+import { OwnerDocumentsCard } from '../components/OwnerDocumentsCard';
+import { OwnerAboutCard } from '../components/OwnerAboutCard';
+import { OwnerSubscriptionCard } from '../components/OwnerSubscriptionCard';
+import { OwnerPostsCard } from '../components/OwnerPostsCard';
+import {
+  ownerState,
+  ownerStateBadgeVariant,
+  ownerTrustTier,
+  OWNER_TRUST_VARIANT,
+  type Owner,
+} from '../api/owner.types';
 import styles from './OwnerProfilePage.module.css';
+
+const NOT_FOUND_MESSAGE = 'Owner not found';
+const TAB_KEYS = ['overview', 'posts'] as const;
+type TabKey = (typeof TAB_KEYS)[number];
 
 export default function OwnerProfilePage() {
   const { ownerId } = useParams<{ ownerId: string }>();
   const { t } = useTranslation();
-  const { data: owner, isLoading, isError, refetch } = useOwnerQuery(ownerId);
+  const { data: owner, isLoading, isError, error, refetch } = useOwnerQuery(ownerId);
+
+  const notFound =
+    (isError && error instanceof Error && error.message === NOT_FOUND_MESSAGE) ||
+    (!isLoading && !isError && !owner);
 
   return (
     <PageContainer>
       <PageHeader
-        title={t('owner.profile.title')}
+        title={owner ? owner.name : t('owner.profile.title')}
         subtitle={t('owner.profile.subtitle')}
         showBack
         backLabel={t('common.back')}
@@ -33,107 +63,114 @@ export default function OwnerProfilePage() {
       />
 
       {isLoading ? (
-        <Spinner />
-      ) : isError ? (
-        <ErrorState message={t('common.loadError')} retryLabel={t('common.retry')} onRetry={() => void refetch()} />
-      ) : !owner ? (
+        <div className={styles.center}>
+          <Spinner size="lg" />
+        </div>
+      ) : notFound ? (
         <EmptyState icon={<InboxIcon />} title={t('owner.profile.notFound')} />
-      ) : (
-        <OwnerProfile owner={owner} />
-      )}
+      ) : isError ? (
+        <ErrorState
+          message={t('common.loadError')}
+          retryLabel={t('common.retry')}
+          onRetry={() => void refetch()}
+        />
+      ) : owner ? (
+        <OwnerProfileContent owner={owner} />
+      ) : null}
     </PageContainer>
   );
 }
 
-function OwnerProfile({ owner }: { owner: Owner }) {
-  const { t } = useTranslation();
+function OwnerProfileContent({ owner }: { owner: Owner }) {
+  const { t, i18n } = useTranslation();
+  const lightbox = useDisclosure();
+  const { data: facilities, isLoading: facilitiesLoading } = useOwnerFacilities(owner.id);
+  const facilityList = useMemo(() => facilities ?? [], [facilities]);
+
+  const state = ownerState(owner);
+  const tier = ownerTrustTier(owner.trustScore);
+  const dateLocale = i18n.language.startsWith('ar') ? 'ar-SY' : 'en-US';
+  const createdLabel = owner.createdAt
+    ? new Date(owner.createdAt).toLocaleDateString(dateLocale, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : null;
+  const phoneLabel = owner.phone ? `+963 ${toLocalPhone(owner.phone)}` : '—';
+  const [tab, setTab] = useState<TabKey>('overview');
+  const tabs = TAB_KEYS.map((key) => ({ key, label: t(`owner.tabs.${key}`) }));
 
   return (
-    <div className={styles.grid}>
-      <Card className={styles.card}>
-        <div className={styles.identity}>
-          <Avatar name={owner.name} size="lg" />
-          <div className={styles.identityText}>
-            <p className={styles.name}>{owner.name}</p>
-            <p className={styles.email}>{owner.email}</p>
-          </div>
-        </div>
-        <div className={styles.rows}>
-          <div className={styles.row}>
-            <span className={styles.label}>{t('owner.col.phone')}</span>
-            <span className={styles.value}>{owner.phone || '—'}</span>
-          </div>
-          <div className={styles.row}>
-            <span className={styles.label}>{t('owner.col.region')}</span>
-            <span className={styles.value}>{owner.region || '—'}</span>
-          </div>
-          <div className={styles.row}>
-            <span className={styles.label}>{t('owner.col.trustTier')}</span>
-            <span className={styles.value}>{t(`owner.tier.${owner.trustTier}`)}</span>
-          </div>
-          {owner.createdAt && (
-            <div className={styles.row}>
-              <span className={styles.label}>{t('owner.col.created')}</span>
-              <span className={styles.value}>
-                {new Date(owner.createdAt).toLocaleDateString()}
-              </span>
+    <div className={styles.page}>
+      <DetailHero
+        name={owner.name}
+        email={owner.email}
+        photoUrl={owner.photoUrl}
+        onPhotoClick={lightbox.open}
+        photoLabel={t('owner.profile.viewPhoto')}
+        testId="owner-detail-hero"
+        badges={
+          <>
+            <Badge variant={ownerStateBadgeVariant(state)}>{t(`owner.state.${state}`)}</Badge>
+            <Badge variant={OWNER_TRUST_VARIANT[tier]}>{t(`owner.trust.${tier}`)}</Badge>
+          </>
+        }
+        meta={
+          <>
+            <MetaItem icon={<PhoneIcon />} label={t('owner.col.phone')} value={phoneLabel} ltr />
+            {owner.nationalId && (
+              <MetaItem
+                icon={<DocumentIcon />}
+                label={t('owner.col.nationalId')}
+                value={owner.nationalId}
+                ltr
+              />
+            )}
+            {createdLabel && (
+              <MetaItem icon={<CalendarIcon />} label={t('owner.col.created')} value={createdLabel} />
+            )}
+          </>
+        }
+      />
+
+      <OwnerAttentionCard owner={owner} />
+
+      <OwnerFacilityStats facilities={facilityList} />
+
+      <Tabs
+        items={tabs}
+        value={tab}
+        onChange={(key) => setTab(key as TabKey)}
+        aria-label={t('owner.tabs.aria')}
+      />
+
+      <div className={styles.tabPanel}>
+        {tab === 'overview' && (
+          <div className={styles.panel}>
+            <OwnerSubscriptionCard ownerId={owner.id} />
+            <div className={styles.grid}>
+              <OwnerAboutCard owner={owner} />
+              <OwnerDocumentsCard ownerId={owner.id} documents={owner.documents} />
             </div>
-          )}
-        </div>
-      </Card>
-
-      <Card className={styles.card}>
-        <h2 className={styles.sectionTitle}>{t('owner.profile.statusSection')}</h2>
-        <div className={styles.badges}>
-          <Badge variant={statusToBadgeVariant(owner.status)}>{t(`status.${owner.status}`)}</Badge>
-          <Badge variant={statusToBadgeVariant(owner.verificationStatus)}>
-            {t(`status.${owner.verificationStatus}`)}
-          </Badge>
-        </div>
-        <div className={styles.rows}>
-          <div className={styles.row}>
-            <span className={styles.label}>{t('owner.col.status')}</span>
-            <span className={styles.value}>{t(`status.${owner.status}`)}</span>
-          </div>
-          <div className={styles.row}>
-            <span className={styles.label}>{t('owner.col.verification')}</span>
-            <span className={styles.value}>{t(`status.${owner.verificationStatus}`)}</span>
-          </div>
-          <div className={styles.row}>
-            <span className={styles.label}>{t('owner.col.active')}</span>
-            <span className={styles.value}>
-              {owner.isActive ? t('owner.value.yes') : t('owner.value.no')}
-            </span>
-          </div>
-        </div>
-      </Card>
-
-      <Card className={styles.card}>
-        <h2 className={styles.sectionTitle}>{t('owner.profile.documents')}</h2>
-        {owner.documents.length === 0 ? (
-          <p className={styles.muted}>{t('owner.profile.noDocuments')}</p>
-        ) : (
-          <div className={styles.docs}>
-            {owner.documents.map((document) => (
-              <div className={styles.doc} key={document.id}>
-                <div className={styles.docMeta}>
-                  <span className={styles.docName}>{document.name}</span>
-                  <Badge variant={statusToBadgeVariant(document.status)}>
-                    {t(`status.${document.status}`, { defaultValue: document.status })}
-                  </Badge>
-                </div>
-                {document.url && (
-                  <div className={styles.docActions}>
-                    <a className={styles.link} href={document.url} target="_blank" rel="noreferrer">
-                      {t('owner.profile.preview')}
-                    </a>
-                  </div>
-                )}
-              </div>
-            ))}
+            <OwnerFacilitiesCard facilities={facilityList} isLoading={facilitiesLoading} />
           </div>
         )}
-      </Card>
+        {tab === 'posts' && <OwnerPostsCard ownerId={owner.id} />}
+      </div>
+
+      <ImageLightbox
+        isOpen={lightbox.isOpen}
+        onClose={lightbox.close}
+        src={owner.photoUrl}
+        alt={owner.name}
+        title={owner.name}
+        closeLabel={t('common.close')}
+        zoomInLabel={t('common.zoomIn')}
+        zoomOutLabel={t('common.zoomOut')}
+        resetLabel={t('common.resetZoom')}
+        fallback={<Avatar name={owner.name} size="xl" />}
+      />
     </div>
   );
 }

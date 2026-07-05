@@ -1,13 +1,16 @@
 import { filterPaginate } from '@shared/lib/paginate';
 import { haversineKm } from '@shared/lib/geo';
+import { resolveDateRange } from '@ui';
 import type { UserRole } from '@shared/stores/authStore';
 import type { Region } from '@features/region-management/api/region.types';
 import {
+  isAged,
   toFacilityListItem,
   type Facility,
   type FacilityListItem,
   type FacilityListParams,
   type FacilityListResult,
+  type FacilityStats,
 } from './facility.types';
 
 /** The signed-in admin's visibility scope (read from the auth store by the api layer). */
@@ -59,22 +62,10 @@ interface ScopedEntry {
   containingIds: string[];
 }
 
-/**
- * The single scope + filter + paginate pipeline shared by the real and mock sources.
- *
- * Visibility: super_admin sees everything (orphans included); an admin with assigned
- * regions sees only facilities inside ≥1 of their (active, geo) regions — never orphans;
- * an admin with no assigned regions (general oversight) sees all non-orphan facilities.
- */
-export function buildFacilityListResult(
-  facilities: Facility[],
-  params: FacilityListParams,
-  regions: Region[],
-  scope: AdminScope,
-): FacilityListResult {
+/** Project every facility to a scoped entry (region membership + orphan flag). */
+function buildEntries(facilities: Facility[], regions: Region[]): ScopedEntry[] {
   const geoRegions = activeGeoRegions(regions);
-
-  let entries: ScopedEntry[] = facilities.map((facility) => {
+  return facilities.map((facility) => {
     const containing = geoRegions.filter((region) => contains(region, facility));
     return {
       containingIds: containing.map((region) => region.id),
@@ -85,17 +76,51 @@ export function buildFacilityListResult(
       ),
     };
   });
+}
 
+/**
+ * Apply role visibility: super_admin sees everything (orphans included); an admin
+ * with assigned regions sees only facilities inside ≥1 of their (active, geo)
+ * regions — never orphans; an admin with no assigned regions (general oversight)
+ * sees all non-orphan facilities.
+ */
+function applyScope(entries: ScopedEntry[], scope: AdminScope): ScopedEntry[] {
   const assignedRegionIds = scope.assignedRegionIds ?? [];
-  if (scope.role === 'super_admin') {
-    // Everything, orphans included.
-  } else if (scope.role === 'admin' && assignedRegionIds.length > 0) {
+  if (scope.role === 'super_admin') return entries;
+  if (scope.role === 'admin' && assignedRegionIds.length > 0) {
     const assigned = new Set(assignedRegionIds);
-    entries = entries.filter((entry) => entry.containingIds.some((id) => assigned.has(id)));
-  } else {
-    // General oversight (and any non-super session): all non-orphan facilities.
-    entries = entries.filter((entry) => !entry.item.isOrphan);
+    return entries.filter((entry) => entry.containingIds.some((id) => assigned.has(id)));
   }
+  return entries.filter((entry) => !entry.item.isOrphan);
+}
+
+function scopedEntries(facilities: Facility[], regions: Region[], scope: AdminScope): ScopedEntry[] {
+  return applyScope(buildEntries(facilities, regions), scope);
+}
+
+function compareBy(a: FacilityListItem, b: FacilityListItem, sortBy: FacilityListParams['sortBy']): number {
+  switch (sortBy) {
+    case 'name':
+      return a.name.localeCompare(b.name);
+    case 'rating':
+      return (a.rating ?? 0) - (b.rating ?? 0);
+    case 'createdAt':
+    default:
+      return Date.parse(a.createdAt) - Date.parse(b.createdAt);
+  }
+}
+
+/**
+ * The single scope + filter + sort + paginate pipeline shared by the real and
+ * mock sources.
+ */
+export function buildFacilityListResult(
+  facilities: Facility[],
+  params: FacilityListParams,
+  regions: Region[],
+  scope: AdminScope,
+): FacilityListResult {
+  let entries = scopedEntries(facilities, regions, scope);
 
   const q = params.q?.trim().toLowerCase();
   if (q) {
@@ -134,9 +159,67 @@ export function buildFacilityListResult(
       (entry) => typeof entry.item.rating === 'number' && entry.item.rating >= minRating,
     );
   }
+  const governorate = params.governorate;
+  if (governorate && governorate !== 'all') {
+    entries = entries.filter((entry) => entry.item.governorate === governorate);
+  }
+  const city = params.city?.trim().toLowerCase();
+  if (city) {
+    entries = entries.filter((entry) => (entry.item.city ?? '').toLowerCase().includes(city));
+  }
+  const verification = params.verification;
+  if (verification && verification !== 'all') {
+    entries = entries.filter((entry) => entry.item.verification === verification);
+  }
+  const amenities = params.amenities;
+  if (amenities && amenities.length > 0) {
+    entries = entries.filter((entry) =>
+      amenities.every((amenity) => entry.item.amenities.includes(amenity)),
+    );
+  }
+  const dateRange = params.dateRange;
+  if (dateRange && dateRange.preset !== 'all') {
+    const { fromMs, toMs } = resolveDateRange(dateRange, Date.now());
+    entries = entries.filter((entry) => {
+      const created = Date.parse(entry.item.createdAt);
+      if (fromMs !== null && created < fromMs) return false;
+      if (toMs !== null && created > toMs) return false;
+      return true;
+    });
+  }
+
+  if (params.sortBy) {
+    const dir = params.sortDir === 'asc' ? 1 : -1;
+    entries = [...entries].sort((a, b) => compareBy(a.item, b.item, params.sortBy) * dir);
+  }
 
   return filterPaginate(
     entries.map((entry) => entry.item),
     params,
   );
+}
+
+/** Scope-aware KPI aggregate over the visible facility set (ignores param filters). */
+export function computeFacilityStats(
+  facilities: Facility[],
+  regions: Region[],
+  scope: AdminScope,
+): FacilityStats {
+  const items = scopedEntries(facilities, regions, scope).map((entry) => entry.item);
+  const rated = items.filter((item) => typeof item.rating === 'number');
+  const avgRating = rated.length
+    ? rated.reduce((sum, item) => sum + (item.rating ?? 0), 0) / rated.length
+    : 0;
+  return {
+    total: items.length,
+    active: items.filter((item) => item.status === 'active').length,
+    pending: items.filter((item) => item.status === 'pending').length,
+    suspended: items.filter(
+      (item) => item.status === 'suspended' || item.status === 'owner_suspended',
+    ).length,
+    rejected: items.filter((item) => item.status === 'rejected').length,
+    avgRating: Math.round(avgRating * 10) / 10,
+    aged: items.filter((item) => item.status === 'pending' && isAged(item.createdAt)).length,
+    orphan: items.filter((item) => item.isOrphan).length,
+  };
 }

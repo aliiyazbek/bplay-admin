@@ -67,11 +67,13 @@ export const step3Schema = z.object({
   city: z.string().trim().min(2, 'facility.wizard.errors.city'),
   district: z.string().trim().min(2, 'facility.wizard.errors.district'),
   address: z.string().trim().min(5, 'facility.wizard.errors.address'),
-  lat: z.coerce.number().min(-90, 'facility.wizard.errors.lat').max(90, 'facility.wizard.errors.lat'),
-  lng: z.coerce
+  // Driven by the map picker — a NaN default fails the finite check until a point is dropped.
+  lat: z
     .number()
-    .min(-180, 'facility.wizard.errors.lng')
-    .max(180, 'facility.wizard.errors.lng'),
+    .refine((n) => Number.isFinite(n) && n >= -90 && n <= 90, 'facility.wizard.errors.location'),
+  lng: z
+    .number()
+    .refine((n) => Number.isFinite(n) && n >= -180 && n <= 180, 'facility.wizard.errors.location'),
 });
 export type Step3Values = z.infer<typeof step3Schema>;
 
@@ -121,29 +123,45 @@ export const step4ClubSchema = z.object({
 export type Step4ClubValues = z.infer<typeof step4ClubSchema>;
 
 // ---------------------------------------------------------------------------
-// Step 5 — media (document name + url are both-or-neither)
+// Step: courts (club only) — at least one authored court
 // ---------------------------------------------------------------------------
 
-export const step5Schema = z
-  .object({
-    images: z
-      .array(z.string().url('facility.wizard.errors.images'))
-      .min(1, 'facility.wizard.errors.images')
-      .max(6, 'facility.wizard.errors.images'),
-    documentName: z.string().optional(),
-    documentUrl: z
-      .union([z.string().url('facility.wizard.errors.document'), z.literal('')])
-      .optional(),
-  })
-  .superRefine((values, ctx) => {
-    const hasName = Boolean(values.documentName?.trim());
-    const hasUrl = Boolean(values.documentUrl?.trim());
-    if (hasName !== hasUrl) {
-      ctx.addIssue({
-        code: 'custom',
-        path: [hasName ? 'documentUrl' : 'documentName'],
-        message: 'facility.wizard.errors.document',
-      });
-    }
-  });
+export const courtInputSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().trim().min(2, 'facility.wizard.errors.courtName'),
+  sport: sportEnum,
+  pricePerHour: z.number().positive('facility.wizard.errors.price'),
+  surface: surfaceEnum,
+  isIndoor: z.boolean(),
+  hasLighting: z.boolean(),
+  // The editor already normalises empty → undefined, so no preprocess needed here
+  // (keeping input === output so RHF's resolver generics line up).
+  capacity: z.number().int().positive().optional(),
+  isActive: z.boolean(),
+});
+export type CourtInputValues = z.infer<typeof courtInputSchema>;
+
+export const stepCourtsSchema = z.object({
+  courts: z.array(courtInputSchema).min(1, 'facility.wizard.errors.courts'),
+});
+export type StepCourtsValues = z.infer<typeof stepCourtsSchema>;
+
+// ---------------------------------------------------------------------------
+// Step: media — at least one photo (uploaded) + optional verification documents
+// ---------------------------------------------------------------------------
+
+export const step5Schema = z.object({
+  images: z
+    .array(z.string().url('facility.wizard.errors.images'))
+    .min(1, 'facility.wizard.errors.images')
+    .max(6, 'facility.wizard.errors.images'),
+  documents: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        url: z.string().url('facility.wizard.errors.document'),
+      }),
+    )
+    .optional(),
+});
 export type Step5Values = z.infer<typeof step5Schema>;

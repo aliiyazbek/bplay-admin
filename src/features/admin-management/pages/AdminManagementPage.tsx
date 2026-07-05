@@ -12,7 +12,7 @@ import {
   Badge,
   Button,
   ClearFiltersBar,
-  Avatar,
+  UserCell,
   EmptyState,
   PlusIcon,
   InboxIcon,
@@ -23,6 +23,8 @@ import { useDisclosure } from '@shared/hooks/useDisclosure';
 import { statusToBadgeVariant } from '@shared/utils/status';
 import { PATHS } from '@app/router/paths';
 import { useAdminsQuery } from '../hooks/useAdminsQuery';
+import { useAdminStats } from '../hooks/useAdminStats';
+import { AdminOverviewStats } from '../components/AdminOverviewStats';
 import { AdminFormModal } from '../components/AdminFormModal';
 import { AssignRegionsModal } from '../components/AssignRegionsModal';
 import { AdminRowActions } from '../components/AdminRowActions';
@@ -49,6 +51,7 @@ export default function AdminManagementPage() {
     page: 1,
   });
   const { data, isLoading, isError, refetch } = useAdminsQuery(params);
+  const { data: stats } = useAdminStats();
 
   const hasActiveFilters =
     (params.q ?? '') !== '' ||
@@ -84,18 +87,13 @@ export default function AdminManagementPage() {
       key: 'name',
       header: t('admin.col.name'),
       render: (admin) => (
-        <button
-          type="button"
-          className={styles.userLink}
+        <UserCell
+          name={admin.name}
+          email={admin.email}
+          photoUrl={admin.photoUrl}
           onClick={() => openDetail(admin)}
-          data-testid={`admin-name-${admin.id}`}
-        >
-          <Avatar src={admin.photoUrl} name={admin.name} size="sm" />
-          <span className={styles.userText}>
-            <span className={styles.userName}>{admin.name}</span>
-            <span className={styles.userEmail}>{admin.email}</span>
-          </span>
-        </button>
+          testId={`admin-name-${admin.id}`}
+        />
       ),
     },
     {
@@ -133,6 +131,8 @@ export default function AdminManagementPage() {
           </Button>
         }
       />
+
+      <AdminOverviewStats stats={stats} />
 
       <Toolbar
         end={

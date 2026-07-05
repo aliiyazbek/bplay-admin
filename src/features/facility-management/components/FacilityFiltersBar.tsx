@@ -1,14 +1,29 @@
 import { useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Badge, Button, FilterIcon, SearchInput, Select } from '@ui';
+import {
+  Badge,
+  Button,
+  DateRange,
+  FilterIcon,
+  Input,
+  SearchInput,
+  Select,
+  clsx,
+  EMPTY_DATE_RANGE,
+  isDateRangeActive,
+} from '@ui';
 import { useAdminScope } from '../hooks/useAdminScope';
 import { useScopeRegionsQuery } from '../hooks/useScopeRegionsQuery';
 import { useOwnersForPicker } from '../hooks/useOwnersForPicker';
 import {
+  FACILITY_AMENITIES,
   FACILITY_KINDS,
   FACILITY_STATUSES,
+  FACILITY_VERIFICATIONS,
   SPORT_TYPES,
+  SYRIAN_GOVERNORATES,
+  type FacilityAmenity,
   type FacilityListParams,
 } from '../api/facility.types';
 import styles from './FacilityFiltersBar.module.css';
@@ -26,17 +41,25 @@ const CLEARED: Partial<FacilityListParams> = {
   regionId: 'all',
   ownerId: 'all',
   minRating: undefined,
+  governorate: 'all',
+  city: '',
+  verification: 'all',
+  amenities: [],
+  dateRange: EMPTY_DATE_RANGE,
 };
+
+const STATUS_CHIPS = ['all', ...FACILITY_STATUSES] as const;
 
 function isSet(value: string | undefined): boolean {
   return Boolean(value) && value !== 'all';
 }
 
 /**
- * The directory's search + collapsible glass filter strip. The region options
- * are scope-aware: a regional admin only sees their assigned regions and the
- * "Outside regions" option is super_admin-only. The trigger carries a count
- * badge for the active filters; Clear resets them (search text stays).
+ * The directory's filter strip: an always-visible search + status quick-chips
+ * row, plus a collapsible glass panel of secondary filters (kind / sport /
+ * region / owner / rating / governorate / city / verification / date / amenities).
+ * Region options are scope-aware; the trigger carries a count of active panel
+ * filters; Clear resets everything (search text stays).
  */
 export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps) {
   const { t } = useTranslation();
@@ -46,9 +69,24 @@ export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps
   const regionsQuery = useScopeRegionsQuery();
   const ownersQuery = useOwnersForPicker();
 
-  const activeCount =
-    [params.status, params.kind, params.sport, params.regionId, params.ownerId].filter(isSet)
-      .length + (typeof params.minRating === 'number' ? 1 : 0);
+  const status = params.status ?? 'all';
+  const amenities = params.amenities ?? [];
+
+  const panelActiveCount =
+    [
+      params.kind,
+      params.sport,
+      params.regionId,
+      params.ownerId,
+      params.governorate,
+      params.verification,
+    ].filter(isSet).length +
+    (typeof params.minRating === 'number' ? 1 : 0) +
+    ((params.city ?? '').trim() ? 1 : 0) +
+    (amenities.length > 0 ? 1 : 0) +
+    (params.dateRange && isDateRangeActive(params.dateRange) ? 1 : 0);
+
+  const hasAnyFilter = panelActiveCount > 0 || status !== 'all';
 
   const allOption = { value: 'all', label: t('facility.filters.all') };
   const scopedRegions = (regionsQuery.data ?? []).filter(
@@ -60,6 +98,13 @@ export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps
     ...scopedRegions.map((region) => ({ value: region.id, label: region.name })),
     ...(isSuperAdmin ? [{ value: 'orphans', label: t('facility.filters.orphansOption') }] : []),
   ];
+
+  const toggleAmenity = (amenity: FacilityAmenity) => {
+    const next = amenities.includes(amenity)
+      ? amenities.filter((item) => item !== amenity)
+      : [...amenities, amenity];
+    onChange({ amenities: next });
+  };
 
   return (
     <div className={styles.bar}>
@@ -75,9 +120,9 @@ export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps
           variant="secondary"
           leftIcon={<FilterIcon />}
           rightIcon={
-            activeCount > 0 ? (
+            panelActiveCount > 0 ? (
               <Badge variant="info" size="sm">
-                {activeCount}
+                {panelActiveCount}
               </Badge>
             ) : undefined
           }
@@ -87,11 +132,30 @@ export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps
         >
           {t('facility.filters.trigger')}
         </Button>
-        {activeCount > 0 && (
-          <Button variant="ghost" onClick={() => onChange(CLEARED)} data-testid="facility-filters-clear">
+        {hasAnyFilter && (
+          <Button
+            variant="ghost"
+            onClick={() => onChange(CLEARED)}
+            data-testid="facility-filters-clear"
+          >
             {t('facility.filters.clear')}
           </Button>
         )}
+      </div>
+
+      <div className={styles.statusChips} role="group" aria-label={t('facility.filters.status')}>
+        {STATUS_CHIPS.map((value) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={status === value}
+            className={clsx(styles.statusChip, status === value && styles.statusChipActive)}
+            onClick={() => onChange({ status: value })}
+            data-testid={`facility-status-chip-${value}`}
+          >
+            {value === 'all' ? t('facility.filters.allStatus') : t(`status.${value}`)}
+          </button>
+        ))}
       </div>
 
       <AnimatePresence initial={false}>
@@ -104,20 +168,6 @@ export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps
             transition={reduceMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
           >
             <div className={styles.panel}>
-              <div className={styles.filter}>
-                <Select
-                  aria-label={t('facility.filters.status')}
-                  value={params.status ?? 'all'}
-                  onChange={(value) => onChange({ status: value as FacilityListParams['status'] })}
-                  options={[
-                    allOption,
-                    ...FACILITY_STATUSES.map((status) => ({
-                      value: status,
-                      label: t(`status.${status}`),
-                    })),
-                  ]}
-                />
-              </div>
               <div className={styles.filter}>
                 <Select
                   aria-label={t('facility.filters.kind')}
@@ -170,6 +220,47 @@ export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps
               </div>
               <div className={styles.filter}>
                 <Select
+                  aria-label={t('facility.filters.governorate')}
+                  value={params.governorate ?? 'all'}
+                  onChange={(value) =>
+                    onChange({ governorate: value as FacilityListParams['governorate'] })
+                  }
+                  options={[
+                    allOption,
+                    ...SYRIAN_GOVERNORATES.map((governorate) => ({
+                      value: governorate,
+                      label: t(`facility.governorate.${governorate}`),
+                    })),
+                  ]}
+                />
+              </div>
+              <div className={styles.filter}>
+                <Input
+                  value={params.city ?? ''}
+                  onChange={(event) => onChange({ city: event.target.value })}
+                  placeholder={t('facility.filters.cityPlaceholder')}
+                  aria-label={t('facility.filters.city')}
+                  data-testid="facility-filter-city"
+                />
+              </div>
+              <div className={styles.filter}>
+                <Select
+                  aria-label={t('facility.filters.verification')}
+                  value={params.verification ?? 'all'}
+                  onChange={(value) =>
+                    onChange({ verification: value as FacilityListParams['verification'] })
+                  }
+                  options={[
+                    allOption,
+                    ...FACILITY_VERIFICATIONS.map((verification) => ({
+                      value: verification,
+                      label: t(`facility.verification.${verification}`),
+                    })),
+                  ]}
+                />
+              </div>
+              <div className={styles.filter}>
+                <Select
                   aria-label={t('facility.filters.rating')}
                   value={typeof params.minRating === 'number' ? String(params.minRating) : 'any'}
                   onChange={(value) =>
@@ -182,6 +273,42 @@ export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps
                     { value: '4.5', label: t('facility.filters.rating45') },
                   ]}
                 />
+              </div>
+              <div className={styles.filterWide}>
+                <DateRange
+                  value={params.dateRange ?? EMPTY_DATE_RANGE}
+                  onChange={(value) => onChange({ dateRange: value })}
+                  ariaLabel={t('facility.filters.dateAdded')}
+                  allLabel={t('facility.filters.dateAll')}
+                  last7Label={t('facility.filters.date7')}
+                  last30Label={t('facility.filters.date30')}
+                  last90Label={t('facility.filters.date90')}
+                  customLabel={t('facility.filters.dateCustom')}
+                  fromLabel={t('facility.filters.dateFrom')}
+                  toLabel={t('facility.filters.dateTo')}
+                  testId="facility-filter-date"
+                />
+              </div>
+
+              <div className={styles.amenities} role="group" aria-label={t('facility.filters.amenities')}>
+                <span className={styles.amenitiesLabel}>{t('facility.filters.amenities')}</span>
+                <div className={styles.amenityChips}>
+                  {FACILITY_AMENITIES.map((amenity) => {
+                    const active = amenities.includes(amenity);
+                    return (
+                      <button
+                        key={amenity}
+                        type="button"
+                        aria-pressed={active}
+                        className={clsx(styles.amenityChip, active && styles.amenityChipActive)}
+                        onClick={() => toggleAmenity(amenity)}
+                        data-testid={`facility-amenity-${amenity}`}
+                      >
+                        {t(`facility.amenity.${amenity}`)}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </motion.div>

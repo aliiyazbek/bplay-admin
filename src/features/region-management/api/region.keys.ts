@@ -6,4 +6,5 @@ export const regionKeys = {
   list: (params: RegionListParams) => [...regionKeys.lists(), params] as const,
   details: () => [...regionKeys.all, 'detail'] as const,
   detail: (id: string) => [...regionKeys.details(), id] as const,
+  stats: () => [...regionKeys.all, 'stats'] as const,
 };

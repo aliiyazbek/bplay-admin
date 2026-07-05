@@ -16,9 +16,12 @@ import {
   SkeletonText,
   ErrorState,
   EmptyState,
+  ImageLightbox,
+  MapView,
   MapPinIcon,
   PhoneIcon,
   StadiumIcon,
+  EditIcon,
 } from '@ui';
 import { PATHS } from '@app/router/paths';
 import { useFacilityQuery } from '../hooks/useFacilityQuery';
@@ -28,7 +31,6 @@ import { WorkingHoursView } from '../components/WorkingHoursView';
 import { PitchSpecsGrid } from '../components/PitchSpecsGrid';
 import { CourtCard } from '../components/CourtCard';
 import { DocumentChip } from '../components/DocumentChip';
-import { StaticMapPin } from '../components/StaticMapPin';
 import type { Facility } from '../api/facility.types';
 import styles from './FacilityProfilePage.module.css';
 
@@ -37,6 +39,7 @@ type ProfileTab = 'overview' | 'courts' | 'media';
 export default function FacilityProfilePage() {
   const { facilityId } = useParams<{ facilityId: string }>();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: facility, isLoading, isError, error, refetch } = useFacilityQuery(facilityId);
 
   const notFound = isError && error instanceof Error && error.message === 'Facility not found';
@@ -48,7 +51,21 @@ export default function FacilityProfilePage() {
         subtitle={t('facility.profile.subtitle')}
         showBack
         backLabel={t('common.back')}
-        actions={facility ? <FacilityStatusActions facility={facility} /> : undefined}
+        actions={
+          facility ? (
+            <>
+              <Button
+                variant="secondary"
+                leftIcon={<EditIcon />}
+                onClick={() => navigate(`${PATHS.facilityManagement}/${facility.id}/edit`)}
+                data-testid="facility-edit"
+              >
+                {t('facility.profile.edit')}
+              </Button>
+              <FacilityStatusActions facility={facility} />
+            </>
+          ) : undefined
+        }
       />
 
       {isLoading ? (
@@ -97,6 +114,8 @@ function FacilityProfile({ facility }: { facility: Facility }) {
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
   const [tab, setTab] = useState<ProfileTab>('overview');
+  const [lightbox, setLightbox] = useState<string | null>(null);
+  const editPath = `${PATHS.facilityManagement}/${facility.id}/edit`;
 
   const numberLocale = i18n.language.startsWith('ar') ? 'ar-SY' : 'en-US';
   const cover = facility.images[0];
@@ -268,7 +287,9 @@ function FacilityProfile({ facility }: { facility: Facility }) {
                   </span>
                 </div>
               </div>
-              <StaticMapPin lat={facility.location.lat} lng={facility.location.lng} />
+              <div className={styles.mapView}>
+                <MapView lat={facility.location.lat} lng={facility.location.lng} />
+              </div>
             </Card>
           </div>
         </div>
@@ -277,22 +298,31 @@ function FacilityProfile({ facility }: { facility: Facility }) {
       {tab === 'courts' && (
         <div className={styles.tabPanel} role="tabpanel" aria-label={t('facility.profile.tabs.courts')}>
           {facility.kind === 'club' ? (
-            facility.courts.length === 0 ? (
-              <Card className={styles.card}>
-                <p className={styles.muted}>{t('facility.profile.courtsEmpty')}</p>
-              </Card>
-            ) : (
-              <>
+            <>
+              <div className={styles.courtsHead}>
                 <p className={styles.courtsCount}>
-                  {t('facility.profile.courtsCount', { count: facility.courts.length })}
+                  {facility.courts.length === 0
+                    ? t('facility.profile.courtsEmpty')
+                    : t('facility.profile.courtsCount', { count: facility.courts.length })}
                 </p>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  leftIcon={<EditIcon />}
+                  onClick={() => navigate(editPath)}
+                  data-testid="facility-manage-courts"
+                >
+                  {t('facility.profile.manageCourts')}
+                </Button>
+              </div>
+              {facility.courts.length > 0 && (
                 <div className={styles.courtsGrid}>
                   {facility.courts.map((court) => (
                     <CourtCard key={court.id} court={court} />
                   ))}
                 </div>
-              </>
-            )
+              )}
+            </>
           ) : (
             <Card className={styles.card}>
               <p className={styles.muted}>{t('facility.profile.pitchSelf')}</p>
@@ -316,17 +346,16 @@ function FacilityProfile({ facility }: { facility: Facility }) {
             ) : (
               <div className={styles.photoGrid}>
                 {facility.images.map((image, index) => (
-                  <a
+                  <button
                     key={`${image}-${index}`}
+                    type="button"
                     className={styles.photoLink}
-                    href={image}
-                    target="_blank"
-                    rel="noreferrer"
+                    onClick={() => setLightbox(image)}
                     aria-label={`${facility.name} — ${t('facility.profile.photos')} ${index + 1}`}
                     data-testid={`facility-photo-${index}`}
                   >
                     <img className={styles.photo} src={image} alt="" loading="lazy" />
-                  </a>
+                  </button>
                 ))}
               </div>
             )}
@@ -363,6 +392,18 @@ function FacilityProfile({ facility }: { facility: Facility }) {
           {t('facility.profile.viewOwner')}
         </Button>
       </section>
+
+      <ImageLightbox
+        isOpen={lightbox !== null}
+        onClose={() => setLightbox(null)}
+        src={lightbox ?? undefined}
+        alt={facility.name}
+        title={facility.name}
+        closeLabel={t('common.close')}
+        zoomInLabel={t('common.zoomIn')}
+        zoomOutLabel={t('common.zoomOut')}
+        resetLabel={t('common.resetZoom')}
+      />
     </div>
   );
 }

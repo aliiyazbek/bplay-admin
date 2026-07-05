@@ -1,4 +1,5 @@
 .tablist {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -35,9 +36,9 @@
 
 .indicator {
   position: absolute;
-  inset: 0;
   background: var(--color-glass-strong);
   border-radius: var(--radius-full);
+  pointer-events: none;
 }
 
 /* Content sits above the absolutely-positioned indicator pill. */

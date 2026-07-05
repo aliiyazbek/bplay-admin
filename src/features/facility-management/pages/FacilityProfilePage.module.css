@@ -198,6 +198,15 @@
   gap: var(--space-2);
 }
 
+/* Interactive map inside the location card. */
+.mapView {
+  block-size: 220px;
+  margin-block-start: var(--space-2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-glass-border);
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -217,6 +226,14 @@
 }
 
 /* ---------- Courts tab ---------- */
+
+.courtsHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
 
 .courtsCount {
   margin: 0;
@@ -241,6 +258,11 @@
 
 .photoLink {
   display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
   border-radius: var(--radius-lg);
   overflow: hidden;
 }

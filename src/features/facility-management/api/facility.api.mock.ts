@@ -3,12 +3,15 @@ import { haversineKm } from '@shared/lib/geo';
 import { useAuthStore } from '@shared/stores/authStore';
 import { getScopeRegions } from '@features/region-management/api';
 import { getOwnerById } from '@features/owner-management/api';
-import { buildFacilityListResult, type AdminScope } from './facility.filter';
-import { isAged, toRegionFacility } from './facility.types';
+import { buildFacilityListResult, computeFacilityStats, type AdminScope } from './facility.filter';
+import { toRegionFacility } from './facility.types';
 import type {
+  BulkActionResult,
+  BulkFacilityAction,
   CancelPolicy,
   ClubFacility,
   Court,
+  CourtInput,
   DayHours,
   Facility,
   FacilityDocument,
@@ -16,6 +19,7 @@ import type {
   FacilityListResult,
   FacilityLocation,
   FacilityStatistics,
+  FacilityStats,
   FacilityStatus,
   CreateFacilityInput,
   PitchFacility,
@@ -23,6 +27,7 @@ import type {
   RegionFacility,
   SportType,
   PitchSurface,
+  UpdateFacilityInput,
   WorkingHours,
 } from './facility.types';
 
@@ -719,17 +724,6 @@ export async function getPendingFacilities(
   return getFacilities({ ...params, status: 'pending' });
 }
 
-export async function getPendingCount(): Promise<number> {
-  const result = await getFacilities({ status: 'pending', page: 1, pageSize: 1 });
-  return result.total;
-}
-
-/** Scope-wide count of pending submissions older than the aged threshold. */
-export async function getAgedCount(): Promise<number> {
-  const result = await getFacilities({ status: 'pending', page: 1, pageSize: db.length });
-  return result.items.filter((item) => isAged(item.createdAt)).length;
-}
-
 export async function getFacilityById(id: string): Promise<Facility> {
   await mockDelay();
   const facility = db.find((item) => item.id === id);
@@ -782,6 +776,46 @@ export async function reactivateFacility(id: string): Promise<void> {
   facility.suspensionReason = undefined;
 }
 
+const DEFAULT_SPECS: PitchSpecs = {
+  surface: 'artificial',
+  isIndoor: false,
+  hasLighting: false,
+  hasParking: false,
+  hasLockerRoom: false,
+  hasCafe: false,
+};
+
+/** Materialise input documents into stored documents, preserving prior status by URL. */
+function buildDocuments(
+  id: string,
+  input: CreateFacilityInput,
+  previous: FacilityDocument[] = [],
+): FacilityDocument[] {
+  const priorStatusByUrl = new Map(previous.map((doc) => [doc.url, doc.status]));
+  return (input.documents ?? []).map((doc, index) => ({
+    id: `${id}-d${index + 1}`,
+    name: doc.name,
+    status: priorStatusByUrl.get(doc.url) ?? 'pending',
+    url: doc.url,
+  }));
+}
+
+/** Materialise an authored court, keeping its id on edit or minting one when new. */
+function toCourt(input: CourtInput): Court {
+  courtSeq += 1;
+  return {
+    id: input.id ?? `crt-${courtSeq}`,
+    name: input.name,
+    sport: input.sport,
+    pricePerHour: input.pricePerHour,
+    surface: input.surface,
+    isIndoor: input.isIndoor,
+    hasLighting: input.hasLighting,
+    capacity: input.capacity,
+    isActive: input.isActive,
+  };
+}
+
 export async function createFacility(input: CreateFacilityInput): Promise<Facility> {
   await mockDelay();
   seq += 1;
@@ -801,10 +835,7 @@ export async function createFacility(input: CreateFacilityInput): Promise<Facili
     ownerId: input.ownerId,
     ownerName,
     createdAt: new Date().toISOString(),
-    documents:
-      input.documentName && input.documentUrl
-        ? [{ id: `${id}-d1`, name: input.documentName, status: 'pending', url: input.documentUrl }]
-        : [],
+    documents: buildDocuments(id, input),
     statistics: zeroStats(),
   };
 
@@ -816,7 +847,7 @@ export async function createFacility(input: CreateFacilityInput): Promise<Facili
       sports: [...input.sports],
       workingHours: { ...(input.workingHours ?? {}) },
       contactPhone: input.contactPhone || undefined,
-      courts: [],
+      courts: (input.courts ?? []).map(toCourt),
     };
     db.unshift(created);
     return created;
@@ -828,18 +859,110 @@ export async function createFacility(input: CreateFacilityInput): Promise<Facili
     sport: input.sports[0] ?? 'football',
     pricePerHour: input.pricePerHour ?? 0,
     capacity: input.capacity,
-    specs: input.specs ?? {
-      surface: 'artificial',
-      isIndoor: false,
-      hasLighting: false,
-      hasParking: false,
-      hasLockerRoom: false,
-      hasCafe: false,
-    },
+    specs: input.specs ?? { ...DEFAULT_SPECS },
     cancelPolicy: input.cancelPolicy ?? { freeHoursBefore: 24, penaltyPercent: 0 },
   };
   db.unshift(created);
   return created;
+}
+
+/** Edit an existing facility in place, preserving status / createdAt / stats / rating. */
+export async function updateFacility(id: string, input: UpdateFacilityInput): Promise<Facility> {
+  await mockDelay();
+  const index = db.findIndex((item) => item.id === id);
+  if (index === -1) throw new Error('Facility not found');
+  const existing = db[index];
+
+  let ownerName = existing.ownerName;
+  if (input.ownerId !== existing.ownerId) {
+    try {
+      ownerName = (await getOwnerById(input.ownerId)).name;
+    } catch {
+      ownerName = existing.ownerName;
+    }
+  }
+
+  const base = {
+    id,
+    name: input.name,
+    status: existing.status,
+    location: { ...input.location },
+    images: [...input.images],
+    ownerId: input.ownerId,
+    ownerName,
+    createdAt: existing.createdAt,
+    adminNotes: existing.adminNotes,
+    suspensionReason: existing.suspensionReason,
+    rating: existing.rating,
+    documents: buildDocuments(id, input, existing.documents),
+    statistics: existing.statistics,
+  };
+
+  let updated: Facility;
+  if (input.kind === 'club') {
+    updated = {
+      ...base,
+      kind: 'club',
+      description: input.description,
+      logoUrl: existing.kind === 'club' ? existing.logoUrl : undefined,
+      sports: [...input.sports],
+      workingHours: {
+        ...(input.workingHours ?? (existing.kind === 'club' ? existing.workingHours : {})),
+      },
+      contactPhone: input.contactPhone || undefined,
+      courts: (input.courts ?? (existing.kind === 'club' ? existing.courts : [])).map(toCourt),
+    };
+  } else {
+    updated = {
+      ...base,
+      kind: 'pitch',
+      sport: input.sports[0] ?? 'football',
+      pricePerHour: input.pricePerHour ?? 0,
+      capacity: input.capacity,
+      specs: input.specs ?? (existing.kind === 'pitch' ? existing.specs : { ...DEFAULT_SPECS }),
+      cancelPolicy:
+        input.cancelPolicy ??
+        (existing.kind === 'pitch' ? existing.cancelPolicy : { freeHoursBefore: 24, penaltyPercent: 0 }),
+    };
+  }
+  db[index] = updated;
+  return updated;
+}
+
+/** Approve or reject many pending submissions at once; non-pending ids are skipped. */
+export async function bulkAction(
+  ids: string[],
+  action: BulkFacilityAction,
+  reason?: string,
+): Promise<BulkActionResult> {
+  await mockDelay();
+  if (action === 'reject' && (!reason || reason.trim().length === 0)) {
+    throw new Error('Reason is required');
+  }
+  const skipped: string[] = [];
+  let succeeded = 0;
+  for (const id of ids) {
+    const facility = db.find((item) => item.id === id);
+    if (!facility || facility.status !== 'pending') {
+      skipped.push(id);
+      continue;
+    }
+    if (action === 'approve') {
+      facility.status = 'active';
+      facility.adminNotes = undefined;
+    } else {
+      facility.status = 'rejected';
+      facility.adminNotes = reason?.trim();
+    }
+    succeeded += 1;
+  }
+  return { succeeded, skipped };
+}
+
+export async function getFacilityStats(): Promise<FacilityStats> {
+  await mockDelay();
+  const regions = await getScopeRegions();
+  return computeFacilityStats([...db], regions, currentScope());
 }
 
 /**
@@ -864,6 +987,30 @@ export async function getRegionFacilityCounts(): Promise<Record<string, number>>
     ).length;
   }
   return counts;
+}
+
+/** Facility count per owner id (for the owners list facility-count column/filter). */
+export async function getFacilityCountsByOwner(): Promise<Record<string, number>> {
+  await mockDelay(200);
+  const counts: Record<string, number> = {};
+  for (const facility of db) {
+    counts[facility.ownerId] = (counts[facility.ownerId] ?? 0) + 1;
+  }
+  return counts;
+}
+
+/**
+ * Disable every active facility owned by an owner — the owner block/suspend
+ * cascade (FR-ADM-OWNER-006 / OW4). A real backend does this server-side.
+ */
+export async function suspendFacilitiesByOwner(ownerId: string): Promise<void> {
+  await mockDelay(200);
+  for (const facility of db) {
+    if (facility.ownerId === ownerId && facility.status === 'active') {
+      facility.status = 'suspended';
+      facility.suspensionReason = 'Owner account suspended or blocked.';
+    }
+  }
 }
 
 /**

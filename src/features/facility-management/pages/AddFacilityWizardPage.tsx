@@ -1,15 +1,32 @@
 import { useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
-import { PageContainer, PageHeader, Stepper, MapPinIcon } from '@ui';
+import {
+  PageContainer,
+  PageHeader,
+  Stepper,
+  Spinner,
+  EmptyState,
+  ErrorState,
+  MapPinIcon,
+  StadiumIcon,
+} from '@ui';
 import { PATHS } from '@app/router/paths';
 import { useCreateFacility } from '../hooks/useCreateFacility';
-import type { CreateFacilityInput, FacilityRegionSeed } from '../api/facility.types';
+import { useUpdateFacility } from '../hooks/useUpdateFacility';
+import { useFacilityQuery } from '../hooks/useFacilityQuery';
+import {
+  facilityToInput,
+  type CreateFacilityInput,
+  type Facility,
+  type FacilityRegionSeed,
+} from '../api/facility.types';
 import { Step1OwnerType } from '../components/wizard/Step1OwnerType';
 import { Step2Basics } from '../components/wizard/Step2Basics';
 import { Step3Location } from '../components/wizard/Step3Location';
 import { Step4Details } from '../components/wizard/Step4Details';
+import { StepCourts } from '../components/wizard/StepCourts';
 import { Step5Media } from '../components/wizard/Step5Media';
 import styles from './AddFacilityWizardPage.module.css';
 
@@ -17,66 +34,124 @@ import styles from './AddFacilityWizardPage.module.css';
 const KIND_SPECIFIC_FIELDS = [
   'description',
   'workingHours',
+  'courts',
   'pricePerHour',
   'capacity',
   'specs',
   'cancelPolicy',
 ] as const;
 
-type StepKey = 'owner' | 'basics' | 'location' | 'details' | 'media';
+type StepKey = 'owner' | 'basics' | 'location' | 'details' | 'courts' | 'media';
 
 /**
- * Add Facility wizard — a glass panel over the review-desk stage. The page owns
- * the draft (`Partial<CreateFacilityInput>`) and the active index; every step is
- * its own small RHF form seeded from the draft, so Back keeps whatever was typed
- * and Next only merges validated values.
+ * Add / Edit Facility wizard. The page owns the draft (`Partial<CreateFacilityInput>`)
+ * and the active index; every step is its own small RHF form seeded from the draft,
+ * so Back keeps whatever was typed and Next only merges validated values.
  *
- * Opened from a region's detail page (router state carries a `region` seed), the
- * facility's coordinates are pre-filled from the region center and the standalone
- * location step is dropped — you land inside that region without re-entering it.
+ * - New: opened at /new. From a region's detail page (router state carries a seed)
+ *   the location step is pre-centred on the region + draws its radius circle.
+ * - Edit: opened at /:id/edit — the facility is loaded and the draft pre-filled.
  */
 export default function AddFacilityWizardPage() {
+  const { facilityId } = useParams<{ facilityId: string }>();
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const routerLocation = useLocation();
-  const reduceMotion = useReducedMotion();
-  const mutation = useCreateFacility();
+  const editMode = Boolean(facilityId);
+  const facilityQuery = useFacilityQuery(facilityId);
 
+  const routerLocation = useLocation();
   const regionSeed =
     (routerLocation.state as { region?: FacilityRegionSeed } | null)?.region ?? null;
 
-  // With a region seed the location is known, so that step is omitted.
-  const stepKeys = useMemo<StepKey[]>(
-    () =>
-      regionSeed
-        ? ['owner', 'basics', 'details', 'media']
-        : ['owner', 'basics', 'location', 'details', 'media'],
-    [regionSeed],
-  );
+  if (editMode) {
+    if (facilityQuery.isLoading) {
+      return (
+        <PageContainer>
+          <PageHeader
+            title={t('facility.wizard.editTitle')}
+            subtitle={t('facility.wizard.editSubtitle')}
+            showBack
+            backLabel={t('common.back')}
+          />
+          <div className={styles.loading}>
+            <Spinner size="lg" />
+          </div>
+        </PageContainer>
+      );
+    }
+    if (facilityQuery.isError) {
+      return (
+        <PageContainer>
+          <PageHeader
+            title={t('facility.wizard.editTitle')}
+            showBack
+            backLabel={t('common.back')}
+          />
+          <ErrorState
+            message={t('common.loadError')}
+            retryLabel={t('common.retry')}
+            onRetry={() => void facilityQuery.refetch()}
+          />
+        </PageContainer>
+      );
+    }
+    if (!facilityQuery.data) {
+      return (
+        <PageContainer>
+          <PageHeader title={t('facility.wizard.editTitle')} showBack backLabel={t('common.back')} />
+          <EmptyState icon={<StadiumIcon />} title={t('facility.profile.notFound')} />
+        </PageContainer>
+      );
+    }
+    return (
+      <FacilityWizard
+        editId={facilityId}
+        initialDraft={facilityToInput(facilityQuery.data)}
+        regionSeed={null}
+      />
+    );
+  }
+
+  const initialDraft: Partial<CreateFacilityInput> = regionSeed
+    ? { location: { lat: regionSeed.centerLat, lng: regionSeed.centerLng, address: '' } }
+    : {};
+  return <FacilityWizard initialDraft={initialDraft} regionSeed={regionSeed} />;
+}
+
+interface FacilityWizardProps {
+  initialDraft: Partial<CreateFacilityInput>;
+  editId?: string;
+  regionSeed?: FacilityRegionSeed | null;
+}
+
+function FacilityWizard({ initialDraft, editId, regionSeed = null }: FacilityWizardProps) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
+  const createMutation = useCreateFacility();
+  const updateMutation = useUpdateFacility();
+
+  const [draft, setDraft] = useState<Partial<CreateFacilityInput>>(initialDraft);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const kind = draft.kind ?? 'club';
+  const isSubmitting = editId ? updateMutation.isPending : createMutation.isPending;
+
+  const stepKeys = useMemo<StepKey[]>(() => {
+    const keys: StepKey[] = ['owner', 'basics', 'location', 'details'];
+    if (kind === 'club') keys.push('courts');
+    keys.push('media');
+    return keys;
+  }, [kind]);
   const steps = useMemo(
     () => stepKeys.map((key) => ({ key, label: t(`facility.wizard.steps.${key}`) })),
     [stepKeys, t],
   );
-
-  const [draft, setDraft] = useState<Partial<CreateFacilityInput>>(() =>
-    regionSeed
-      ? {
-          location: {
-            lat: regionSeed.centerLat,
-            lng: regionSeed.centerLng,
-            address: regionSeed.name,
-          },
-        }
-      : {},
-  );
-  const [activeIndex, setActiveIndex] = useState(0);
-  const activeKey = stepKeys[activeIndex];
+  const activeKey = stepKeys[Math.min(activeIndex, stepKeys.length - 1)];
 
   const goToStep = (patch: Partial<CreateFacilityInput>, index: number) => {
     setDraft((prev) => ({ ...prev, ...patch }));
     setActiveIndex(index);
   };
-  /** Generic step nav — Back/Next just move one step in the current flow. */
   const next = (patch: Partial<CreateFacilityInput>) => goToStep(patch, activeIndex + 1);
   const back = (patch: Partial<CreateFacilityInput>) => goToStep(patch, activeIndex - 1);
 
@@ -97,8 +172,8 @@ export default function AddFacilityWizardPage() {
     setActiveIndex((index) => index + 1);
   };
 
-  /** Step 5 submit — compose the full input from the validated draft and create. */
-  const createFacility = (patch: Partial<CreateFacilityInput>) => {
+  /** Final step — compose the full input from the validated draft and create/update. */
+  const submitFacility = (patch: Partial<CreateFacilityInput>) => {
     const merged = { ...draft, ...patch };
     if (
       !merged.ownerId ||
@@ -119,26 +194,28 @@ export default function AddFacilityWizardPage() {
       contactPhone: merged.contactPhone,
       location: merged.location,
       workingHours: merged.workingHours,
+      courts: merged.courts,
       pricePerHour: merged.pricePerHour,
       capacity: merged.capacity,
       specs: merged.specs,
       cancelPolicy: merged.cancelPolicy,
       images: merged.images,
-      documentName: merged.documentName,
-      documentUrl: merged.documentUrl,
+      documents: merged.documents,
     };
-    mutation.mutate(input, {
-      onSuccess: (created) => navigate(`${PATHS.facilityManagement}/${created.id}`),
-    });
+    const onSuccess = (facility: Facility) =>
+      navigate(`${PATHS.facilityManagement}/${facility.id}`);
+    if (editId) {
+      updateMutation.mutate({ id: editId, input }, { onSuccess });
+    } else {
+      createMutation.mutate(input, { onSuccess });
+    }
   };
-
-  const kind = draft.kind ?? 'club';
 
   return (
     <PageContainer>
       <PageHeader
-        title={t('facility.wizard.title')}
-        subtitle={t('facility.wizard.subtitle')}
+        title={editId ? t('facility.wizard.editTitle') : t('facility.wizard.title')}
+        subtitle={editId ? t('facility.wizard.editSubtitle') : t('facility.wizard.subtitle')}
         showBack
         backLabel={t('common.back')}
       />
@@ -174,17 +251,19 @@ export default function AddFacilityWizardPage() {
           <Step2Basics draft={draft} kind={kind} onBack={back} onNext={next} />
         )}
         {activeKey === 'location' && (
-          <Step3Location draft={draft} onBack={back} onNext={next} />
+          <Step3Location draft={draft} regionSeed={regionSeed} onBack={back} onNext={next} />
         )}
         {activeKey === 'details' && (
           <Step4Details draft={draft} kind={kind} onBack={back} onNext={next} />
         )}
+        {activeKey === 'courts' && <StepCourts draft={draft} onBack={back} onNext={next} />}
         {activeKey === 'media' && (
           <Step5Media
             draft={draft}
-            isCreating={mutation.isPending}
+            isSubmitting={isSubmitting}
+            submitLabel={editId ? t('facility.wizard.save') : t('facility.wizard.create')}
             onBack={back}
-            onNext={createFacility}
+            onNext={submitFacility}
           />
         )}
       </motion.section>

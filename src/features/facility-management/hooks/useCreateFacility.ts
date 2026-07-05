@@ -17,5 +17,6 @@ export function useCreateFacility() {
       queryClient.invalidateQueries({ queryKey: facilityKeys.all });
       toast.success(t('facility.toast.created'));
     },
+    onError: () => toast.error(t('facility.toast.error')),
   });
 }

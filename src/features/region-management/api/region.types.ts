@@ -111,6 +111,14 @@ export interface RegionListResult {
   pageCount: number;
 }
 
+/** Platform-wide region counts for the list KPI row. */
+export interface RegionStats {
+  total: number;
+  active: number;
+  /** Live regions with no admin assigned (needs attention). */
+  unassigned: number;
+}
+
 export interface CreateRegionInput {
   name: string;
   centerLat: number;

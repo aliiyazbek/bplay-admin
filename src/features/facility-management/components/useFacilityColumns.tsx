@@ -26,6 +26,7 @@ export function useFacilityColumns({
       {
         key: 'name',
         header: t('facility.col.name'),
+        sortable: true,
         render: (item) => (
           <span className={styles.nameCell}>
             {item.thumbnailUrl ? (
@@ -89,6 +90,7 @@ export function useFacilityColumns({
       {
         key: 'rating',
         header: t('facility.col.rating'),
+        sortable: true,
         render: (item) => <RatingStars value={item.rating ?? null} size="sm" />,
       },
       {
@@ -99,6 +101,7 @@ export function useFacilityColumns({
       {
         key: 'created',
         header: t('facility.col.created'),
+        sortable: true,
         render: (item) => (
           <span className={styles.date}>
             {new Date(item.createdAt).toLocaleDateString(i18n.language, {

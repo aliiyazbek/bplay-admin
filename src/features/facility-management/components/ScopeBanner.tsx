@@ -2,26 +2,27 @@ import { useTranslation } from 'react-i18next';
 import { ClockIcon, GlobeIcon } from '@ui';
 import { useAdminScope } from '../hooks/useAdminScope';
 import { useScopeRegionsQuery } from '../hooks/useScopeRegionsQuery';
-import { usePendingCountQuery } from '../hooks/usePendingCountQuery';
 import styles from './ScopeBanner.module.css';
 
 export interface ScopeBannerProps {
-  /** Scope-wide count of pending submissions waiting over 48h (useAgedCountQuery). */
+  /** Scope-wide count of pending submissions (from the shared stats query). */
+  pendingCount?: number;
+  /** Scope-wide count of pending submissions waiting over 48h. */
   agedCount?: number;
-  /** Count of facilities outside every region — super_admin only, page-computed. */
+  /** Count of facilities outside every region — super_admin only. */
   orphanCount?: number;
 }
 
 /**
  * The slim glass strip on top of the review desk: who the signed-in admin is
  * allowed to see (all regions / their regions / general oversight) plus the
- * scope-aware pending chip and an amber aged chip when submissions go stale.
+ * scope-aware pending chip and an amber aged chip when submissions go stale. All
+ * counts are passed in from the page's single stats query.
  */
-export function ScopeBanner({ agedCount = 0, orphanCount }: ScopeBannerProps) {
+export function ScopeBanner({ pendingCount, agedCount = 0, orphanCount }: ScopeBannerProps) {
   const { t } = useTranslation();
   const { isSuperAdmin, isGeneralOversight, assignedRegionIds } = useAdminScope();
   const regionsQuery = useScopeRegionsQuery();
-  const pendingQuery = usePendingCountQuery();
 
   let scopeText: string;
   if (isSuperAdmin) {
@@ -47,9 +48,9 @@ export function ScopeBanner({ agedCount = 0, orphanCount }: ScopeBannerProps) {
       <span className={styles.text}>{scopeText}</span>
 
       <div className={styles.chips}>
-        {typeof pendingQuery.data === 'number' && (
+        {typeof pendingCount === 'number' && (
           <span className={styles.chip}>
-            {t('facility.scope.pending', { count: pendingQuery.data })}
+            {t('facility.scope.pending', { count: pendingCount })}
           </span>
         )}
         {agedCount > 0 && (

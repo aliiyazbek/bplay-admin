@@ -6,6 +6,7 @@ import type {
   AdminListParams,
   AdminListResult,
   AdminScope,
+  AdminStats,
   CreateAdminInput,
   UpdateAdminInput,
 } from './admin.types';
@@ -117,6 +118,22 @@ export async function getAdmins(params: AdminListParams): Promise<AdminListResul
   const regions = await getScopeRegions();
   const hydrated = db.map((record) => toPublicAdmin(record, regions));
   return filterAndPaginateAdmins(hydrated, params);
+}
+
+/** Platform-wide admin counts for the list KPI row (live admins, regions hydrated). */
+export async function getAdminStats(): Promise<AdminStats> {
+  const regions = await getScopeRegions();
+  const live = db
+    .filter((record) => !record.isDeleted)
+    .map((record) => toPublicAdmin(record, regions));
+  return {
+    total: live.length,
+    active: live.filter((admin) => admin.status === 'active').length,
+    regional: live.filter((admin) => admin.scope === 'regional').length,
+    unassigned: live.filter(
+      (admin) => admin.scope === 'regional' && admin.assignedRegionIds.length === 0,
+    ).length,
+  };
 }
 
 /** Fetch a single admin by id INCLUDING soft-deleted ones (the detail page still shows it). */

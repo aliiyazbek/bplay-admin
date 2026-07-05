@@ -23,6 +23,8 @@ import { googleMapsLink, formatLatLng } from '@shared/lib/geo';
 import { PATHS } from '@app/router/paths';
 import { useRegionsQuery } from '../hooks/useRegionsQuery';
 import { useRegionFacilityCounts } from '../hooks/useRegionFacilityCounts';
+import { useRegionStats } from '../hooks/useRegionStats';
+import { RegionOverviewStats } from '../components/RegionOverviewStats';
 import { RegionFormModal } from '../components/RegionFormModal';
 import { AssignAdminModal } from '../components/AssignAdminModal';
 import { RegionRowActions } from '../components/RegionRowActions';
@@ -45,6 +47,8 @@ export default function RegionManagementPage() {
   });
   const { data, isLoading, isError, refetch } = useRegionsQuery(params);
   const { data: facilityCounts } = useRegionFacilityCounts();
+  const { data: stats } = useRegionStats();
+  const facilitiesTotal = Object.values(facilityCounts ?? {}).reduce((sum, count) => sum + count, 0);
 
   const hasActiveFilters =
     (params.q ?? '') !== '' ||
@@ -140,6 +144,8 @@ export default function RegionManagementPage() {
           </Button>
         }
       />
+
+      <RegionOverviewStats stats={stats} facilities={facilitiesTotal} />
 
       <Toolbar
         end={

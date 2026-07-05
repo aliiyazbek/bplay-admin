@@ -54,3 +54,61 @@ export async function reverseGeocode(
   const data = (await res.json()) as { display_name?: string };
   return data.display_name ?? null;
 }
+
+/** Structured reverse-geocode result — the parts a location form auto-fills. */
+export interface ReverseAddress {
+  label: string;
+  road?: string;
+  city?: string;
+  district?: string;
+  /** Raw administrative area (governorate/state) for best-effort enum matching. */
+  state?: string;
+}
+
+interface NominatimReverse {
+  display_name?: string;
+  address?: {
+    road?: string;
+    pedestrian?: string;
+    neighbourhood?: string;
+    suburb?: string;
+    quarter?: string;
+    city_district?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    state?: string;
+    county?: string;
+  };
+}
+
+/**
+ * Reverse geocode into structured address parts (road / city / district / state)
+ * for auto-filling a location form. Returns null on failure so the caller keeps
+ * whatever the user already typed.
+ */
+export async function reverseGeocodeAddress(
+  lat: number,
+  lng: number,
+  lang: string,
+  signal?: AbortSignal,
+): Promise<ReverseAddress | null> {
+  const url = new URL(`${BASE}/reverse`);
+  url.searchParams.set('format', 'jsonv2');
+  url.searchParams.set('lat', String(lat));
+  url.searchParams.set('lon', String(lng));
+  url.searchParams.set('accept-language', lang);
+  url.searchParams.set('addressdetails', '1');
+  const res = await fetch(url.toString(), { signal, headers: { Accept: 'application/json' } });
+  if (!res.ok) return null;
+  const data = (await res.json()) as NominatimReverse;
+  const address = data.address ?? {};
+  return {
+    label: data.display_name ?? '',
+    road: address.road ?? address.pedestrian,
+    city: address.city ?? address.town ?? address.village ?? address.municipality,
+    district: address.suburb ?? address.neighbourhood ?? address.quarter ?? address.city_district,
+    state: address.state ?? address.county,
+  };
+}

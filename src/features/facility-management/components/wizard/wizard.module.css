@@ -235,6 +235,89 @@
   color: var(--status-danger-text);
 }
 
+/* Step 3 — map picker frame */
+.mapWrap {
+  block-size: 340px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-glass-border);
+}
+
+@media (max-width: 640px) {
+  .mapWrap {
+    block-size: 280px;
+  }
+}
+
+/* Courts step (club) — repeatable court editor cards */
+.courts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.courtCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-glass);
+}
+
+.courtHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.courtIndex {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.courtGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.courtToggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.courtToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--text-sm);
+}
+
+.courtToggle:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.courtToggleLabel {
+  font-weight: var(--weight-medium);
+}
+
+.addCourt {
+  align-self: flex-start;
+}
+
 /* Footer shared by every step (Back at start, Next/Create at end). */
 .footer {
   display: flex;

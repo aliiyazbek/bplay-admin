@@ -49,6 +49,42 @@
   padding: var(--space-10);
 }
 
+/* Video fills the stage; native controls, no zoom/pan. */
+.video {
+  max-inline-size: 100%;
+  block-size: 100%;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-glass-border-strong);
+  background: var(--color-bg);
+}
+
+/* Gallery prev/next controls, floated over the stage edges. */
+.navBtn {
+  position: absolute;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  box-shadow: var(--shadow-md);
+}
+.navPrev {
+  inset-inline-start: var(--space-3);
+}
+.navNext {
+  inset-inline-end: var(--space-3);
+}
+.counter {
+  position: absolute;
+  inset-block-end: var(--space-3);
+  inset-inline-end: var(--space-3);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Zoom toolbar — a compact pill under the stage. */
 .controls {
   display: inline-flex;
