@@ -13,6 +13,7 @@ import {
   type BulkActionResult,
   type BulkFacilityAction,
   type CreateFacilityInput,
+  type FacilityDocAction,
   type Facility,
   type FacilityDto,
   type FacilityListParams,
@@ -78,6 +79,21 @@ export async function suspendFacility(id: string, reason: string): Promise<void>
 
 export async function reactivateFacility(id: string): Promise<void> {
   await apiClient.patch(`${FACILITIES_PATH}/${id}/reactivate`);
+}
+
+export async function reviewFacilityDocument(
+  facilityId: string,
+  documentId: string,
+  action: FacilityDocAction,
+  reason?: string,
+): Promise<void> {
+  if (action === 'reject' && (!reason || reason.trim().length === 0)) {
+    throw new Error('Reason is required');
+  }
+  await apiClient.patch(`${FACILITIES_PATH}/${facilityId}/documents/${documentId}`, {
+    status: action === 'accept' ? 'approved' : 'rejected',
+    reason: reason?.trim(),
+  });
 }
 
 /** The snake_case wire body shared by create (POST) and update (PUT). */

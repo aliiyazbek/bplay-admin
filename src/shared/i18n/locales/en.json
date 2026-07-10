@@ -23,7 +23,10 @@
     "language": "Language",
     "skipToContent": "Skip to content",
     "dismiss": "Dismiss",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "outsideRegions": "Outside regions",
+    "export": "Export",
+    "exporting": "Exporting…"
   },
   "nav": {
     "adminManagement": "Admins",
@@ -32,6 +35,8 @@
     "playerManagement": "Players",
     "facilityManagement": "Facilities",
     "communityManagement": "Community",
+    "bookingManagement": "Bookings",
+    "clubSubscriptions": "Subscriptions",
     "profile": "Profile",
     "dashboard": "Dashboard"
   },
@@ -135,6 +140,7 @@
       "dob": "Date of birth",
       "city": "City",
       "joined": "Member since",
+      "link": "Link",
       "sports": "Sports"
     },
     "location": {
@@ -156,13 +162,10 @@
       "title": "Account & security",
       "type": "Membership",
       "email": "Email",
-      "twoFactor": "Two-factor auth",
       "noShow": "No-show violations",
       "bookingSuspended": "Booking status",
       "verified": "Verified",
       "unverified": "Unverified",
-      "enabled": "Enabled",
-      "disabled": "Disabled",
       "violations": "{{count}} violation(s)",
       "suspendedUntil": "Suspended until {{date}}",
       "suspendedActive": "Suspended",
@@ -177,8 +180,6 @@
       "status": "Status",
       "empty": "No bookings yet."
     },
-    "bookingStatus": { "upcoming": "Upcoming", "completed": "Completed", "cancelled": "Cancelled", "no_show": "No-show" },
-    "payment": { "cash": "Cash", "transfer": "Transfer" },
     "rooms": {
       "match": "Match",
       "date": "Date",
@@ -196,13 +197,9 @@
       "club": "Club",
       "price": "Price",
       "period": "Period",
-      "autoRenew": "Auto-renew",
       "status": "Status",
-      "empty": "No club memberships.",
-      "autoOn": "On",
-      "autoOff": "Off"
+      "empty": "No club memberships."
     },
-    "membershipStatus": { "active": "Active", "expired": "Expired", "suspended": "Suspended", "cancelled": "Cancelled" },
     "subscription": {
       "title": "Bplay subscription",
       "free": "Free account",
@@ -210,7 +207,6 @@
       "price": "Price",
       "started": "Started",
       "renews": "Renews",
-      "autoRenew": "Auto-renew",
       "invoices": "Invoice history"
     },
     "subscriptionStatus": { "active": "Active", "expired": "Expired" },
@@ -458,7 +454,6 @@
       "name": "Owner",
       "phone": "Phone",
       "status": "Account",
-      "trust": "Trust",
       "facilities": "Facilities",
       "nationalId": "National number",
       "created": "Joined"
@@ -524,6 +519,7 @@
       "emailRequired": "Email is required",
       "emailInvalid": "Enter a valid email",
       "phoneInvalid": "Enter a valid Syrian mobile (9 digits, e.g. 9XXXXXXXX)",
+      "nationalIdRequired": "National number is required",
       "nationalIdInvalid": "The national number must be exactly 11 digits"
     },
     "create": {
@@ -546,11 +542,14 @@
       "view": "View",
       "accept": "Accept",
       "reject": "Reject",
+      "change": "Change decision",
       "openTab": "Open in a new tab",
       "noPreview": "No document to display.",
       "pdfHint": "If the file doesn't preview here, use “Open in a new tab” above.",
       "rejectTitle": "Reject document?",
       "rejectMessage": "The {{type}} will be rejected. The owner is notified and can re-upload.",
+      "acceptTitle": "Accept document?",
+      "acceptMessage": "The {{type}} will be marked as accepted.",
       "type": {
         "national_id": "National ID",
         "business_license": "Business license",
@@ -567,8 +566,9 @@
       "dob": "Date of birth",
       "city": "City",
       "address": "Address",
+      "website": "Website",
       "intent": "Intended facility",
-      "trust": "Trust score",
+      "trust": "Trust",
       "revenue": "Monthly revenue",
       "currency": "SYP"
     },
@@ -644,6 +644,7 @@
       "clear": "Clear filters",
       "status": "Status",
       "kind": "Type",
+      "source": "Source",
       "sport": "Sport",
       "region": "Region",
       "owner": "Owner",
@@ -680,6 +681,7 @@
       "created": "Created"
     },
     "kind": { "club": "Club", "pitch": "Pitch" },
+    "source": { "admin": "Admin-added", "owner": "Owner-added" },
     "sport": {
       "tennis": "Tennis",
       "padel": "Padel",
@@ -713,8 +715,27 @@
     },
     "verification": {
       "verified": "Verified",
-      "unverified": "Pending docs",
+      "unverified": "Not verified",
       "no_docs": "No documents"
+    },
+    "doc": {
+      "title": "Verification documents",
+      "noDocuments": "No verification documents uploaded.",
+      "view": "View",
+      "accept": "Accept",
+      "reject": "Reject",
+      "change": "Change decision",
+      "openTab": "Open in a new tab",
+      "noPreview": "No document to display.",
+      "pdfHint": "If the file doesn't preview here, use “Open in a new tab” above.",
+      "rejectTitle": "Reject document?",
+      "rejectMessage": "{{name}} will be rejected. The owner is notified and can re-upload.",
+      "acceptTitle": "Accept document?",
+      "acceptMessage": "{{name}} will be marked as accepted.",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Explain the decision — the owner is notified.",
+      "status": { "pending": "Under review", "approved": "Accepted", "rejected": "Rejected" },
+      "toast": { "accepted": "Document accepted", "rejected": "Document rejected" }
     },
     "amenity": {
       "indoor": "Indoor",
@@ -799,8 +820,9 @@
       "error": "Something went wrong. Please try again.",
       "bulkApproved": "{{count}} facilities approved",
       "bulkRejected": "{{count}} facilities rejected",
-      "bulkSkipped": "{{count}} skipped (not pending)"
+      "bulkSkipped": "{{count}} skipped (not eligible)"
     },
+    "approveBlocked": "Approve all documents first",
     "profile": {
       "title": "Facility profile",
       "subtitle": "Full facility record, statistics and governance actions",
@@ -837,7 +859,6 @@
       "documents": "Documents",
       "noPhotos": "No photos uploaded yet.",
       "noDocuments": "No documents uploaded.",
-      "openDocument": "Open",
       "owner": "Owner",
       "viewOwner": "View owner profile",
       "edit": "Edit",
@@ -944,7 +965,7 @@
         "moveLater": "Move later",
         "imagesMax": "Maximum of 6 photos reached.",
         "documents": "Verification documents",
-        "documentsHint": "Optional — business license, ownership proof, etc.",
+        "documentsHint": "Required — business license, ownership proof, etc.",
         "docDrop": "Drag documents here or browse",
         "docTypes": "PDF or image files",
         "photo": "Photo"
@@ -963,7 +984,8 @@
         "price": "Price per hour must be greater than 0",
         "courtName": "Court name must be at least 2 characters",
         "courts": "Add at least one court",
-        "document": "Enter a valid document URL"
+        "document": "Enter a valid document URL",
+        "documents": "Upload at least one verification document"
       }
     }
   },
@@ -1368,5 +1390,167 @@
       "explore": "Explore",
       "rights": "© {{year}} Bplay. All rights reserved."
     }
+  },
+  "booking": {
+    "title": "Bookings",
+    "subtitle": "Read-only oversight of every court and pitch booking across the platform.",
+    "search": "Search by reference, player, or facility",
+    "currency": "SYP",
+    "col": {
+      "reference": "Reference",
+      "party": "Booked by",
+      "facility": "Facility",
+      "court": "Court",
+      "sport": "Sport",
+      "region": "Region",
+      "dateTime": "Date & time",
+      "status": "Status",
+      "payment": "Payment",
+      "total": "Total"
+    },
+    "status": {
+      "under_review": "Under review",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "rejected": "Rejected",
+      "no_show": "No-show"
+    },
+    "paymentStatus": { "unpaid": "Unpaid", "paid": "Paid", "refunded": "Refunded" },
+    "source": { "electronic": "Online", "manual": "Manual", "private": "Private block" },
+    "sport": {
+      "tennis": "Tennis",
+      "padel": "Padel",
+      "football": "Football",
+      "basketball": "Basketball",
+      "swimming": "Swimming",
+      "volleyball": "Volleyball"
+    },
+    "blockReason": { "maintenance": "Maintenance", "holiday": "Holiday", "event": "Event" },
+    "facilityKind": { "club": "Club", "pitch": "Pitch" },
+    "checkInMethod": { "qr": "QR code", "manual": "Manual" },
+    "stats": {
+      "total": "Total bookings",
+      "underReview": "Under review",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "attention": "Needs attention",
+      "revenue": "Collected revenue"
+    },
+    "filters": {
+      "trigger": "Filters",
+      "clear": "Clear",
+      "all": "All",
+      "allStatus": "All statuses",
+      "paymentStatus": "Payment",
+      "facility": "Facility",
+      "sport": "Sport",
+      "source": "Source",
+      "region": "Region",
+      "orphansOption": "Outside regions",
+      "dateAdded": "Booking date",
+      "dateAll": "Any date",
+      "date7": "Last 7 days",
+      "date30": "Last 30 days",
+      "date90": "Last 90 days",
+      "dateCustom": "Custom range",
+      "dateFrom": "From",
+      "dateTo": "To"
+    },
+    "party": { "guest": "Guest", "block": "Block" },
+    "detail": {
+      "party": "Booked by",
+      "reputation": "Reputation",
+      "noShow": "No-show violations",
+      "rating": "Overall rating",
+      "facility": "Facility & court",
+      "court": "Court",
+      "viewFacility": "View facility",
+      "viewPlayer": "View player",
+      "money": "Payment breakdown",
+      "applied": "Applied price",
+      "fees": "Fees",
+      "tax": "Tax",
+      "total": "Total",
+      "checkIn": "Check-in",
+      "checkInMethod": "Check-in method",
+      "notCheckedIn": "Not checked in",
+      "recurring": "Recurring series",
+      "recurringNote": "Part of a recurring booking series.",
+      "notes": "Notes",
+      "timeline": "Timeline",
+      "duration": "Duration",
+      "hours": "{{n}} h"
+    },
+    "empty": { "title": "No bookings found", "desc": "Try adjusting the filters or search." },
+    "actions": { "view": "View booking" }
+  },
+  "membership": {
+    "title": "Club Subscriptions",
+    "subtitle": "Oversight of players' club membership subscriptions",
+    "search": "Search player, club or plan",
+    "currency": "SYP",
+    "exportError": "Could not export the subscriptions. Please try again.",
+    "col": { "player": "Player", "club": "Club", "plan": "Plan", "period": "Period", "segments": "Segments", "status": "Status", "price": "Price" },
+    "status": { "pending_activation": "Pending activation", "active": "Active", "paused": "Paused", "expired": "Expired", "cancelled": "Cancelled" },
+    "segment": { "premium": "Premium", "new": "New", "near_expiry": "Near expiry", "churn_risk": "Churn risk" },
+    "planType": { "individual": "Individual", "family": "Family", "corporate": "Corporate", "trial": "Trial" },
+    "billingCycle": { "monthly": "Monthly", "quarterly": "Quarterly", "yearly": "Yearly", "day_pass": "Day pass" },
+    "stats": { "total": "Total", "active": "Active", "nearExpiry": "Near expiry", "churnRisk": "Churn risk", "expired": "Expired", "revenue": "Revenue" },
+    "filters": {
+      "allStatus": "All statuses",
+      "allClubs": "All clubs",
+      "allPlans": "All plans",
+      "allSegments": "All segments",
+      "allRegions": "All regions",
+      "region": "Region",
+      "orphansOption": "Outside regions",
+      "search": "Search player, club or plan",
+      "dateStarted": "Start date",
+      "dateAll": "Any time",
+      "date7": "Last 7 days",
+      "date30": "Last 30 days",
+      "date90": "Last 90 days",
+      "dateCustom": "Custom range",
+      "dateFrom": "From",
+      "dateTo": "To"
+    },
+    "detail": {
+      "player": "Player",
+      "viewPlayer": "View player",
+      "club": "Club & plan",
+      "viewClub": "View club",
+      "plan": "Plan",
+      "planType": "Plan type",
+      "billingCycle": "Billing cycle",
+      "price": "Price",
+      "duration": "Duration",
+      "days": "days",
+      "entryLimit": "Monthly entry limit",
+      "unlimited": "Unlimited",
+      "features": "Features",
+      "dates": "Dates",
+      "start": "Start",
+      "end": "End",
+      "daysLeft": "Days left",
+      "payments": "Payments",
+      "paymentDate": "Date",
+      "amount": "Amount",
+      "method": "Method",
+      "paymentStatus": "Status",
+      "usage": "Usage",
+      "entriesUsed": "Entries used",
+      "checkIns": "Check-ins",
+      "checkInDate": "Date",
+      "checkInMethod": "Method",
+      "noPayments": "No payments recorded",
+      "noCheckIns": "No check-ins recorded",
+      "notFound": "Subscription not found"
+    },
+    "paymentMethod": { "cash": "Cash", "transfer": "Transfer" },
+    "paymentStatus": { "unpaid": "Unpaid", "paid": "Paid", "refunded": "Refunded" },
+    "checkInMethod": { "qr": "QR code", "manual": "Manual" },
+    "empty": { "title": "No subscriptions found", "desc": "No club subscriptions match the current filters." },
+    "actions": { "view": "View subscription" }
   }
 }

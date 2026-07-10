@@ -23,7 +23,10 @@
     "language": "اللغة",
     "skipToContent": "تخطَّ إلى المحتوى",
     "dismiss": "تجاهل",
-    "notifications": "الإشعارات"
+    "notifications": "الإشعارات",
+    "outsideRegions": "خارج المناطق",
+    "export": "تصدير",
+    "exporting": "جارٍ التصدير…"
   },
   "nav": {
     "adminManagement": "المدراء",
@@ -32,6 +35,8 @@
     "playerManagement": "اللاعبون",
     "facilityManagement": "المنشآت",
     "communityManagement": "المجتمع",
+    "bookingManagement": "الحجوزات",
+    "clubSubscriptions": "الاشتراكات",
     "profile": "الملف الشخصي",
     "dashboard": "لوحة التحكم"
   },
@@ -135,6 +140,7 @@
       "dob": "تاريخ الميلاد",
       "city": "المدينة",
       "joined": "عضو منذ",
+      "link": "الرابط",
       "sports": "الرياضات"
     },
     "location": {
@@ -156,13 +162,10 @@
       "title": "الحساب والأمان",
       "type": "العضوية",
       "email": "البريد الإلكتروني",
-      "twoFactor": "المصادقة الثنائية",
       "noShow": "مخالفات عدم الحضور",
       "bookingSuspended": "حالة الحجز",
       "verified": "مؤكَّد",
       "unverified": "غير مؤكَّد",
-      "enabled": "مفعّلة",
-      "disabled": "معطّلة",
       "violations": "{{count}} مخالفة",
       "suspendedUntil": "موقوف حتى {{date}}",
       "suspendedActive": "موقوف",
@@ -177,8 +180,6 @@
       "status": "الحالة",
       "empty": "لا توجد حجوزات بعد."
     },
-    "bookingStatus": { "upcoming": "قادمة", "completed": "منتهية", "cancelled": "ملغاة", "no_show": "عدم حضور" },
-    "payment": { "cash": "نقداً", "transfer": "تحويل" },
     "rooms": {
       "match": "المباراة",
       "date": "التاريخ",
@@ -196,13 +197,9 @@
       "club": "النادي",
       "price": "السعر",
       "period": "الفترة",
-      "autoRenew": "التجديد التلقائي",
       "status": "الحالة",
-      "empty": "لا توجد اشتراكات أندية.",
-      "autoOn": "مفعّل",
-      "autoOff": "متوقف"
+      "empty": "لا توجد اشتراكات أندية."
     },
-    "membershipStatus": { "active": "نشط", "expired": "منتهٍ", "suspended": "موقوف", "cancelled": "ملغى" },
     "subscription": {
       "title": "اشتراك Bplay",
       "free": "حساب مجاني",
@@ -210,7 +207,6 @@
       "price": "السعر",
       "started": "بدأ في",
       "renews": "يُجدَّد في",
-      "autoRenew": "التجديد التلقائي",
       "invoices": "سجل الفواتير"
     },
     "subscriptionStatus": { "active": "نشط", "expired": "منتهٍ" },
@@ -458,7 +454,6 @@
       "name": "المالك",
       "phone": "الهاتف",
       "status": "الحساب",
-      "trust": "الثقة",
       "facilities": "المنشآت",
       "nationalId": "الرقم الوطني",
       "created": "تاريخ الانضمام"
@@ -524,6 +519,7 @@
       "emailRequired": "البريد الإلكتروني مطلوب",
       "emailInvalid": "أدخل بريداً إلكترونياً صحيحاً",
       "phoneInvalid": "أدخل رقم موبايل سوري صحيح (9 أرقام، مثل 9XXXXXXXX)",
+      "nationalIdRequired": "الرقم الوطني مطلوب",
       "nationalIdInvalid": "يجب أن يتكوّن الرقم الوطني من 11 رقماً بالضبط"
     },
     "create": {
@@ -546,11 +542,14 @@
       "view": "عرض",
       "accept": "قبول",
       "reject": "رفض",
+      "change": "تغيير القرار",
       "openTab": "فتح في تبويب جديد",
       "noPreview": "لا توجد وثيقة لعرضها.",
       "pdfHint": "إن لم تظهر المعاينة هنا، استخدم «فتح في تبويب جديد» بالأعلى.",
       "rejectTitle": "رفض الوثيقة؟",
       "rejectMessage": "سيتم رفض {{type}}. يُبلَّغ المالك ويمكنه إعادة الرفع.",
+      "acceptTitle": "قبول الوثيقة؟",
+      "acceptMessage": "سيتم اعتماد {{type}} كوثيقة مقبولة.",
       "type": {
         "national_id": "الهوية الوطنية",
         "business_license": "الرخصة التجارية",
@@ -567,8 +566,9 @@
       "dob": "تاريخ الميلاد",
       "city": "المدينة",
       "address": "العنوان",
+      "website": "الموقع الإلكتروني",
       "intent": "المنشأة المزمعة",
-      "trust": "درجة الثقة",
+      "trust": "الثقة",
       "revenue": "الإيراد الشهري",
       "currency": "ل.س"
     },
@@ -644,6 +644,7 @@
       "clear": "مسح عوامل التصفية",
       "status": "الحالة",
       "kind": "النوع",
+      "source": "المصدر",
       "sport": "الرياضة",
       "region": "المنطقة",
       "owner": "المالك",
@@ -680,6 +681,7 @@
       "created": "تاريخ الإنشاء"
     },
     "kind": { "club": "نادٍ", "pitch": "ملعب مستقل" },
+    "source": { "admin": "من اللوحة", "owner": "من المالك" },
     "sport": {
       "tennis": "تنس",
       "padel": "بادل",
@@ -713,8 +715,27 @@
     },
     "verification": {
       "verified": "موثّقة",
-      "unverified": "بانتظار المستندات",
+      "unverified": "غير موثّقة",
       "no_docs": "بلا مستندات"
+    },
+    "doc": {
+      "title": "وثائق التحقق",
+      "noDocuments": "لم تُرفَع أي وثائق تحقق.",
+      "view": "عرض",
+      "accept": "قبول",
+      "reject": "رفض",
+      "change": "تغيير القرار",
+      "openTab": "فتح في تبويب جديد",
+      "noPreview": "لا توجد وثيقة لعرضها.",
+      "pdfHint": "إن لم تظهر المعاينة هنا، استخدم «فتح في تبويب جديد» بالأعلى.",
+      "rejectTitle": "رفض الوثيقة؟",
+      "rejectMessage": "سيتم رفض {{name}}. يُبلَّغ المالك ويمكنه إعادة الرفع.",
+      "acceptTitle": "قبول الوثيقة؟",
+      "acceptMessage": "سيتم اعتماد {{name}} كوثيقة مقبولة.",
+      "reasonLabel": "السبب",
+      "reasonPlaceholder": "وضّح القرار — يُبلَّغ المالك به.",
+      "status": { "pending": "قيد المراجعة", "approved": "مقبولة", "rejected": "مرفوضة" },
+      "toast": { "accepted": "تم قبول الوثيقة", "rejected": "تم رفض الوثيقة" }
     },
     "amenity": {
       "indoor": "مسقوف",
@@ -799,8 +820,9 @@
       "error": "حدث خطأ ما. حاول مرة أخرى.",
       "bulkApproved": "تمت الموافقة على {{count}} منشآت",
       "bulkRejected": "تم رفض {{count}} منشآت",
-      "bulkSkipped": "تم تخطّي {{count}} (ليست قيد المراجعة)"
+      "bulkSkipped": "تم تخطّي {{count}} (غير مؤهّلة)"
     },
+    "approveBlocked": "اعتمد جميع الوثائق أولاً",
     "profile": {
       "title": "ملف المنشأة",
       "subtitle": "السجل الكامل للمنشأة مع الإحصاءات وإجراءات الإدارة",
@@ -837,7 +859,6 @@
       "documents": "المستندات",
       "noPhotos": "لا توجد صور مرفوعة بعد.",
       "noDocuments": "لا توجد مستندات مرفوعة.",
-      "openDocument": "فتح",
       "owner": "المالك",
       "viewOwner": "عرض ملف المالك",
       "edit": "تعديل",
@@ -944,7 +965,7 @@
         "moveLater": "تأخير",
         "imagesMax": "تم بلوغ الحد الأقصى (6 صور).",
         "documents": "مستندات التحقق",
-        "documentsHint": "اختياري — السجل التجاري، إثبات الملكية، إلخ.",
+        "documentsHint": "إلزامي — السجل التجاري، إثبات الملكية، إلخ.",
         "docDrop": "اسحب المستندات هنا أو تصفّح",
         "docTypes": "ملفات PDF أو صور",
         "photo": "صورة"
@@ -963,7 +984,8 @@
         "price": "يجب أن يكون سعر الساعة أكبر من صفر",
         "courtName": "يجب أن يكون اسم الملعب حرفين على الأقل",
         "courts": "أضف ملعباً واحداً على الأقل",
-        "document": "أدخل رابط مستند صحيحاً"
+        "document": "أدخل رابط مستند صحيحاً",
+        "documents": "ارفع وثيقة تحقق واحدة على الأقل"
       }
     }
   },
@@ -1368,5 +1390,167 @@
       "explore": "استكشف",
       "rights": "© {{year}} Bplay. جميع الحقوق محفوظة."
     }
+  },
+  "booking": {
+    "title": "الحجوزات",
+    "subtitle": "إشراف للقراءة فقط على جميع حجوزات الملاعب والصالات عبر المنصة.",
+    "search": "ابحث بالرقم المرجعي أو اللاعب أو المنشأة",
+    "currency": "ل.س",
+    "col": {
+      "reference": "الرقم المرجعي",
+      "party": "الحاجز",
+      "facility": "المنشأة",
+      "court": "الملعب",
+      "sport": "الرياضة",
+      "region": "المنطقة",
+      "dateTime": "التاريخ والوقت",
+      "status": "الحالة",
+      "payment": "الدفع",
+      "total": "الإجمالي"
+    },
+    "status": {
+      "under_review": "قيد المراجعة",
+      "confirmed": "مؤكد",
+      "completed": "مكتمل",
+      "cancelled": "ملغى",
+      "rejected": "مرفوض",
+      "no_show": "عدم حضور"
+    },
+    "paymentStatus": { "unpaid": "غير مدفوع", "paid": "مدفوع", "refunded": "مُسترد" },
+    "source": { "electronic": "إلكتروني", "manual": "يدوي", "private": "حجز خاص" },
+    "sport": {
+      "tennis": "تنس",
+      "padel": "بادل",
+      "football": "كرة قدم",
+      "basketball": "كرة سلة",
+      "swimming": "سباحة",
+      "volleyball": "كرة طائرة"
+    },
+    "blockReason": { "maintenance": "صيانة", "holiday": "عطلة", "event": "فعالية" },
+    "facilityKind": { "club": "نادٍ", "pitch": "ملعب" },
+    "checkInMethod": { "qr": "رمز QR", "manual": "يدوي" },
+    "stats": {
+      "total": "إجمالي الحجوزات",
+      "underReview": "قيد المراجعة",
+      "confirmed": "مؤكدة",
+      "completed": "مكتملة",
+      "attention": "تحتاج انتباهاً",
+      "revenue": "الإيرادات المحصّلة"
+    },
+    "filters": {
+      "trigger": "عوامل التصفية",
+      "clear": "مسح",
+      "all": "الكل",
+      "allStatus": "كل الحالات",
+      "paymentStatus": "الدفع",
+      "facility": "المنشأة",
+      "sport": "الرياضة",
+      "source": "المصدر",
+      "region": "المنطقة",
+      "orphansOption": "خارج المناطق",
+      "dateAdded": "تاريخ الحجز",
+      "dateAll": "أي تاريخ",
+      "date7": "آخر 7 أيام",
+      "date30": "آخر 30 يوماً",
+      "date90": "آخر 90 يوماً",
+      "dateCustom": "نطاق مخصص",
+      "dateFrom": "من",
+      "dateTo": "إلى"
+    },
+    "party": { "guest": "زائر", "block": "محجوز" },
+    "detail": {
+      "party": "الحاجز",
+      "reputation": "السمعة",
+      "noShow": "مخالفات عدم الحضور",
+      "rating": "التقييم العام",
+      "facility": "المنشأة والملعب",
+      "court": "الملعب",
+      "viewFacility": "عرض المنشأة",
+      "viewPlayer": "عرض اللاعب",
+      "money": "تفاصيل الدفع",
+      "applied": "السعر المطبّق",
+      "fees": "الرسوم",
+      "tax": "الضريبة",
+      "total": "الإجمالي",
+      "checkIn": "تسجيل الوصول",
+      "checkInMethod": "طريقة تسجيل الوصول",
+      "notCheckedIn": "لم يُسجّل الوصول",
+      "recurring": "سلسلة متكررة",
+      "recurringNote": "جزء من سلسلة حجوزات متكررة.",
+      "notes": "ملاحظات",
+      "timeline": "المسار الزمني",
+      "duration": "المدة",
+      "hours": "{{n}} ساعة"
+    },
+    "empty": { "title": "لا توجد حجوزات", "desc": "جرّب تعديل عوامل التصفية أو البحث." },
+    "actions": { "view": "عرض الحجز" }
+  },
+  "membership": {
+    "title": "اشتراكات النوادي",
+    "subtitle": "الإشراف على اشتراكات عضويات اللاعبين في النوادي",
+    "search": "ابحث عن لاعب أو نادٍ أو باقة",
+    "currency": "ل.س",
+    "exportError": "تعذّر تصدير الاشتراكات. يرجى المحاولة مرة أخرى.",
+    "col": { "player": "اللاعب", "club": "النادي", "plan": "الباقة", "period": "المدة", "segments": "الشرائح", "status": "الحالة", "price": "السعر" },
+    "status": { "pending_activation": "بانتظار التفعيل", "active": "نشط", "paused": "موقوف مؤقتًا", "expired": "منتهٍ", "cancelled": "ملغى" },
+    "segment": { "premium": "مميّز", "new": "جديد", "near_expiry": "قارب على الانتهاء", "churn_risk": "معرّض للفقد" },
+    "planType": { "individual": "فردي", "family": "عائلي", "corporate": "شركات", "trial": "تجريبي" },
+    "billingCycle": { "monthly": "شهري", "quarterly": "ربع سنوي", "yearly": "سنوي", "day_pass": "تذكرة يومية" },
+    "stats": { "total": "الإجمالي", "active": "نشط", "nearExpiry": "قارب على الانتهاء", "churnRisk": "معرّض للفقد", "expired": "منتهٍ", "revenue": "الإيرادات" },
+    "filters": {
+      "allStatus": "كل الحالات",
+      "allClubs": "كل النوادي",
+      "allPlans": "كل الباقات",
+      "allSegments": "كل الشرائح",
+      "allRegions": "كل المناطق",
+      "region": "المنطقة",
+      "orphansOption": "خارج المناطق",
+      "search": "ابحث عن لاعب أو نادٍ أو باقة",
+      "dateStarted": "تاريخ البدء",
+      "dateAll": "أي وقت",
+      "date7": "آخر 7 أيام",
+      "date30": "آخر 30 يوماً",
+      "date90": "آخر 90 يوماً",
+      "dateCustom": "نطاق مخصّص",
+      "dateFrom": "من",
+      "dateTo": "إلى"
+    },
+    "detail": {
+      "player": "اللاعب",
+      "viewPlayer": "عرض اللاعب",
+      "club": "النادي والباقة",
+      "viewClub": "عرض النادي",
+      "plan": "الباقة",
+      "planType": "نوع الباقة",
+      "billingCycle": "دورة الفوترة",
+      "price": "السعر",
+      "duration": "المدة",
+      "days": "يوم",
+      "entryLimit": "حد الدخول الشهري",
+      "unlimited": "غير محدود",
+      "features": "المزايا",
+      "dates": "التواريخ",
+      "start": "البداية",
+      "end": "النهاية",
+      "daysLeft": "الأيام المتبقية",
+      "payments": "المدفوعات",
+      "paymentDate": "التاريخ",
+      "amount": "المبلغ",
+      "method": "الطريقة",
+      "paymentStatus": "الحالة",
+      "usage": "الاستخدام",
+      "entriesUsed": "مرات الدخول المستخدمة",
+      "checkIns": "تسجيلات الدخول",
+      "checkInDate": "التاريخ",
+      "checkInMethod": "الطريقة",
+      "noPayments": "لا توجد مدفوعات مسجّلة",
+      "noCheckIns": "لا توجد تسجيلات دخول",
+      "notFound": "الاشتراك غير موجود"
+    },
+    "paymentMethod": { "cash": "نقدًا", "transfer": "تحويل" },
+    "paymentStatus": { "unpaid": "غير مدفوع", "paid": "مدفوع", "refunded": "مسترجع" },
+    "checkInMethod": { "qr": "رمز QR", "manual": "يدوي" },
+    "empty": { "title": "لا توجد اشتراكات", "desc": "لا توجد اشتراكات نوادٍ مطابقة للمرشّحات الحالية." },
+    "actions": { "view": "عرض الاشتراك" }
   }
 }

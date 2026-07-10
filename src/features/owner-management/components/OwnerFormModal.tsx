@@ -58,7 +58,7 @@ export function OwnerFormModal({ isOpen, onClose }: Props) {
       name: data.name,
       email: data.email,
       phone: data.phone,
-      nationalId: data.nationalId || undefined,
+      nationalId: data.nationalId,
       intendedFacilityType: data.intendedFacilityType,
     });
     setCreated(result);

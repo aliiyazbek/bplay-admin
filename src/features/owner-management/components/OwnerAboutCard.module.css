@@ -37,15 +37,6 @@
   text-align: end;
 }
 
-.trust {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-.trustScore {
-  font-variant-numeric: tabular-nums;
-}
-
 .bio {
   margin: 0;
   padding-block-start: var(--space-3);
@@ -53,4 +44,19 @@
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   line-height: 1.6;
+}
+
+.profileLink {
+  display: inline-block;
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-primary-accent);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+}
+.profileLink:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
 }

@@ -1,11 +1,10 @@
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Button, CheckIcon, clsx } from '@ui';
+import { Avatar, Button, CheckIcon, clsx, RegionTag } from '@ui';
 import { PhotoStrip } from './PhotoStrip';
-import { RegionTag } from './RegionTag';
 import { AgeBadge } from './AgeBadge';
 import { DocumentChip } from './DocumentChip';
-import type { FacilityListItem } from '../api/facility.types';
+import { facilityDocsAllApproved, type FacilityListItem } from '../api/facility.types';
 import styles from './FacilityReviewCard.module.css';
 
 /**
@@ -46,6 +45,7 @@ export function FacilityReviewCard({
 }: FacilityReviewCardProps) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
+  const approveBlocked = !facilityDocsAllApproved(item.documents);
 
   const cardVariants: Variants = {
     hidden: reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 },
@@ -119,6 +119,8 @@ export function FacilityReviewCard({
             size="sm"
             variant="primary"
             leftIcon={<CheckIcon />}
+            disabled={approveBlocked}
+            title={approveBlocked ? t('facility.approveBlocked') : undefined}
             onClick={() => onApprove(item)}
             data-testid={`facility-approve-${item.id}`}
           >

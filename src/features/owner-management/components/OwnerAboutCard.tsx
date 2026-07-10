@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Badge } from '@ui';
+import { formatUrlLabel } from '@shared/utils/url';
 import { ownerTrustTier, OWNER_TRUST_VARIANT, type Owner } from '../api/owner.types';
 import styles from './OwnerAboutCard.module.css';
 
@@ -31,6 +32,23 @@ export function OwnerAboutCard({ owner }: Props) {
   if (dob) rows.push({ key: 'dob', label: t('owner.about.dob'), value: dob });
   if (owner.city) rows.push({ key: 'city', label: t('owner.about.city'), value: owner.city });
   if (owner.address) rows.push({ key: 'address', label: t('owner.about.address'), value: owner.address });
+  if (owner.link) {
+    rows.push({
+      key: 'website',
+      label: t('owner.about.website'),
+      value: (
+        <a
+          className={styles.profileLink}
+          href={owner.link}
+          target="_blank"
+          rel="noreferrer noopener"
+          dir="ltr"
+        >
+          {formatUrlLabel(owner.link)}
+        </a>
+      ),
+    });
+  }
   if (owner.intendedFacilityType) {
     rows.push({
       key: 'intent',
@@ -42,12 +60,9 @@ export function OwnerAboutCard({ owner }: Props) {
     key: 'trust',
     label: t('owner.about.trust'),
     value: (
-      <span className={styles.trust}>
-        <span className={styles.trustScore}>{owner.trustScore} / 100</span>
-        <Badge variant={OWNER_TRUST_VARIANT[tier]} size="sm">
-          {t(`owner.trust.${tier}`)}
-        </Badge>
-      </span>
+      <Badge variant={OWNER_TRUST_VARIANT[tier]} size="sm">
+        {t(`owner.trust.${tier}`)}
+      </Badge>
     ),
   });
   if (revenue) {
@@ -69,7 +84,11 @@ export function OwnerAboutCard({ owner }: Props) {
           </div>
         ))}
       </dl>
-      {owner.bio && <p className={styles.bio}>{owner.bio}</p>}
+      {owner.bio && (
+        <p className={styles.bio} dir="auto">
+          {owner.bio}
+        </p>
+      )}
     </Card>
   );
 }

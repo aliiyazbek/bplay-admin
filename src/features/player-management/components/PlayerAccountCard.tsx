@@ -52,12 +52,6 @@ export function PlayerAccountCard({ player }: Props) {
           </dd>
         </div>
         <div className={styles.row}>
-          <dt className={styles.label}>{t('player.account.twoFactor')}</dt>
-          <dd className={styles.value}>
-            {t(player.twoFactorEnabled ? 'player.account.enabled' : 'player.account.disabled')}
-          </dd>
-        </div>
-        <div className={styles.row}>
           <dt className={styles.label}>{t('player.account.noShow')}</dt>
           <dd className={styles.value}>
             {flagged ? (

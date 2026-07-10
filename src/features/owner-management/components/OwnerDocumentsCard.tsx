@@ -4,6 +4,7 @@ import {
   Card,
   Badge,
   Button,
+  ConfirmDialog,
   EmptyState,
   ReasonDialog,
   DocumentViewerModal,
@@ -13,6 +14,7 @@ import {
   EyeIcon,
   CheckIcon,
   XIcon,
+  RotateCcwIcon,
 } from '@ui';
 import { ownerDocBadgeVariant, type OwnerDocument } from '../api/owner.types';
 import { useOwnerDocumentReview } from '../hooks/useOwnerDocumentReview';
@@ -29,6 +31,7 @@ export function OwnerDocumentsCard({ ownerId, documents }: Props) {
   const review = useOwnerDocumentReview();
   const [viewing, setViewing] = useState<OwnerDocument | null>(null);
   const [rejecting, setRejecting] = useState<OwnerDocument | null>(null);
+  const [accepting, setAccepting] = useState<OwnerDocument | null>(null);
 
   const accept = (document: OwnerDocument) =>
     review.mutate({ id: ownerId, documentId: document.id, action: 'accept' });
@@ -40,6 +43,20 @@ export function OwnerDocumentsCard({ ownerId, documents }: Props) {
       { onSuccess: () => setRejecting(null) },
     );
   };
+
+  const confirmAccept = () => {
+    if (!accepting) return;
+    review.mutate(
+      { id: ownerId, documentId: accepting.id, action: 'accept' },
+      { onSuccess: () => setAccepting(null) },
+    );
+  };
+
+  // An already-decided document is reversed behind a quiet "change decision"
+  // control instead of a loud opposite-action button: accepted → reject (with a
+  // reason), rejected → accept (confirmed). Only `under_review` shows the pair.
+  const changeDecision = (document: OwnerDocument) =>
+    document.status === 'accepted' ? setRejecting(document) : setAccepting(document);
 
   return (
     <Card className={styles.card} data-testid="owner-detail-documents">
@@ -77,27 +94,38 @@ export function OwnerDocumentsCard({ ownerId, documents }: Props) {
                     {t('owner.doc.view')}
                   </Button>
                 )}
-                {document.status !== 'accepted' && (
+                {document.status === 'under_review' ? (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      leftIcon={<CheckIcon />}
+                      onClick={() => accept(document)}
+                      disabled={review.isPending}
+                      data-testid={`owner-doc-accept-${document.id}`}
+                    >
+                      {t('owner.doc.accept')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      leftIcon={<XIcon />}
+                      onClick={() => setRejecting(document)}
+                      data-testid={`owner-doc-reject-${document.id}`}
+                    >
+                      {t('owner.doc.reject')}
+                    </Button>
+                  </>
+                ) : (
                   <Button
                     size="sm"
                     variant="ghost"
-                    leftIcon={<CheckIcon />}
-                    onClick={() => accept(document)}
+                    leftIcon={<RotateCcwIcon />}
+                    onClick={() => changeDecision(document)}
                     disabled={review.isPending}
-                    data-testid={`owner-doc-accept-${document.id}`}
+                    data-testid={`owner-doc-change-${document.id}`}
                   >
-                    {t('owner.doc.accept')}
-                  </Button>
-                )}
-                {document.status !== 'rejected' && (
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    leftIcon={<XIcon />}
-                    onClick={() => setRejecting(document)}
-                    data-testid={`owner-doc-reject-${document.id}`}
-                  >
-                    {t('owner.doc.reject')}
+                    {t('owner.doc.change')}
                   </Button>
                 )}
               </span>
@@ -133,6 +161,22 @@ export function OwnerDocumentsCard({ ownerId, documents }: Props) {
         confirmText={t('owner.doc.reject')}
         cancelText={t('common.cancel')}
         variant="danger"
+        isLoading={review.isPending}
+      />
+
+      <ConfirmDialog
+        isOpen={accepting !== null}
+        onClose={() => setAccepting(null)}
+        onConfirm={confirmAccept}
+        title={t('owner.doc.acceptTitle')}
+        message={
+          accepting
+            ? t('owner.doc.acceptMessage', { type: t(`owner.doc.type.${accepting.type}`) })
+            : undefined
+        }
+        confirmText={t('owner.doc.accept')}
+        cancelText={t('common.cancel')}
+        variant="primary"
         isLoading={review.isPending}
       />
     </Card>

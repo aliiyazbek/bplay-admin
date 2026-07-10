@@ -147,7 +147,8 @@ export const stepCourtsSchema = z.object({
 export type StepCourtsValues = z.infer<typeof stepCourtsSchema>;
 
 // ---------------------------------------------------------------------------
-// Step: media — at least one photo (uploaded) + optional verification documents
+// Step: media — at least one photo + at least one verification document
+// (every facility must be verifiable — mirrors the owner KYC requirement).
 // ---------------------------------------------------------------------------
 
 export const step5Schema = z.object({
@@ -162,6 +163,6 @@ export const step5Schema = z.object({
         url: z.string().url('facility.wizard.errors.document'),
       }),
     )
-    .optional(),
+    .min(1, 'facility.wizard.errors.documents'),
 });
 export type Step5Values = z.infer<typeof step5Schema>;

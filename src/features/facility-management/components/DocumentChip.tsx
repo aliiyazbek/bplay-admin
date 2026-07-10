@@ -9,26 +9,21 @@ export interface DocumentChipProps {
 }
 
 /**
- * A verification document as a small glass chip that opens the file in a new
- * tab. The colored dot mirrors the document's review status (Badge palette).
+ * A verification document shown as a small, read-only glass chip: the name and a
+ * colored dot mirroring its review status (Badge palette). Intentionally NOT a
+ * link — documents are opened and reviewed from inside the facility profile, not
+ * from the review queue.
  */
 export function DocumentChip({ document }: DocumentChipProps) {
   const { t } = useTranslation();
   const statusVariant = statusToBadgeVariant(document.status);
 
   return (
-    <a
-      className={styles.chip}
-      href={document.url}
-      target="_blank"
-      rel="noreferrer"
-      aria-label={`${document.name} — ${t('facility.profile.openDocument')}`}
-      data-testid={`document-chip-${document.id}`}
-    >
+    <span className={styles.chip} data-testid={`document-chip-${document.id}`}>
       <DocumentIcon className={styles.icon} />
       <span className={styles.name}>{document.name}</span>
       <span className={clsx(styles.dot, styles[statusVariant])} aria-hidden />
       <span className={styles.srOnly}>{t(`status.${document.status}`)}</span>
-    </a>
+    </span>
   );
 }

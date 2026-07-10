@@ -1,22 +1,36 @@
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { Card, Badge, DataTable, EmptyState, InboxIcon, type Column } from '@ui';
-import { bookingStatusBadgeVariant, type PlayerBooking } from '../api/player.types';
-import { usePlayerBookings } from '../hooks/usePlayerRelated';
+import { PATHS } from '@app/router/paths';
+import {
+  getBookings,
+  bookingStatusBadgeVariant,
+  paymentStatusBadgeVariant,
+  type BookingListItem,
+} from '@features/booking-management/api';
 import styles from './playerCards.module.css';
 
 interface Props {
   playerId: string;
 }
 
-/** The player's booking history — facility/court, sport, date, status, amount, payment. */
+/** The player's booking history — facility/court, sport, date, status, payment, amount. */
 export function PlayerBookingsCard({ playerId }: Props) {
   const { t, i18n } = useTranslation();
-  const { data, isLoading, isError, refetch } = usePlayerBookings(playerId);
+  const navigate = useNavigate();
   const locale = i18n.language.startsWith('ar') ? 'ar-SY' : 'en-US';
   const nf = useMemo(() => new Intl.NumberFormat(locale), [locale]);
 
-  const columns = useMemo<Column<PlayerBooking>[]>(
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ['player-bookings', playerId],
+    queryFn: () =>
+      getBookings({ playerId, page: 1, pageSize: 100, sortBy: 'date', sortDir: 'desc' }),
+    select: (result) => result.items,
+  });
+
+  const columns = useMemo<Column<BookingListItem>[]>(
     () => [
       {
         key: 'facility',
@@ -24,18 +38,20 @@ export function PlayerBookingsCard({ playerId }: Props) {
         render: (b) => (
           <span className={styles.nameCell}>
             <span>{b.facilityName}</span>
-            <span className={styles.nameSub}>{b.courtName}</span>
+            {b.courtName && <span className={styles.nameSub}>{b.courtName}</span>}
           </span>
         ),
       },
-      { key: 'sport', header: t('player.bookings.sport'), render: (b) => t(`player.sport.${b.sport}`) },
+      { key: 'sport', header: t('player.bookings.sport'), render: (b) => t(`booking.sport.${b.sport}`) },
       {
         key: 'date',
         header: t('player.bookings.date'),
         render: (b) => (
           <span className={styles.nameCell}>
             <span>{new Date(b.date).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-            <span className={styles.nameSub} dir="ltr">{b.startTime}</span>
+            <span className={styles.nameSub} dir="ltr">
+              {b.startTime} – {b.endTime}
+            </span>
           </span>
         ),
       },
@@ -45,16 +61,24 @@ export function PlayerBookingsCard({ playerId }: Props) {
         align: 'end',
         render: (b) => (
           <span className={styles.invoiceAmount}>
-            {nf.format(b.amountSyp)} {t('player.detail.stats.currency')}
+            {nf.format(b.totalSyp)} {t('booking.currency')}
           </span>
         ),
       },
-      { key: 'payment', header: t('player.bookings.payment'), render: (b) => t(`player.payment.${b.paymentMethod}`) },
+      {
+        key: 'payment',
+        header: t('player.bookings.payment'),
+        render: (b) => (
+          <Badge variant={paymentStatusBadgeVariant(b.paymentStatus)}>
+            {t(`booking.paymentStatus.${b.paymentStatus}`)}
+          </Badge>
+        ),
+      },
       {
         key: 'status',
         header: t('player.bookings.status'),
         render: (b) => (
-          <Badge variant={bookingStatusBadgeVariant(b.status)}>{t(`player.bookingStatus.${b.status}`)}</Badge>
+          <Badge variant={bookingStatusBadgeVariant(b.status)}>{t(`booking.status.${b.status}`)}</Badge>
         ),
       },
     ],
@@ -66,13 +90,14 @@ export function PlayerBookingsCard({ playerId }: Props) {
       <div className={styles.head}>
         <h2 className={styles.title}>{t('player.tabs.bookings')}</h2>
       </div>
-      <DataTable<PlayerBooking>
+      <DataTable<BookingListItem>
         columns={columns}
         data={data ?? []}
         isLoading={isLoading}
         error={isError ? t('common.loadError') : undefined}
         onRetry={() => void refetch()}
         getRowId={(b) => b.id}
+        onRowClick={(b) => navigate(`${PATHS.bookingManagement}/${b.id}`)}
         emptyState={<EmptyState icon={<InboxIcon />} title={t('player.bookings.empty')} />}
       />
     </Card>

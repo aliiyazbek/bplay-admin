@@ -12,6 +12,8 @@ export const PATHS = {
   facilityManagement: '/app/facility-management',
   facilityManagementNew: '/app/facility-management/new',
   communityManagement: '/app/community-management',
+  bookingManagement: '/app/booking-management',
+  clubSubscriptions: '/app/club-subscriptions',
 } as const;
 
 export type AppPath = (typeof PATHS)[keyof typeof PATHS];

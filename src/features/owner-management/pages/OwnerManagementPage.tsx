@@ -28,8 +28,6 @@ import { OwnerFormModal } from '../components/OwnerFormModal';
 import {
   ownerState,
   ownerStateBadgeVariant,
-  ownerTrustTier,
-  OWNER_TRUST_VARIANT,
   type Owner,
   type OwnerListParams,
 } from '../api/owner.types';
@@ -72,16 +70,6 @@ export default function OwnerManagementPage() {
           onClick={() => openProfile(owner)}
           testId={`owner-name-${owner.id}`}
         />
-      ),
-    },
-    {
-      key: 'trust',
-      header: t('owner.col.trust'),
-      align: 'center',
-      render: (owner) => (
-        <Badge variant={OWNER_TRUST_VARIANT[ownerTrustTier(owner.trustScore)]}>
-          {owner.trustScore}
-        </Badge>
       ),
     },
     {

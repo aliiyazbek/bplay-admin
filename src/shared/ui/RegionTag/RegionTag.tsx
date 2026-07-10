@@ -1,19 +1,21 @@
 import { useTranslation } from 'react-i18next';
-import { GlobeIcon, MapPinIcon, clsx } from '@ui';
+import { GlobeIcon, MapPinIcon } from '../icons';
+import { clsx } from '../clsx';
 import styles from './RegionTag.module.css';
 
 export interface RegionTagProps {
-  /** Names of the active scope regions containing the facility. */
+  /** Names of the active scope regions containing the entity. */
   regionNames: string[];
-  /** True when no active scope region contains the facility. */
+  /** True when no active scope region contains the entity. */
   isOrphan: boolean;
   /** Compact = first region + "+N" (directory table cells). */
   compact?: boolean;
 }
 
 /**
- * Where a facility lives in the scope model: its containing region(s), or an
- * amber "outside regions" tag for orphans (only super_admin ever sees those).
+ * Where a scoped entity (facility, booking, subscription) lives in the region
+ * model: its containing region(s), or an amber "outside regions" tag for
+ * orphans (only super_admin ever sees those).
  */
 export function RegionTag({ regionNames, isOrphan, compact = false }: RegionTagProps) {
   const { t } = useTranslation();
@@ -22,7 +24,7 @@ export function RegionTag({ regionNames, isOrphan, compact = false }: RegionTagP
     return (
       <span className={clsx(styles.tag, styles.orphan)}>
         <GlobeIcon className={styles.icon} />
-        {t('facility.queue.orphan')}
+        {t('common.outsideRegions')}
       </span>
     );
   }

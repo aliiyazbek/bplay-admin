@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@ui';
+import { formatUrlLabel } from '@shared/utils/url';
 import type { Player } from '../api/player.types';
 import styles from './playerCards.module.css';
 
@@ -25,6 +26,23 @@ export function PlayerAboutCard({ player }: Props) {
   if (dob) rows.push({ key: 'dob', label: t('player.about.dob'), value: dob });
   if (player.city) rows.push({ key: 'city', label: t('player.about.city'), value: player.city });
   if (joined) rows.push({ key: 'joined', label: t('player.about.joined'), value: joined });
+  if (player.link) {
+    rows.push({
+      key: 'link',
+      label: t('player.about.link'),
+      value: (
+        <a
+          className={styles.profileLink}
+          href={player.link}
+          target="_blank"
+          rel="noreferrer noopener"
+          dir="ltr"
+        >
+          {formatUrlLabel(player.link)}
+        </a>
+      ),
+    });
+  }
 
   return (
     <Card padding="lg" className={styles.card} data-testid="player-detail-about">
@@ -54,7 +72,11 @@ export function PlayerAboutCard({ player }: Props) {
           </dd>
         </div>
       </dl>
-      {player.bio && <p className={styles.bio}>{player.bio}</p>}
+      {player.bio && (
+        <p className={styles.bio} dir="auto">
+          {player.bio}
+        </p>
+      )}
     </Card>
   );
 }

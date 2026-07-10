@@ -281,6 +281,14 @@ export const DownloadIcon = (p: IconProps) => (
   </Icon>
 );
 
+/** Membership / club-subscription glyph — a payment card. */
+export const CreditCardIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="2" y="5" width="20" height="14" rx="2" />
+    <path d="M2 10h20" />
+  </Icon>
+);
+
 export const UploadCloudIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24" />

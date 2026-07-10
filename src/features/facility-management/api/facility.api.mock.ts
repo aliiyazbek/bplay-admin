@@ -4,7 +4,7 @@ import { useAuthStore } from '@shared/stores/authStore';
 import { getScopeRegions } from '@features/region-management/api';
 import { getOwnerById } from '@features/owner-management/api';
 import { buildFacilityListResult, computeFacilityStats, type AdminScope } from './facility.filter';
-import { toRegionFacility } from './facility.types';
+import { facilityDocsAllApproved, facilityDocumentKind, toRegionFacility } from './facility.types';
 import type {
   BulkActionResult,
   BulkFacilityAction,
@@ -15,6 +15,8 @@ import type {
   DayHours,
   Facility,
   FacilityDocument,
+  FacilityDocAction,
+  FacilitySource,
   FacilityListParams,
   FacilityListResult,
   FacilityLocation,
@@ -55,13 +57,22 @@ function images(id: string, count: number): string[] {
 type DocName = 'Business License' | 'Ownership Proof' | 'Tax Certificate';
 type DocStatus = 'approved' | 'pending';
 
+// Real, viewable sample files so the document viewer works pre-backend: licenses
+// and certificates as an embedded PDF, ownership proofs as a scanned image.
+const SAMPLE_DOC_PDF = 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf';
+const sampleDocImage = (seed: string): string => `https://picsum.photos/seed/${seed}/1000/700`;
+
 function docs(facilityId: string, entries: Array<[DocName, DocStatus]>): FacilityDocument[] {
-  return entries.map(([name, status], index) => ({
-    id: `${facilityId}-d${index + 1}`,
-    name,
-    status,
-    url: `https://example.com/docs/${name.toLowerCase().replace(/ /g, '-')}-${facilityId}.pdf`,
-  }));
+  return entries.map(([name, status], index) => {
+    const kind: 'image' | 'pdf' = name === 'Ownership Proof' ? 'image' : 'pdf';
+    return {
+      id: `${facilityId}-d${index + 1}`,
+      name,
+      status,
+      url: kind === 'pdf' ? SAMPLE_DOC_PDF : sampleDocImage(`${facilityId}-d${index + 1}`),
+      kind,
+    };
+  });
 }
 
 function zeroStats(): FacilityStatistics {
@@ -112,6 +123,7 @@ interface ClubSpec {
   ownerId: string;
   ownerName: string;
   createdAt: string;
+  source?: FacilitySource;
   sports: SportType[];
   courts: Court[];
   imageCount: number;
@@ -129,6 +141,7 @@ interface ClubSpec {
 function makeClub(spec: ClubSpec): ClubFacility {
   return {
     kind: 'club',
+    source: spec.source ?? 'owner',
     id: spec.id,
     name: spec.name,
     status: spec.status,
@@ -159,6 +172,7 @@ interface PitchSpec {
   ownerId: string;
   ownerName: string;
   createdAt: string;
+  source?: FacilitySource;
   sport: SportType;
   pricePerHour: number;
   specs: PitchSpecs;
@@ -175,6 +189,7 @@ interface PitchSpec {
 function makePitch(spec: PitchSpec): PitchFacility {
   return {
     kind: 'pitch',
+    source: spec.source ?? 'owner',
     id: spec.id,
     name: spec.name,
     status: spec.status,
@@ -245,6 +260,7 @@ const db: Facility[] = [
   makeClub({
     id: 'f3',
     name: 'Qasioun Heights Club',
+    source: 'admin',
     status: 'active',
     location: { lat: 33.5525, lng: 36.291, address: 'Qasioun Foothill Rd 4', city: 'Damascus', district: 'Muhajreen', governorate: 'damascus' },
     ownerId: '302',
@@ -390,6 +406,7 @@ const db: Facility[] = [
   makeClub({
     id: 'f10',
     name: 'Citadel Sports Complex',
+    source: 'admin',
     status: 'active',
     location: { lat: 36.199, lng: 37.162, address: 'Citadel View St 8', city: 'Aleppo', district: 'Aziziyeh', governorate: 'aleppo' },
     ownerId: '308',
@@ -575,10 +592,11 @@ const db: Facility[] = [
   makePitch({
     id: 'f19',
     name: 'Tartus Marina Pitch',
+    source: 'admin',
     status: 'active',
     location: { lat: 34.893, lng: 35.879, address: 'Marina Walk 6', city: 'Tartus', district: 'Marina', governorate: 'tartus' },
-    ownerId: '313',
-    ownerName: 'Sara Haddad',
+    ownerId: '304',
+    ownerName: 'Karim Aziz',
     createdAt: daysAgo(60),
     sport: 'football',
     pricePerHour: 32_000,
@@ -640,8 +658,8 @@ const db: Facility[] = [
     name: 'Euphrates Sports Academy',
     status: 'pending',
     location: { lat: 35.33, lng: 40.14, address: 'Euphrates Corniche 44', city: 'Deir ez-Zor', district: 'Al-Qusour', governorate: 'deir_ez_zor' },
-    ownerId: '307',
-    ownerName: 'Nour Kassem',
+    ownerId: '300',
+    ownerName: 'Fadi Barakat',
     createdAt: hoursAgo(40),
     sports: ['football', 'basketball'],
     description: 'The first bookable academy east of the Euphrates — grass field plus a youth court.',
@@ -677,8 +695,8 @@ const db: Facility[] = [
     name: 'Hauran Volleyball Ground',
     status: 'rejected',
     location: { lat: 32.62, lng: 36.1, address: 'Hauran Plain Rd 5', city: 'Daraa', district: 'Al-Kashef', governorate: 'daraa' },
-    ownerId: '307',
-    ownerName: 'Nour Kassem',
+    ownerId: '309',
+    ownerName: 'Dina Saab',
     createdAt: daysAgo(22),
     sport: 'volleyball',
     pricePerHour: 25_000,
@@ -744,6 +762,9 @@ export async function approveFacility(id: string): Promise<void> {
   await mockDelay();
   const facility = findOrThrow(id);
   if (facility.status !== 'pending') throw new Error('Invalid status transition');
+  if (!facilityDocsAllApproved(facility.documents)) {
+    throw new Error('All verification documents must be approved first');
+  }
   facility.status = 'active';
   facility.adminNotes = undefined;
 }
@@ -776,6 +797,25 @@ export async function reactivateFacility(id: string): Promise<void> {
   facility.suspensionReason = undefined;
 }
 
+export async function reviewFacilityDocument(
+  facilityId: string,
+  documentId: string,
+  action: FacilityDocAction,
+  reason?: string,
+): Promise<void> {
+  await mockDelay();
+  const facility = db.find((item) => item.id === facilityId);
+  const document = facility?.documents.find((doc) => doc.id === documentId);
+  if (!document) return;
+  if (action === 'accept') {
+    document.status = 'approved';
+    document.rejectionReason = undefined;
+  } else {
+    document.status = 'rejected';
+    document.rejectionReason = reason;
+  }
+}
+
 const DEFAULT_SPECS: PitchSpecs = {
   surface: 'artificial',
   isIndoor: false,
@@ -797,6 +837,7 @@ function buildDocuments(
     name: doc.name,
     status: priorStatusByUrl.get(doc.url) ?? 'pending',
     url: doc.url,
+    kind: facilityDocumentKind(doc.url, undefined, doc.name),
   }));
 }
 
@@ -834,6 +875,7 @@ export async function createFacility(input: CreateFacilityInput): Promise<Facili
     images: [...input.images],
     ownerId: input.ownerId,
     ownerName,
+    source: 'admin' as FacilitySource,
     createdAt: new Date().toISOString(),
     documents: buildDocuments(id, input),
     statistics: zeroStats(),
@@ -890,6 +932,7 @@ export async function updateFacility(id: string, input: UpdateFacilityInput): Pr
     images: [...input.images],
     ownerId: input.ownerId,
     ownerName,
+    source: existing.source,
     createdAt: existing.createdAt,
     adminNotes: existing.adminNotes,
     suspensionReason: existing.suspensionReason,
@@ -943,7 +986,11 @@ export async function bulkAction(
   let succeeded = 0;
   for (const id of ids) {
     const facility = db.find((item) => item.id === id);
-    if (!facility || facility.status !== 'pending') {
+    if (
+      !facility ||
+      facility.status !== 'pending' ||
+      (action === 'approve' && !facilityDocsAllApproved(facility.documents))
+    ) {
       skipped.push(id);
       continue;
     }

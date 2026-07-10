@@ -1,10 +1,12 @@
-import type { FacilityAction, FacilityStatus } from '../api/facility.types';
+import type { FacilityAction, FacilityDocument, FacilityStatus } from '../api/facility.types';
 
 /** The minimal facility shape the action components need (Facility or FacilityListItem). */
 export interface FacilityActionTarget {
   id: string;
   name: string;
   status: FacilityStatus;
+  /** Verification documents — approval is blocked until every one is approved. */
+  documents: FacilityDocument[];
 }
 
 /**

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -17,6 +17,7 @@ import { useCreateFacility } from '../hooks/useCreateFacility';
 import { useUpdateFacility } from '../hooks/useUpdateFacility';
 import { useFacilityQuery } from '../hooks/useFacilityQuery';
 import {
+  canEditFacility,
   facilityToInput,
   type CreateFacilityInput,
   type Facility,
@@ -101,6 +102,9 @@ export default function AddFacilityWizardPage() {
           <EmptyState icon={<StadiumIcon />} title={t('facility.profile.notFound')} />
         </PageContainer>
       );
+    }
+    if (!canEditFacility(facilityQuery.data.source)) {
+      return <Navigate to={`${PATHS.facilityManagement}/${facilityId}`} replace />;
     }
     return (
       <FacilityWizard

@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BuildingIcon, RatingStars, StadiumIcon, type Column } from '@ui';
+import { BuildingIcon, RatingStars, RegionTag, StadiumIcon, type Column } from '@ui';
 import { FacilityStatusBadge } from './FacilityStatusBadge';
-import { RegionTag } from './RegionTag';
+import { FacilitySourceBadge } from './FacilitySourceBadge';
 import type { FacilityListItem } from '../api/facility.types';
 import styles from './useFacilityColumns.module.css';
 
@@ -45,6 +45,7 @@ export function useFacilityColumns({
             >
               {item.kind === 'club' ? <BuildingIcon /> : <StadiumIcon />}
             </span>
+            <FacilitySourceBadge source={item.source} />
           </span>
         ),
       },

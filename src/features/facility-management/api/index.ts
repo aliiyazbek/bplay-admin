@@ -43,6 +43,7 @@ export const approveFacility = impl.approveFacility;
 export const rejectFacility = impl.rejectFacility;
 export const suspendFacility = impl.suspendFacility;
 export const reactivateFacility = impl.reactivateFacility;
+export const reviewFacilityDocument = impl.reviewFacilityDocument;
 export const createFacility = impl.createFacility;
 export const updateFacility = impl.updateFacility;
 export const bulkAction = impl.bulkAction;

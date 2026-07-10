@@ -5,11 +5,9 @@ import {
   toPlayer,
   type Player,
   type PlayerAction,
-  type PlayerBooking,
   type PlayerDto,
   type PlayerListParams,
   type PlayerListResult,
-  type PlayerMembership,
   type PlayerRating,
   type PlayerReport,
   type PlayerRoom,
@@ -41,16 +39,6 @@ export async function getPlayerStats(): Promise<PlayerStats> {
     suspended: all.filter((p) => p.accountStatus === 'suspended' && !p.isBlocked).length,
     blocked: all.filter((p) => p.isBlocked).length,
   };
-}
-
-export async function getPlayerBookings(id: string): Promise<PlayerBooking[]> {
-  const res = await apiClient.get(`${PLAYERS_PATH}/${id}/bookings`);
-  return unwrapList<PlayerBooking>(res.data, ['bookings']);
-}
-
-export async function getPlayerMemberships(id: string): Promise<PlayerMembership[]> {
-  const res = await apiClient.get(`${PLAYERS_PATH}/${id}/memberships`);
-  return unwrapList<PlayerMembership>(res.data, ['memberships']);
 }
 
 export async function getPlayerSubscription(id: string): Promise<PlayerSubscription> {

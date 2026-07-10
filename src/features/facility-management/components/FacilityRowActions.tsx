@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { EyeIcon, IconButton } from '@ui';
 import { actionVariant, availableActions } from './facilityActions';
 import { FACILITY_ACTION_ICONS, FacilityActionDialogs } from './FacilityStatusActions';
-import type { FacilityAction, FacilityListItem } from '../api/facility.types';
+import { facilityDocsAllApproved, type FacilityAction, type FacilityListItem } from '../api/facility.types';
 import styles from './FacilityRowActions.module.css';
 
 export interface FacilityRowActionsProps {
@@ -29,13 +29,15 @@ export function FacilityRowActions({ item, onView }: FacilityRowActionsProps) {
       />
       {actions.map((action) => {
         const variant = actionVariant(action);
+        const blocked = action === 'approve' && !facilityDocsAllApproved(item.documents);
         return (
           <IconButton
             key={action}
             size="sm"
             variant={variant === 'primary' ? 'ghost' : variant}
-            label={t(`facility.actions.${action}`)}
+            label={blocked ? t('facility.approveBlocked') : t(`facility.actions.${action}`)}
             icon={FACILITY_ACTION_ICONS[action]}
+            disabled={blocked}
             onClick={() => setPending(action)}
             data-testid={`facility-row-${action}-${item.id}`}
           />
@@ -43,7 +45,12 @@ export function FacilityRowActions({ item, onView }: FacilityRowActionsProps) {
       })}
 
       <FacilityActionDialogs
-        facility={{ id: item.id, name: item.name, status: item.status }}
+        facility={{
+          id: item.id,
+          name: item.name,
+          status: item.status,
+          documents: item.documents,
+        }}
         action={pending}
         onClose={() => setPending(null)}
       />

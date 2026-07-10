@@ -37,6 +37,7 @@ export * from './SearchInput/SearchInput';
 export * from './Skeleton/Skeleton';
 export * from './Avatar/Avatar';
 export * from './UserCell/UserCell';
+export * from './RegionTag/RegionTag';
 export * from './PageContainer/PageContainer';
 export * from './PageHeader/PageHeader';
 export * from './Toolbar/Toolbar';

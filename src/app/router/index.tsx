@@ -34,6 +34,18 @@ const CommunityManagementPage = lazy(
   () => import('@features/community-management/pages/CommunityManagementPage'),
 );
 const PostDetailPage = lazy(() => import('@features/community-management/pages/PostDetailPage'));
+const BookingManagementPage = lazy(
+  () => import('@features/booking-management/pages/BookingManagementPage'),
+);
+const BookingDetailPage = lazy(
+  () => import('@features/booking-management/pages/BookingDetailPage'),
+);
+const ClubSubscriptionsPage = lazy(
+  () => import('@features/club-subscriptions/pages/ClubSubscriptionsPage'),
+);
+const MembershipDetailPage = lazy(
+  () => import('@features/club-subscriptions/pages/MembershipDetailPage'),
+);
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const DashboardLayout = lazy(() => import('@app/layouts/DashboardLayout'));
 
@@ -183,6 +195,38 @@ export default function AppRouter() {
               element={
                 <RequireAnyRole roles={['super_admin', 'admin']}>
                   <PostDetailPage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
+              path="booking-management"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <BookingManagementPage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
+              path="booking-management/:bookingId"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <BookingDetailPage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
+              path="club-subscriptions"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <ClubSubscriptionsPage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
+              path="club-subscriptions/:membershipId"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <MembershipDetailPage />
                 </RequireAnyRole>
               }
             />

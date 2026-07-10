@@ -14,7 +14,6 @@ import {
   Pagination,
   PlusIcon,
   ReasonDialog,
-  SearchInput,
   Skeleton,
   Tabs,
   EMPTY_DATE_RANGE,
@@ -65,6 +64,7 @@ const INITIAL_DIRECTORY: FacilityListParams = {
   q: '',
   status: 'all',
   kind: 'all',
+  source: 'all',
   sport: 'all',
   regionId: 'all',
   ownerId: 'all',
@@ -343,13 +343,11 @@ export default function FacilityManagementPage() {
           aria-label={t('facility.tabs.queue')}
           data-testid="facility-queue-grid"
         >
-          <div className={styles.queueSearch}>
-            <SearchInput
-              value={queueParams.q ?? ''}
-              onChange={(q) => patchQueue({ q, page: 1 })}
-              placeholder={t('facility.search')}
-            />
-          </div>
+          <FacilityFiltersBar
+            params={queueParams}
+            onChange={(patch) => patchQueue({ ...patch, page: 1 })}
+            hideStatus
+          />
           {renderQueue()}
         </section>
       ) : (

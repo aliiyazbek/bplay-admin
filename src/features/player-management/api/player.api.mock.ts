@@ -3,19 +3,15 @@ import type { GeoPoint } from '@shared/lib/geo';
 import { filterAndPaginatePlayers } from './player.filter';
 import type {
   BillingPeriod,
-  BookingStatus,
   Gender,
   MatchStyle,
-  MembershipStatus,
   Player,
   PlayerAccountStatus,
   PlayerAccountType,
   PlayerAction,
-  PlayerBooking,
   PlayerInvoice,
   PlayerListParams,
   PlayerListResult,
-  PlayerMembership,
   PlayerRating,
   PlayerReport,
   PlayerRoom,
@@ -44,11 +40,20 @@ const FACILITIES = [
   'Champions Hub',
 ];
 const COURTS = ['Court A', 'Center Court', 'Pitch 2', 'Court 1', 'Indoor B', 'Court 3'];
-const CLUBS = ['Green Valley Club', 'Champions Hub', 'Elite Sports Club'];
-const CLUB_PLANS = [
-  { name: 'Monthly Basic', price: 300_000 },
-  { name: 'Quarterly Pro', price: 750_000 },
-  { name: 'Annual Elite', price: 2_400_000 },
+/** Real, active club facilities a player can subscribe to — links to the facility profile. */
+const MEMBER_CLUBS = [
+  { id: 'f5', name: 'Abu Rummaneh Racquet Club' },
+  { id: 'f10', name: 'Citadel Sports Complex' },
+  { id: 'f14', name: 'Orontes Sports City' },
+  { id: 'f17', name: 'Blue Beach Sports Club' },
+  { id: 'f21', name: 'Hama Norias Sports Club' },
+  { id: 'f3', name: 'Qasioun Heights Club' },
+];
+/** Real, active facilities (pitches) a player can rate — links to the facility profile. */
+const RATED_FACILITIES = [
+  { id: 'f4', name: 'Barada Riverside Pitch' },
+  { id: 'f11', name: 'Al-Aziziyah Community Pitch' },
+  { id: 'f19', name: 'Tartus Marina Pitch' },
 ];
 const BPLAY_PLANS = [
   { name: 'Bplay Plus', monthly: 120_000, annual: 1_200_000 },
@@ -103,6 +108,7 @@ interface Seed {
   dob: string;
   city: string;
   bio?: string;
+  link?: string;
   sports: PlayerSport[];
   emailVerified: boolean;
   twoFactor: boolean;
@@ -116,9 +122,9 @@ interface Seed {
 }
 
 const SEED: Seed[] = [
-  { name: 'Yara Ibrahim', email: 'yara.ibrahim@bplay.app', phone: '933210110', gender: 'female', dob: '1996-03-14', city: 'Damascus', bio: 'Padel and football on weekends.', sports: [sp('football', 'intermediate'), sp('padel', 'advanced')], emailVerified: true, twoFactor: true, accountStatus: 'active', isBlocked: false, accountType: 'paid', noShow: 0, photo: 20 },
+  { name: 'Yara Ibrahim', email: 'yara.ibrahim@bplay.app', phone: '933210110', gender: 'female', dob: '1996-03-14', city: 'Damascus', bio: 'Padel and football on weekends.', link: 'https://instagram.com/yara.plays', sports: [sp('football', 'intermediate'), sp('padel', 'advanced')], emailVerified: true, twoFactor: true, accountStatus: 'active', isBlocked: false, accountType: 'paid', noShow: 0, photo: 20 },
   { name: 'Kareem Saleh', email: 'kareem.saleh@bplay.app', phone: '944320221', gender: 'male', dob: '1993-07-02', city: 'Aleppo', sports: [sp('tennis', 'intermediate')], emailVerified: true, twoFactor: false, accountStatus: 'active', isBlocked: false, accountType: 'free', noShow: 0, photo: 12 },
-  { name: 'Lana Haddad', email: 'lana.haddad@bplay.app', phone: '955430332', gender: 'female', dob: '1998-11-21', city: 'Damascus', bio: 'Competitive padel player.', sports: [sp('padel', 'pro'), sp('basketball', 'beginner')], emailVerified: true, twoFactor: false, accountStatus: 'active', isBlocked: false, accountType: 'paid', noShow: 1, photo: 32 },
+  { name: 'Lana Haddad', email: 'lana.haddad@bplay.app', phone: '955430332', gender: 'female', dob: '1998-11-21', city: 'Damascus', bio: 'Competitive padel player.', link: 'https://linktr.ee/lana.padel', sports: [sp('padel', 'pro'), sp('basketball', 'beginner')], emailVerified: true, twoFactor: false, accountStatus: 'active', isBlocked: false, accountType: 'paid', noShow: 1, photo: 32 },
   { name: 'Omar Nasr', email: 'omar.nasr@bplay.app', phone: '966540443', gender: 'male', dob: '1991-01-09', city: 'Homs', sports: [sp('football', 'advanced')], emailVerified: true, twoFactor: false, accountStatus: 'suspended', isBlocked: false, accountType: 'free', noShow: 4, photo: 51, statusReason: 'Multiple no-show violations reported by facilities.' },
   { name: 'Sara Deeb', email: 'sara.deeb@bplay.app', phone: '977650554', gender: 'female', dob: '1995-05-30', city: 'Latakia', bio: 'Swimming and tennis.', sports: [sp('swimming', 'advanced'), sp('tennis', 'intermediate')], emailVerified: true, twoFactor: true, accountStatus: 'active', isBlocked: false, accountType: 'paid', noShow: 0, photo: 47 },
   { name: 'Hadi Mansour', email: 'hadi.mansour@bplay.app', phone: '988760665', gender: 'male', dob: '1994-09-17', city: 'Tartus', sports: [sp('football', 'intermediate'), sp('volleyball', 'beginner')], emailVerified: true, twoFactor: false, accountStatus: 'active', isBlocked: false, accountType: 'free', noShow: 2, photo: 15 },
@@ -128,68 +134,30 @@ const SEED: Seed[] = [
   { name: 'Ziad Fares', email: 'ziad.fares@bplay.app', phone: '966210109', gender: 'male', dob: '1989-06-19', city: 'Damascus', sports: [sp('football', 'advanced'), sp('tennis', 'beginner')], emailVerified: true, twoFactor: false, accountStatus: 'active', isBlocked: false, accountType: 'paid', noShow: 5, photo: 33 },
   { name: 'Rima Saab', email: 'rima.saab@bplay.app', phone: '977320210', gender: 'female', dob: '1999-04-27', city: 'Daraa', bio: 'New to Bplay.', sports: [sp('volleyball', 'beginner')], emailVerified: false, twoFactor: false, accountStatus: 'active', isBlocked: false, accountType: 'free', noShow: 0, photo: 9 },
   { name: 'Tarek Wehbe', email: 'tarek.wehbe@bplay.app', phone: '988430321', gender: 'male', dob: '1993-10-08', city: 'Idlib', sports: [sp('football', 'intermediate')], emailVerified: true, twoFactor: false, accountStatus: 'active', isBlocked: false, accountType: 'free', noShow: 1, photo: 60 },
-  { name: 'Dina Rahal', email: 'dina.rahal@bplay.app', phone: '933540432', gender: 'female', dob: '1996-12-01', city: 'Latakia', bio: 'Competitive swimmer.', sports: [sp('swimming', 'pro')], emailVerified: true, twoFactor: true, accountStatus: 'active', isBlocked: false, accountType: 'paid', noShow: 0, photo: 44 },
+  { name: 'Dina Rahal', email: 'dina.rahal@bplay.app', phone: '933540432', gender: 'female', dob: '1996-12-01', city: 'Latakia', bio: 'Competitive swimmer.', link: 'https://instagram.com/dina.swims', sports: [sp('swimming', 'pro')], emailVerified: true, twoFactor: true, accountStatus: 'active', isBlocked: false, accountType: 'paid', noShow: 0, photo: 44 },
   { name: 'Samer Halabi', email: 'samer.halabi@bplay.app', phone: '944650543', gender: 'male', dob: '1988-03-03', city: 'Homs', sports: [sp('padel', 'advanced')], emailVerified: true, twoFactor: false, accountStatus: 'suspended', isBlocked: false, accountType: 'paid', noShow: 0, photo: 52, statusReason: 'Account paused pending identity re-verification.' },
   { name: 'Lina Kassem', email: 'lina.kassem@bplay.app', phone: '955760654', gender: 'female', dob: '1994-07-15', city: 'Tartus', sports: [sp('tennis', 'intermediate'), sp('padel', 'beginner')], emailVerified: true, twoFactor: false, accountStatus: 'active', isBlocked: false, accountType: 'free', noShow: 0, photo: 25 },
   { name: 'Fadi Barakat', email: 'fadi.barakat.p@bplay.app', phone: '966870765', gender: 'male', dob: '1991-11-11', city: 'Aleppo', sports: [sp('basketball', 'intermediate'), sp('football', 'intermediate')], emailVerified: true, twoFactor: false, accountStatus: 'active', isBlocked: false, accountType: 'free', noShow: 3, photo: 11 },
 ];
 
 // --- per-player related-collection generators (deterministic from index) -----
-function genBookings(id: string, seed: Seed, i: number): PlayerBooking[] {
-  const count = 3 + (i % 4);
-  const list: PlayerBooking[] = [];
-  for (let j = 0; j < count; j += 1) {
-    let status: BookingStatus;
-    let date: string;
-    if (j < Math.min(seed.noShow, 2)) {
-      status = 'no_show';
-      date = daysAgo(20 + j * 7);
-    } else if (j >= count - 1) {
-      status = 'upcoming';
-      date = daysAhead(3 + j);
-    } else if ((i + j) % 5 === 0) {
-      status = 'cancelled';
-      date = daysAgo(10 + j * 3);
-    } else {
-      status = 'completed';
-      date = daysAgo(5 + j * 6);
-    }
-    const hour = 16 + (j % 5);
-    list.push({
-      id: `${id}-b${j + 1}`,
-      facilityName: FACILITIES[(i + j) % FACILITIES.length],
-      courtName: COURTS[(i + j) % COURTS.length],
-      sport: seed.sports[j % seed.sports.length].sport,
-      date,
-      startTime: `${String(hour).padStart(2, '0')}:00`,
-      endTime: `${String(hour + 1).padStart(2, '0')}:00`,
-      status,
-      amountSyp: 40_000 + ((i + j) % 4) * 15_000,
-      paymentMethod: (i + j) % 2 === 0 ? 'cash' : 'transfer',
-    });
-  }
-  return list;
+/**
+ * Denormalised lifetime booking counters. A player's real booking + membership
+ * history now lives in the booking-management / club-subscriptions features;
+ * these are the profile's lifetime aggregate figures (a real backend denormalises
+ * them the same way), derived deterministically from the seed index.
+ */
+function bookingsCountFor(seed: Seed, i: number): number {
+  return 3 + (i % 5) + Math.min(seed.noShow, 2);
 }
-
-function genMemberships(id: string, i: number): PlayerMembership[] {
-  const n = i % 3 === 0 ? 2 : i % 3 === 1 ? 1 : 0;
-  const list: PlayerMembership[] = [];
-  for (let j = 0; j < n; j += 1) {
-    const plan = CLUB_PLANS[(i + j) % CLUB_PLANS.length];
-    const status: MembershipStatus = j === 0 ? 'active' : 'expired';
-    list.push({
-      id: `${id}-m${j + 1}`,
-      clubName: CLUBS[(i + j) % CLUBS.length],
-      planName: plan.name,
-      priceSyp: plan.price,
-      status,
-      startDate: daysAgo(150 - j * 30),
-      endDate: status === 'active' ? daysAhead(60) : daysAgo(10),
-      paymentMethod: (i + j) % 2 === 0 ? 'cash' : 'transfer',
-      autoRenew: status === 'active',
-    });
-  }
-  return list;
+function membershipsCountFor(i: number): number {
+  return i % 3 === 0 ? 2 : i % 3 === 1 ? 1 : 0;
+}
+function lifetimeSpendSyp(seed: Seed, i: number, subscription: PlayerSubscription): number {
+  const bookingSpend = bookingsCountFor(seed, i) * (45_000 + (i % 4) * 15_000);
+  const membershipSpend = membershipsCountFor(i) * (300_000 + (i % 3) * 225_000);
+  const platformSpend = subscription.invoices.reduce((sum, inv) => sum + inv.amountSyp, 0);
+  return bookingSpend + membershipSpend + platformSpend;
 }
 
 function genSubscription(id: string, seed: Seed, i: number): PlayerSubscription {
@@ -216,7 +184,6 @@ function genSubscription(id: string, seed: Seed, i: number): PlayerSubscription 
     billingPeriod: period,
     startDate: daysAgo(annual ? 200 : 90),
     renewalDate: annual ? daysAhead(165) : daysAhead(15),
-    autoRenew: i % 3 !== 0,
     priceSyp: price,
     invoices,
   };
@@ -259,20 +226,31 @@ function genRooms(id: string, i: number): PlayerRoom[] {
 function genRatings(id: string, i: number): PlayerRating[] {
   const count = 2 + (i % 4);
   const targets: RatingTarget[] = ['facility', 'club', 'player'];
-  const targetNames: Record<RatingTarget, string[]> = {
-    facility: FACILITIES,
-    club: CLUBS,
-    player: ['Kareem S.', 'Omar N.', 'Nour A.', 'Bilal K.', 'Dina R.'],
-  };
+  const playerNames = ['Kareem S.', 'Omar N.', 'Nour A.', 'Bilal K.', 'Dina R.'];
   const list: PlayerRating[] = [];
   for (let j = 0; j < count; j += 1) {
     const target = targets[(i + j) % targets.length];
-    const pool = targetNames[target];
+    // Facility & club ratings point at a real facility, so the name links to its profile.
+    let targetName: string;
+    let targetId: string | undefined;
+    if (target === 'facility') {
+      const f = RATED_FACILITIES[(i + j) % RATED_FACILITIES.length];
+      targetName = f.name;
+      targetId = f.id;
+    } else if (target === 'club') {
+      const c = MEMBER_CLUBS[(i + j) % MEMBER_CLUBS.length];
+      targetName = c.name;
+      targetId = c.id;
+    } else {
+      targetName = playerNames[(i + j) % playerNames.length];
+      targetId = undefined;
+    }
     const comment = RATING_COMMENTS[(i + j) % RATING_COMMENTS.length] || undefined;
     list.push({
       id: `${id}-rt${j + 1}`,
       target,
-      targetName: pool[(i + j) % pool.length],
+      targetName,
+      targetId,
       stars: 3 + ((i + j) % 3),
       comment,
       date: daysAgo(8 + j * 10),
@@ -286,11 +264,14 @@ function genRatings(id: string, i: number): PlayerRating[] {
 function genReports(id: string, i: number): PlayerReport[] {
   const list: PlayerReport[] = [];
   const counterparty = (offset: number): string => SEED[(i + offset) % SEED.length].name;
+  // The counterparty is another player — id mirrors the db (500 + seed index).
+  const counterpartyId = (offset: number): string => String(500 + ((i + offset) % SEED.length));
   if (i === 2 || i === 5 || i === 9) {
     list.push({
       id: `${id}-rp1`,
       direction: 'against',
       counterpartyName: counterparty(1),
+      counterpartyId: counterpartyId(1),
       reason: REPORT_REASONS[i % REPORT_REASONS.length],
       details: 'Reported after a competitive match; awaiting super-admin review.',
       context: 'room',
@@ -303,6 +284,7 @@ function genReports(id: string, i: number): PlayerReport[] {
       id: `${id}-rp2`,
       direction: 'filed',
       counterpartyName: counterparty(3),
+      counterpartyId: counterpartyId(3),
       reason: REPORT_REASONS[(i + 1) % REPORT_REASONS.length],
       details: 'Filed by the player against an opponent.',
       context: 'chat',
@@ -315,8 +297,6 @@ function genReports(id: string, i: number): PlayerReport[] {
 }
 
 // --- in-memory mutable stores (mutations persist for the session) ------------
-const bookingsBy: Record<string, PlayerBooking[]> = {};
-const membershipsBy: Record<string, PlayerMembership[]> = {};
 const subscriptionBy: Record<string, PlayerSubscription> = {};
 const roomsBy: Record<string, PlayerRoom[]> = {};
 const ratingsBy: Record<string, PlayerRating[]> = {};
@@ -330,17 +310,12 @@ function openReportCount(reports: PlayerReport[]): number {
 
 const db: Player[] = SEED.map((seed, i) => {
   const id = String(500 + i);
-  const bookings = (bookingsBy[id] = genBookings(id, seed, i));
-  const memberships = (membershipsBy[id] = genMemberships(id, i));
   const subscription = (subscriptionBy[id] = genSubscription(id, seed, i));
   const rooms = (roomsBy[id] = genRooms(id, i));
   const ratings = (ratingsBy[id] = genRatings(id, i));
   const reports = (reportsBy[id] = genReports(id, i));
 
-  const totalSpent =
-    bookings.filter((b) => b.status === 'completed').reduce((s, b) => s + b.amountSyp, 0) +
-    memberships.filter((m) => m.status !== 'cancelled').reduce((s, m) => s + m.priceSyp, 0) +
-    subscription.invoices.reduce((s, inv) => s + inv.amountSyp, 0);
+  const totalSpent = lifetimeSpendSyp(seed, i, subscription);
 
   return {
     id,
@@ -352,6 +327,7 @@ const db: Player[] = SEED.map((seed, i) => {
     photoUrl: `https://i.pravatar.cc/512?img=${seed.photo}`,
     city: seed.city,
     bio: seed.bio,
+    link: seed.link,
     sports: seed.sports,
     accountStatus: seed.accountStatus,
     statusReason: seed.statusReason,
@@ -364,7 +340,7 @@ const db: Player[] = SEED.map((seed, i) => {
     noShowViolations: seed.noShow,
     bookingSuspendedUntil: seed.noShow >= 5 ? daysAhead(10) : undefined,
     overallRating: Math.round((3.7 + (i % 12) * 0.1) * 10) / 10,
-    bookingsCount: bookings.length,
+    bookingsCount: bookingsCountFor(seed, i),
     roomsCount: rooms.length,
     ratingsGivenCount: ratings.length,
     totalSpentSyp: totalSpent,
@@ -417,16 +393,6 @@ export async function getPlayerStats(): Promise<PlayerStats> {
     suspended: db.filter((p) => p.accountStatus === 'suspended' && !p.isBlocked).length,
     blocked: db.filter((p) => p.isBlocked).length,
   };
-}
-
-export async function getPlayerBookings(id: string): Promise<PlayerBooking[]> {
-  await mockDelay(300);
-  return (bookingsBy[id] ?? []).map((booking) => ({ ...booking }));
-}
-
-export async function getPlayerMemberships(id: string): Promise<PlayerMembership[]> {
-  await mockDelay(300);
-  return (membershipsBy[id] ?? []).map((membership) => ({ ...membership }));
 }
 
 export async function getPlayerSubscription(id: string): Promise<PlayerSubscription> {

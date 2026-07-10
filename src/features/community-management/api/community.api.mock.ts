@@ -30,6 +30,8 @@ interface AuthorSeed {
   type: CommunityActorType;
   name: string;
   logoUrl?: string;
+  /** For facility authors: the real facility id the author link deep-links to. */
+  facilityId?: string;
 }
 
 const PLAYER_AUTHORS: AuthorSeed[] = [
@@ -43,11 +45,14 @@ const PLAYER_AUTHORS: AuthorSeed[] = [
   { id: '514', type: 'player', name: 'Lina Kassem', logoUrl: 'https://i.pravatar.cc/512?img=25' },
 ];
 
+// Facility authors: `id` is the OWNER id (so their posts still show under the
+// owner's "Posts" tab), while `facilityId` is the real facility the author link
+// opens — name + id aligned to actual facility seeds (f1–f4) for a coherent click.
 const FACILITY_AUTHORS: AuthorSeed[] = [
-  { id: '300', type: 'facility', name: 'Green Valley Club', logoUrl: 'https://picsum.photos/seed/fac-300/200' },
-  { id: '301', type: 'facility', name: 'Padel Point', logoUrl: 'https://picsum.photos/seed/fac-301/200' },
-  { id: '302', type: 'facility', name: 'Ace Tennis Center', logoUrl: 'https://picsum.photos/seed/fac-302/200' },
-  { id: '303', type: 'facility', name: 'Downtown Arena', logoUrl: 'https://picsum.photos/seed/fac-303/200' },
+  { id: '300', type: 'facility', facilityId: 'f1', name: 'Al-Baramkeh Sports Club', logoUrl: 'https://picsum.photos/seed/fac-f1/200' },
+  { id: '301', type: 'facility', facilityId: 'f2', name: 'Mezzeh Padel Arena', logoUrl: 'https://picsum.photos/seed/fac-f2/200' },
+  { id: '302', type: 'facility', facilityId: 'f3', name: 'Qasioun Heights Club', logoUrl: 'https://picsum.photos/seed/fac-f3/200' },
+  { id: '303', type: 'facility', facilityId: 'f4', name: 'Barada Riverside Pitch', logoUrl: 'https://picsum.photos/seed/fac-f4/200' },
 ];
 
 const AUTHORS: AuthorSeed[] = [...PLAYER_AUTHORS, ...FACILITY_AUTHORS];
@@ -59,6 +64,7 @@ const toActorRow = (seed: AuthorSeed): CommunityActor => ({
   type: seed.type,
   name: seed.name,
   logoUrl: seed.logoUrl,
+  facilityId: seed.facilityId,
 });
 
 // --- media helpers -----------------------------------------------------------

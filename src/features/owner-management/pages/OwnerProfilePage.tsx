@@ -33,8 +33,6 @@ import { OwnerPostsCard } from '../components/OwnerPostsCard';
 import {
   ownerState,
   ownerStateBadgeVariant,
-  ownerTrustTier,
-  OWNER_TRUST_VARIANT,
   type Owner,
 } from '../api/owner.types';
 import styles from './OwnerProfilePage.module.css';
@@ -88,7 +86,6 @@ function OwnerProfileContent({ owner }: { owner: Owner }) {
   const facilityList = useMemo(() => facilities ?? [], [facilities]);
 
   const state = ownerState(owner);
-  const tier = ownerTrustTier(owner.trustScore);
   const dateLocale = i18n.language.startsWith('ar') ? 'ar-SY' : 'en-US';
   const createdLabel = owner.createdAt
     ? new Date(owner.createdAt).toLocaleDateString(dateLocale, {
@@ -111,10 +108,7 @@ function OwnerProfileContent({ owner }: { owner: Owner }) {
         photoLabel={t('owner.profile.viewPhoto')}
         testId="owner-detail-hero"
         badges={
-          <>
-            <Badge variant={ownerStateBadgeVariant(state)}>{t(`owner.state.${state}`)}</Badge>
-            <Badge variant={OWNER_TRUST_VARIANT[tier]}>{t(`owner.trust.${tier}`)}</Badge>
-          </>
+          <Badge variant={ownerStateBadgeVariant(state)}>{t(`owner.state.${state}`)}</Badge>
         }
         meta={
           <>

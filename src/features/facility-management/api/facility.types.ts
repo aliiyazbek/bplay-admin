@@ -6,7 +6,8 @@
  * Wire DTOs mirror the mobile snake_case contract so go-live is a flag flip.
  */
 
-import type { CoverageTone, DateRangeValue } from '@ui';
+import type { BadgeVariant, CoverageTone, DateRangeValue } from '@ui';
+import { statusToBadgeVariant } from '@shared/utils/status';
 
 // ---------------------------------------------------------------------------
 // Enums (wire values match the mobile app's apiValue strings)
@@ -38,6 +39,20 @@ export type PitchSurface = 'grass' | 'artificial' | 'hardcourt' | 'clay' | 'sand
 
 /** The admin actions available on a facility (approve/reject need pending). */
 export type FacilityAction = 'approve' | 'reject' | 'suspend' | 'reactivate';
+
+/**
+ * How a facility entered the platform: created by an admin from THIS dashboard,
+ * or by the owner through the mobile app. Only admin-created facilities may be
+ * edited here — see {@link canEditFacility}.
+ */
+export type FacilitySource = 'admin' | 'owner';
+
+export const FACILITY_SOURCES: FacilitySource[] = ['admin', 'owner'];
+
+/** Editing is allowed only for facilities the admin created from the dashboard. */
+export function canEditFacility(source: FacilitySource): boolean {
+  return source === 'admin';
+}
 
 /** A pending submission waiting longer than this is "aged" (review-desk amber). */
 export const AGED_THRESHOLD_HOURS = 48;
@@ -158,6 +173,14 @@ export type FacilityVerification = 'verified' | 'unverified' | 'no_docs';
 
 export const FACILITY_VERIFICATIONS: FacilityVerification[] = ['verified', 'unverified', 'no_docs'];
 
+/** Per-document review status (mirrors the owner KYC review contract). */
+export type FacilityDocStatus = 'pending' | 'approved' | 'rejected';
+
+export const FACILITY_DOC_STATUSES: FacilityDocStatus[] = ['pending', 'approved', 'rejected'];
+
+/** Per-document review decisions an admin can apply. */
+export type FacilityDocAction = 'accept' | 'reject';
+
 /** Sortable directory columns. */
 export type FacilitySortBy = 'createdAt' | 'name' | 'rating';
 
@@ -176,9 +199,14 @@ export interface FacilityLocation {
 
 export interface FacilityDocument {
   id: string;
+  /** Free-text document title (e.g. "Business License") — the row label. */
   name: string;
-  status: string;
+  status: FacilityDocStatus;
+  /** Admin note explaining a rejection (shown to the owner, who may re-upload). */
+  rejectionReason?: string;
   url: string;
+  /** Drives the viewer branch + row icon — an inline image vs an embedded PDF/file. */
+  kind: 'image' | 'pdf';
 }
 
 /** Read-only figures (D-ADM-5) — the admin never edits these. */
@@ -238,6 +266,8 @@ export interface FacilityBase {
   ownerId: string;
   ownerName: string;
   createdAt: string;
+  /** Origin: 'admin' (created from this dashboard — editable here) or 'owner' (via the app). */
+  source: FacilitySource;
   /** Rejection reason — set when status is 'rejected'; shown to the owner. */
   adminNotes?: string;
   /** Admin suspension reason — set when status is 'suspended'. */
@@ -283,6 +313,8 @@ export interface FacilityListItem {
   isOrphan: boolean;
   ownerId: string;
   ownerName: string;
+  /** Origin: 'admin' (created from the dashboard) or 'owner' (via the app). */
+  source: FacilitySource;
   rating?: number;
   thumbnailUrl?: string;
   /** All facility photos — the review queue shows a hero + peeking strip. */
@@ -326,6 +358,35 @@ export function facilityVerification(facility: Facility): FacilityVerification {
   return facility.documents.every((doc) => doc.status === 'approved') ? 'verified' : 'unverified';
 }
 
+/**
+ * A facility may only be approved once every uploaded verification document is
+ * approved (a facility with no documents can never be approved). Drives the
+ * approve-button gate on the queue, the directory rows and the profile, and is
+ * enforced again in the approve mutation.
+ */
+export function facilityDocsAllApproved(documents: FacilityDocument[]): boolean {
+  return documents.length > 0 && documents.every((doc) => doc.status === 'approved');
+}
+
+/** Per-document status → Badge variant (mirrors the owner doc-status mapping). */
+const FACILITY_DOC_STATUS_KEY: Record<FacilityDocStatus, string> = {
+  pending: 'review',
+  approved: 'approved',
+  rejected: 'rejected',
+};
+export function facilityDocBadgeVariant(status: FacilityDocStatus): BadgeVariant {
+  return statusToBadgeVariant(FACILITY_DOC_STATUS_KEY[status]);
+}
+
+/** An image vs a PDF/other file, from the mime type, the url or the filename extension. */
+export function facilityDocumentKind(url: string, mime?: string, name?: string): 'image' | 'pdf' {
+  if (mime?.startsWith('image/')) return 'image';
+  if (mime === 'application/pdf') return 'pdf';
+  // Wizard uploads carry a `blob:` URL with no extension, so fall back to the filename.
+  const imageExt = /\.(png|jpe?g|webp|gif)$/i;
+  return imageExt.test(url) || (name != null && imageExt.test(name)) ? 'image' : 'pdf';
+}
+
 export function toFacilityListItem(
   facility: Facility,
   regionNames: string[],
@@ -343,6 +404,7 @@ export function toFacilityListItem(
     isOrphan,
     ownerId: facility.ownerId,
     ownerName: facility.ownerName,
+    source: facility.source,
     rating: facility.rating,
     thumbnailUrl: facility.images[0],
     images: facility.images,
@@ -422,6 +484,8 @@ export interface FacilityListParams {
   q?: string;
   status?: 'all' | FacilityStatus;
   kind?: 'all' | FacilityKind;
+  /** Origin: created by an admin from the dashboard vs by the owner via the app. */
+  source?: 'all' | FacilitySource;
   sport?: 'all' | SportType;
   /** A scope-region id, 'orphans' (super_admin only) or 'all'. */
   regionId?: 'all' | 'orphans' | string;
@@ -584,11 +648,19 @@ export interface FacilityDto {
   images?: string[];
   owner_id?: string | number;
   owner_name?: string;
+  source?: string;
   created_at?: string;
   admin_notes?: string;
   suspension_reason?: string;
   rating?: number;
-  documents?: Array<{ id?: string | number; name?: string; status?: string; url?: string }>;
+  documents?: Array<{
+    id?: string | number;
+    name?: string;
+    status?: string;
+    rejection_reason?: string;
+    url?: string;
+    mime_type?: string;
+  }>;
   statistics?: {
     occupancy_percent?: number;
     revenue_syp?: number;
@@ -638,6 +710,10 @@ function normalizeKind(value: string | undefined): FacilityKind {
   return value === 'club' ? 'club' : 'pitch';
 }
 
+function normalizeSource(value: string | undefined): FacilitySource {
+  return value === 'admin' ? 'admin' : 'owner';
+}
+
 function normalizeGovernorate(value: string | undefined): SyrianGovernorate | undefined {
   const s = (value ?? '').toLowerCase();
   return (SYRIAN_GOVERNORATES as string[]).includes(s) ? (s as SyrianGovernorate) : undefined;
@@ -651,6 +727,13 @@ function normalizeSport(value: string | undefined): SportType {
 function normalizeSurface(value: string | undefined): PitchSurface {
   const s = (value ?? '').toLowerCase();
   return (PITCH_SURFACES as string[]).includes(s) ? (s as PitchSurface) : 'artificial';
+}
+
+function normalizeDocStatus(value: string | undefined): FacilityDocStatus {
+  const s = (value ?? '').toLowerCase();
+  if (s === 'approved' || s === 'accepted' || s === 'verified') return 'approved';
+  if (s === 'rejected' || s === 'denied') return 'rejected';
+  return 'pending';
 }
 
 export function toFacility(dto: FacilityDto): Facility {
@@ -670,17 +753,24 @@ export function toFacility(dto: FacilityDto): Facility {
     images: Array.isArray(dto.images) ? dto.images : [],
     ownerId: String(dto.owner_id ?? ''),
     ownerName: dto.owner_name ?? '',
+    source: normalizeSource(dto.source),
     createdAt: dto.created_at ?? new Date().toISOString(),
     adminNotes: dto.admin_notes,
     suspensionReason: dto.suspension_reason,
     rating: dto.rating,
     documents: Array.isArray(dto.documents)
-      ? dto.documents.map((doc, index) => ({
-          id: String(doc.id ?? index),
-          name: doc.name ?? 'Document',
-          status: (doc.status ?? 'pending').toLowerCase(),
-          url: doc.url ?? '',
-        }))
+      ? dto.documents.map((doc, index) => {
+          const url = doc.url ?? '';
+          const name = doc.name ?? 'Document';
+          return {
+            id: String(doc.id ?? index),
+            name,
+            status: normalizeDocStatus(doc.status),
+            rejectionReason: doc.rejection_reason,
+            url,
+            kind: facilityDocumentKind(url, doc.mime_type, name),
+          };
+        })
       : [],
     statistics: {
       occupancyPercent: dto.statistics?.occupancy_percent ?? 0,

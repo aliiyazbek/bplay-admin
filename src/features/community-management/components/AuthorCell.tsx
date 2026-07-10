@@ -6,10 +6,10 @@ import { useAuthRole } from '@shared/stores/authStore';
 import { ACTOR_TYPE_VARIANT, type CommunityActor } from '../api/community.types';
 import styles from './AuthorCell.module.css';
 
-/** The route to an actor's profile — player → player-management, facility → owner-management. */
+/** The route to an actor's profile — player → player-management, facility → facility-management. */
 export function actorProfilePath(actor: CommunityActor): string {
   return actor.type === 'facility'
-    ? `${PATHS.ownerManagement}/${actor.id}`
+    ? `${PATHS.facilityManagement}/${actor.facilityId ?? actor.id}`
     : `${PATHS.playerManagement}/${actor.id}`;
 }
 

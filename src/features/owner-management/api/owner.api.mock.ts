@@ -33,6 +33,7 @@ interface Seed {
   city: string;
   address: string;
   bio: string;
+  link?: string;
   intent: OwnerFacilityIntent;
   region: string;
   accountStatus: OwnerAccountStatus;
@@ -86,16 +87,16 @@ function seedDocs(ownerId: string, accountStatus: OwnerAccountStatus): OwnerDocu
 }
 
 const SEED: Seed[] = [
-  { name: 'Fadi Barakat', legalName: 'Fadi Ahmad Barakat', email: 'fadi.barakat@bplay.app', phone: '933100201', nationalId: '11003001001', dateOfBirth: '1988-04-12', city: 'Damascus', address: 'Mezzeh, Damascus', bio: 'Running a padel venue in west Damascus.', intent: 'sports_club', region: 'Damascus', accountStatus: 'active', isBlocked: false, trustScore: 72, revenue: 3800000, photo: 11, withDocs: true },
+  { name: 'Fadi Barakat', legalName: 'Fadi Ahmad Barakat', email: 'fadi.barakat@bplay.app', phone: '933100201', nationalId: '11003001001', dateOfBirth: '1988-04-12', city: 'Damascus', address: 'Mezzeh, Damascus', bio: 'Running a padel venue in west Damascus.', link: 'https://padelwest.sy', intent: 'sports_club', region: 'Damascus', accountStatus: 'active', isBlocked: false, trustScore: 72, revenue: 3800000, photo: 11, withDocs: true },
   { name: 'Rana Suleiman', legalName: 'Rana Yusuf Suleiman', email: 'rana.suleiman@bplay.app', phone: '944220118', nationalId: '11003001002', dateOfBirth: '1990-09-03', city: 'Aleppo', address: 'Al-Furqan, Aleppo', bio: 'Opening my first independent court.', intent: 'independent_court', region: 'Aleppo', accountStatus: 'active', isBlocked: false, trustScore: 68, revenue: 3200000, photo: 45, withDocs: true },
   { name: 'Omar Khoury', legalName: 'Omar Nabil Khoury', email: 'omar.khoury@bplay.app', phone: '955330447', nationalId: '11003001003', dateOfBirth: '1985-01-22', city: 'Homs', address: 'Al-Waer, Homs', bio: 'Multi-court sports club owner.', intent: 'sports_club', region: 'Homs', accountStatus: 'active', isBlocked: false, trustScore: 78, revenue: 4200000, photo: 13, withDocs: true },
-  { name: 'Lina Nasser', legalName: 'Lina Sami Nasser', email: 'lina.nasser@bplay.app', phone: '966440552', nationalId: '11003001004', dateOfBirth: '1992-11-30', city: 'Latakia', address: 'Al-Ziraa, Latakia', bio: 'Premium club with tennis and padel.', intent: 'sports_club', region: 'Latakia', accountStatus: 'active', isBlocked: false, trustScore: 92, revenue: 6850000, photo: 5, withDocs: true },
+  { name: 'Lina Nasser', legalName: 'Lina Sami Nasser', email: 'lina.nasser@bplay.app', phone: '966440552', nationalId: '11003001004', dateOfBirth: '1992-11-30', city: 'Latakia', address: 'Al-Ziraa, Latakia', bio: 'Premium club with tennis and padel.', link: 'https://latakia-premium.sy', intent: 'sports_club', region: 'Latakia', accountStatus: 'active', isBlocked: false, trustScore: 92, revenue: 6850000, photo: 5, withDocs: true },
   { name: 'Karim Aziz', legalName: 'Karim Walid Aziz', email: 'karim.aziz@bplay.app', phone: '977550663', nationalId: '11003001005', dateOfBirth: '1987-06-18', city: 'Tartus', address: 'Al-Rawda, Tartus', bio: '', intent: 'independent_court', region: 'Tartus', accountStatus: 'active', isBlocked: false, trustScore: 64, revenue: 2900000, photo: 14, withDocs: true },
   { name: 'Maya Fares', legalName: 'Maya Elias Fares', email: 'maya.fares@bplay.app', phone: '988660774', nationalId: '11003001006', dateOfBirth: '1991-02-09', city: 'Damascus', address: 'Malki, Damascus', bio: 'Verified club owner.', intent: 'sports_club', region: 'Damascus', accountStatus: 'active', isBlocked: true, trustScore: 70, blockedReason: 'Repeated policy violations reported by players.', withDocs: true },
   { name: 'Ziad Halabi', legalName: 'Ziad Marwan Halabi', email: 'ziad.halabi@bplay.app', phone: '933770885', nationalId: '11003001007', dateOfBirth: '1983-12-01', city: 'Hama', address: 'Al-Hadher, Hama', bio: '', intent: 'independent_court', region: 'Hama', accountStatus: 'suspended', isBlocked: false, trustScore: 60, statusReason: 'Account paused pending updated tax documents.', photo: 33, withDocs: true },
   { name: 'Nour Kassem', legalName: 'Nour Adnan Kassem', email: 'nour.kassem@bplay.app', phone: '944880996', nationalId: '11003001008', dateOfBirth: '1994-07-25', city: 'Daraa', address: 'Al-Sabil, Daraa', bio: 'New applicant.', intent: 'independent_court', region: 'Daraa', accountStatus: 'under_review', isBlocked: false, trustScore: 40, withDocs: true },
   { name: 'Hadi Rahal', legalName: 'Hadi Ghassan Rahal', email: 'hadi.rahal@bplay.app', phone: '955990107', nationalId: '11003001009', dateOfBirth: '1986-03-14', city: 'Aleppo', address: 'Al-Mogambo, Aleppo', bio: 'Verified sports club.', intent: 'sports_club', region: 'Aleppo', accountStatus: 'active', isBlocked: false, trustScore: 85, revenue: 5100000, photo: 52, withDocs: true },
-  { name: 'Dina Saab', legalName: 'Dina Fouad Saab', email: 'dina.saab@bplay.app', phone: '966101218', nationalId: '11003001010', dateOfBirth: '1989-10-05', city: 'Damascus', address: 'Abu Rummaneh, Damascus', bio: 'Top-rated premium owner.', intent: 'sports_club', region: 'Damascus', accountStatus: 'active', isBlocked: false, trustScore: 96, revenue: 7400000, photo: 9, withDocs: false },
+  { name: 'Dina Saab', legalName: 'Dina Fouad Saab', email: 'dina.saab@bplay.app', phone: '966101218', nationalId: '11003001010', dateOfBirth: '1989-10-05', city: 'Damascus', address: 'Abu Rummaneh, Damascus', bio: 'Top-rated premium owner.', link: 'https://damascus-elite.sy', intent: 'sports_club', region: 'Damascus', accountStatus: 'active', isBlocked: false, trustScore: 96, revenue: 7400000, photo: 9, withDocs: false },
   { name: 'Tarek Mansour', legalName: 'Tarek Bassam Mansour', email: 'tarek.mansour@bplay.app', phone: '977212329', nationalId: '11003001011', dateOfBirth: '1993-05-19', city: 'Homs', address: 'Karm al-Zaytoun, Homs', bio: '', intent: 'independent_court', region: 'Homs', accountStatus: 'active', isBlocked: false, trustScore: 66, revenue: 3500000, photo: 15, withDocs: true },
   { name: 'Yasmin Deeb', legalName: 'Yasmin Rami Deeb', email: 'yasmin.deeb@bplay.app', phone: '988323430', nationalId: '11003001012', dateOfBirth: '1990-08-08', city: 'Latakia', address: 'Al-Sheikh Daher, Latakia', bio: 'Verified owner.', intent: 'sports_club', region: 'Latakia', accountStatus: 'active', isBlocked: false, trustScore: 88, revenue: 4650000, photo: 47, withDocs: false },
   { name: 'Samer Wehbe', legalName: 'Samer Jamal Wehbe', email: 'samer.wehbe@bplay.app', phone: '933434541', nationalId: '11003001013', dateOfBirth: '1984-01-27', city: 'Idlib', address: 'Al-Qusour, Idlib', bio: '', intent: 'independent_court', region: 'Idlib', accountStatus: 'active', isBlocked: false, trustScore: 58, revenue: 2100000, photo: 60, withDocs: true },
@@ -118,6 +119,7 @@ const db: Owner[] = SEED.map((seed, index) => {
     city: seed.city,
     address: seed.address,
     bio: seed.bio || undefined,
+    link: seed.link,
     intendedFacilityType: seed.intent,
     region: seed.region,
     accountStatus: seed.accountStatus,

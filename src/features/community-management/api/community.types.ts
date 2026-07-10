@@ -24,11 +24,17 @@ export type ReactionType = 'like' | 'love' | 'celebrate' | 'support' | 'insightf
 export const REACTION_TYPES: ReactionType[] = ['like', 'love', 'celebrate', 'support', 'insightful'];
 
 export interface CommunityActor {
-  /** For a 'facility' actor this is the owner id (deep-links to owner-management/:id). */
+  /**
+   * The id used for author-scoped post queries: a player id for a player, the
+   * OWNER id for a facility (so a facility's posts still surface under its owner's
+   * "Posts" tab). The clickable profile link uses {@link facilityId} for facilities.
+   */
   id: string;
   type: CommunityActorType;
   name: string;
   logoUrl?: string;
+  /** For a 'facility' actor: the facility's own id — the author link deep-links here. */
+  facilityId?: string;
 }
 
 /** A reactor row: an actor plus the reaction they left. */
@@ -186,6 +192,8 @@ export interface CommunityActorDto {
   id?: string | number;
   author_id?: string | number;
   actor_id?: string | number;
+  facility_id?: string | number;
+  facilityId?: string | number;
   type?: string;
   author_type?: string;
   actor_type?: string;
@@ -264,11 +272,13 @@ function num(value: unknown): number {
 
 export function toActor(dto: CommunityActorDto | undefined): CommunityActor {
   const raw = dto ?? {};
+  const facilityId = raw.facility_id ?? raw.facilityId;
   return {
     id: String(raw.id ?? raw.author_id ?? raw.actor_id ?? ''),
     type: normalizeActorType(raw.type ?? raw.author_type ?? raw.actor_type),
     name: raw.name ?? raw.full_name ?? '',
     logoUrl: raw.logo_url ?? raw.avatar_url ?? raw.photo_url,
+    facilityId: facilityId != null ? String(facilityId) : undefined,
   };
 }
 

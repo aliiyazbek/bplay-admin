@@ -53,6 +53,8 @@ export interface Player {
   /** Governorate-level location (used for search + the city filter). */
   city: string;
   bio?: string;
+  /** Optional personal / social link the player added to their profile. */
+  link?: string;
   sports: PlayerSport[];
   accountStatus: PlayerAccountStatus;
   /** Reason for the current suspended state (admin note). */
@@ -120,47 +122,11 @@ export const ACCOUNT_TYPE_VARIANT: Record<PlayerAccountType, BadgeVariant> = {
 
 // ---------------------------------------------------------------------------
 // Related collections (fetched per-player on the detail page)
+//
+// A player's bookings and club memberships are owned by the booking-management
+// and club-subscriptions oversight features — the player-profile tabs consume
+// those feature APIs directly (getBookings / getMemberships filtered by player).
 // ---------------------------------------------------------------------------
-
-export type PaymentMethod = 'cash' | 'transfer';
-
-/** A single facility/court booking. */
-export type BookingStatus = 'upcoming' | 'completed' | 'cancelled' | 'no_show';
-export interface PlayerBooking {
-  id: string;
-  facilityName: string;
-  courtName: string;
-  sport: SportKind;
-  date: string;
-  startTime: string;
-  endTime?: string;
-  status: BookingStatus;
-  amountSyp: number;
-  paymentMethod: PaymentMethod;
-}
-const BOOKING_STATUS_KEY: Record<BookingStatus, string> = {
-  upcoming: 'upcoming', // unmatched → info (blue)
-  completed: 'completed',
-  cancelled: 'cancelled',
-  no_show: 'failed',
-};
-export function bookingStatusBadgeVariant(status: BookingStatus): BadgeVariant {
-  return statusToBadgeVariant(BOOKING_STATUS_KEY[status]);
-}
-
-/** A player's subscription to a sports-club package. */
-export type MembershipStatus = 'active' | 'expired' | 'suspended' | 'cancelled';
-export interface PlayerMembership {
-  id: string;
-  clubName: string;
-  planName: string;
-  priceSyp: number;
-  status: MembershipStatus;
-  startDate: string;
-  endDate: string;
-  paymentMethod: PaymentMethod;
-  autoRenew: boolean;
-}
 
 /** The player's paid Bplay platform subscription (or free). */
 export type SubscriptionStatus = 'active' | 'expired';
@@ -179,7 +145,6 @@ export interface PlayerSubscription {
   billingPeriod?: BillingPeriod;
   startDate?: string;
   renewalDate?: string;
-  autoRenew?: boolean;
   priceSyp?: number;
   invoices: PlayerInvoice[];
 }
@@ -219,6 +184,8 @@ export interface PlayerRating {
   id: string;
   target: RatingTarget;
   targetName: string;
+  /** Facility id when the target is a facility / club — links to its profile. */
+  targetId?: string;
   stars: number;
   comment?: string;
   date: string;
@@ -235,6 +202,8 @@ export interface PlayerReport {
   id: string;
   direction: ReportDirection;
   counterpartyName: string;
+  /** The other player's id — links to their profile. */
+  counterpartyId?: string;
   reason: string;
   details?: string;
   context: ReportContext;
@@ -319,6 +288,9 @@ export interface PlayerDto {
   city?: string;
   region?: string;
   bio?: string;
+  link?: string;
+  website?: string;
+  social_link?: string;
   sports?: PlayerSportDto[];
   account_status?: string;
   status?: string;
@@ -404,6 +376,7 @@ export function toPlayer(dto: PlayerDto): Player {
     photoUrl: dto.avatar_url ?? dto.photo_url,
     city: dto.city ?? dto.region ?? '',
     bio: dto.bio,
+    link: dto.link ?? dto.website ?? dto.social_link,
     sports,
     accountStatus: normalizeAccountStatus(dto.account_status ?? dto.status),
     statusReason: dto.status_reason,

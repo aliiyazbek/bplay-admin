@@ -54,7 +54,7 @@ export function Step5Media({ draft, isSubmitting, submitLabel, onBack, onNext }:
     setValue(
       'documents',
       files.map((file) => ({ name: file.name, url: file.url })),
-      { shouldDirty: true },
+      { shouldValidate: isSubmitted, shouldDirty: true },
     );
 
   const toPatch = (values: Step5Values): Partial<CreateFacilityInput> => ({
@@ -106,6 +106,11 @@ export function Step5Media({ draft, isSubmitting, submitLabel, onBack, onNext }:
           removeLabel={t('facility.wizard.media.remove')}
           testId="wizard-docs"
         />
+        {errors.documents?.message && (
+          <p className={styles.error} role="alert">
+            {t(errors.documents.message)}
+          </p>
+        )}
       </div>
 
       <footer className={styles.footer}>

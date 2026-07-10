@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { BanIcon, Button, CheckIcon, ConfirmDialog, PowerIcon, ReasonDialog, XIcon } from '@ui';
 import { actionVariant, availableActions, type FacilityActionTarget } from './facilityActions';
 import { useFacilityActions } from '../hooks/useFacilityActions';
-import type { FacilityAction } from '../api/facility.types';
+import { facilityDocsAllApproved, type FacilityAction } from '../api/facility.types';
 
 /** One icon per governance action — shared by the header buttons and row actions. */
 export const FACILITY_ACTION_ICONS: Record<FacilityAction, ReactNode> = {
@@ -108,18 +108,23 @@ export function FacilityStatusActions({ facility }: FacilityStatusActionsProps) 
 
   return (
     <>
-      {actions.map((action) => (
-        <Button
-          key={action}
-          size="sm"
-          variant={actionVariant(action)}
-          leftIcon={FACILITY_ACTION_ICONS[action]}
-          onClick={() => setPending(action)}
-          data-testid={`facility-action-${action}`}
-        >
-          {t(`facility.actions.${action}`)}
-        </Button>
-      ))}
+      {actions.map((action) => {
+        const blocked = action === 'approve' && !facilityDocsAllApproved(facility.documents);
+        return (
+          <Button
+            key={action}
+            size="sm"
+            variant={actionVariant(action)}
+            leftIcon={FACILITY_ACTION_ICONS[action]}
+            disabled={blocked}
+            title={blocked ? t('facility.approveBlocked') : undefined}
+            onClick={() => setPending(action)}
+            data-testid={`facility-action-${action}`}
+          >
+            {t(`facility.actions.${action}`)}
+          </Button>
+        );
+      })}
 
       <FacilityActionDialogs
         facility={facility}

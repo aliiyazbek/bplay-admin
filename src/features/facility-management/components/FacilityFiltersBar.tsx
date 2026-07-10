@@ -19,6 +19,7 @@ import { useOwnersForPicker } from '../hooks/useOwnersForPicker';
 import {
   FACILITY_AMENITIES,
   FACILITY_KINDS,
+  FACILITY_SOURCES,
   FACILITY_STATUSES,
   FACILITY_VERIFICATIONS,
   SPORT_TYPES,
@@ -32,11 +33,14 @@ export interface FacilityFiltersBarProps {
   params: FacilityListParams;
   /** Merge the patch into the params (the page also resets page to 1). */
   onChange: (patch: Partial<FacilityListParams>) => void;
+  /** Hide the status quick-chips row — the pending queue is status-locked. */
+  hideStatus?: boolean;
 }
 
 const CLEARED: Partial<FacilityListParams> = {
   status: 'all',
   kind: 'all',
+  source: 'all',
   sport: 'all',
   regionId: 'all',
   ownerId: 'all',
@@ -61,7 +65,11 @@ function isSet(value: string | undefined): boolean {
  * Region options are scope-aware; the trigger carries a count of active panel
  * filters; Clear resets everything (search text stays).
  */
-export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps) {
+export function FacilityFiltersBar({
+  params,
+  onChange,
+  hideStatus = false,
+}: FacilityFiltersBarProps) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -75,6 +83,7 @@ export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps
   const panelActiveCount =
     [
       params.kind,
+      params.source,
       params.sport,
       params.regionId,
       params.ownerId,
@@ -143,20 +152,22 @@ export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps
         )}
       </div>
 
-      <div className={styles.statusChips} role="group" aria-label={t('facility.filters.status')}>
-        {STATUS_CHIPS.map((value) => (
-          <button
-            key={value}
-            type="button"
-            aria-pressed={status === value}
-            className={clsx(styles.statusChip, status === value && styles.statusChipActive)}
-            onClick={() => onChange({ status: value })}
-            data-testid={`facility-status-chip-${value}`}
-          >
-            {value === 'all' ? t('facility.filters.allStatus') : t(`status.${value}`)}
-          </button>
-        ))}
-      </div>
+      {!hideStatus && (
+        <div className={styles.statusChips} role="group" aria-label={t('facility.filters.status')}>
+          {STATUS_CHIPS.map((value) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={status === value}
+              className={clsx(styles.statusChip, status === value && styles.statusChipActive)}
+              onClick={() => onChange({ status: value })}
+              data-testid={`facility-status-chip-${value}`}
+            >
+              {value === 'all' ? t('facility.filters.allStatus') : t(`status.${value}`)}
+            </button>
+          ))}
+        </div>
+      )}
 
       <AnimatePresence initial={false}>
         {open && (
@@ -178,6 +189,20 @@ export function FacilityFiltersBar({ params, onChange }: FacilityFiltersBarProps
                     ...FACILITY_KINDS.map((kind) => ({
                       value: kind,
                       label: t(`facility.kind.${kind}`),
+                    })),
+                  ]}
+                />
+              </div>
+              <div className={styles.filter}>
+                <Select
+                  aria-label={t('facility.filters.source')}
+                  value={params.source ?? 'all'}
+                  onChange={(value) => onChange({ source: value as FacilityListParams['source'] })}
+                  options={[
+                    allOption,
+                    ...FACILITY_SOURCES.map((source) => ({
+                      value: source,
+                      label: t(`facility.source.${source}`),
                     })),
                   ]}
                 />

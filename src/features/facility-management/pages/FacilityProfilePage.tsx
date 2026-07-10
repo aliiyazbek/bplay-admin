@@ -30,8 +30,9 @@ import { FacilityStatusBadge } from '../components/FacilityStatusBadge';
 import { WorkingHoursView } from '../components/WorkingHoursView';
 import { PitchSpecsGrid } from '../components/PitchSpecsGrid';
 import { CourtCard } from '../components/CourtCard';
-import { DocumentChip } from '../components/DocumentChip';
-import type { Facility } from '../api/facility.types';
+import { FacilityDocumentsCard } from '../components/FacilityDocumentsCard';
+import { FacilitySourceBadge } from '../components/FacilitySourceBadge';
+import { canEditFacility, type Facility } from '../api/facility.types';
 import styles from './FacilityProfilePage.module.css';
 
 type ProfileTab = 'overview' | 'courts' | 'media';
@@ -54,14 +55,16 @@ export default function FacilityProfilePage() {
         actions={
           facility ? (
             <>
-              <Button
-                variant="secondary"
-                leftIcon={<EditIcon />}
-                onClick={() => navigate(`${PATHS.facilityManagement}/${facility.id}/edit`)}
-                data-testid="facility-edit"
-              >
-                {t('facility.profile.edit')}
-              </Button>
+              {canEditFacility(facility.source) && (
+                <Button
+                  variant="secondary"
+                  leftIcon={<EditIcon />}
+                  onClick={() => navigate(`${PATHS.facilityManagement}/${facility.id}/edit`)}
+                  data-testid="facility-edit"
+                >
+                  {t('facility.profile.edit')}
+                </Button>
+              )}
               <FacilityStatusActions facility={facility} />
             </>
           ) : undefined
@@ -170,6 +173,7 @@ function FacilityProfile({ facility }: { facility: Facility }) {
           </div>
           <div className={styles.plateMeta}>
             <FacilityStatusBadge status={facility.status} size="md" />
+            <FacilitySourceBadge source={facility.source} size="md" />
             <span className={styles.plateRating}>
               <RatingStars value={facility.rating ?? null} size="md" />
             </span>
@@ -305,15 +309,17 @@ function FacilityProfile({ facility }: { facility: Facility }) {
                     ? t('facility.profile.courtsEmpty')
                     : t('facility.profile.courtsCount', { count: facility.courts.length })}
                 </p>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  leftIcon={<EditIcon />}
-                  onClick={() => navigate(editPath)}
-                  data-testid="facility-manage-courts"
-                >
-                  {t('facility.profile.manageCourts')}
-                </Button>
+                {canEditFacility(facility.source) && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    leftIcon={<EditIcon />}
+                    onClick={() => navigate(editPath)}
+                    data-testid="facility-manage-courts"
+                  >
+                    {t('facility.profile.manageCourts')}
+                  </Button>
+                )}
               </div>
               {facility.courts.length > 0 && (
                 <div className={styles.courtsGrid}>
@@ -361,18 +367,7 @@ function FacilityProfile({ facility }: { facility: Facility }) {
             )}
           </Card>
 
-          <Card className={styles.card}>
-            <h2 className={styles.sectionTitle}>{t('facility.profile.documents')}</h2>
-            {facility.documents.length === 0 ? (
-              <p className={styles.muted}>{t('facility.profile.noDocuments')}</p>
-            ) : (
-              <div className={styles.docsList}>
-                {facility.documents.map((document) => (
-                  <DocumentChip key={document.id} document={document} />
-                ))}
-              </div>
-            )}
-          </Card>
+          <FacilityDocumentsCard facilityId={facility.id} documents={facility.documents} />
         </div>
       )}
 

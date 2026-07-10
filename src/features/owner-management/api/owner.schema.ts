@@ -9,8 +9,9 @@ export const createOwnerSchema = z.object({
   email: z.string().min(1, 'owner.errors.emailRequired').email('owner.errors.emailInvalid'),
   phone: z.string().regex(PHONE_LOCAL_REGEX, 'owner.errors.phoneInvalid'),
   nationalId: z
-    .union([z.string().regex(NATIONAL_ID_REGEX, 'owner.errors.nationalIdInvalid'), z.literal('')])
-    .optional(),
+    .string()
+    .min(1, 'owner.errors.nationalIdRequired')
+    .regex(NATIONAL_ID_REGEX, 'owner.errors.nationalIdInvalid'),
   intendedFacilityType: z.enum(['sports_club', 'independent_court']),
 });
 export type CreateOwnerValues = z.infer<typeof createOwnerSchema>;

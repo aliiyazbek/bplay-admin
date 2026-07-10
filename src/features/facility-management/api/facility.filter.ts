@@ -153,6 +153,10 @@ export function buildFacilityListResult(
   if (ownerId && ownerId !== 'all') {
     entries = entries.filter((entry) => entry.item.ownerId === ownerId);
   }
+  const source = params.source;
+  if (source && source !== 'all') {
+    entries = entries.filter((entry) => entry.item.source === source);
+  }
   const minRating = params.minRating;
   if (typeof minRating === 'number') {
     entries = entries.filter(

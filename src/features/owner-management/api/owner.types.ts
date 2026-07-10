@@ -68,6 +68,8 @@ export interface Owner {
   city?: string;
   address?: string;
   bio?: string;
+  /** Optional business website / link the owner added to their profile. */
+  link?: string;
   intendedFacilityType?: OwnerFacilityIntent;
   /** Denormalised region label (derived from the owner's facilities). */
   region: string;
@@ -175,6 +177,8 @@ export interface OwnerDto {
   city?: string;
   address?: string;
   bio?: string;
+  link?: string;
+  website?: string;
   intended_facility_type?: string;
   facility_type?: string;
   region?: string;
@@ -264,6 +268,7 @@ export function toOwner(dto: OwnerDto): Owner {
     city: dto.city,
     address: dto.address,
     bio: dto.bio,
+    link: dto.link ?? dto.website,
     intendedFacilityType: normalizeIntent(dto.intended_facility_type ?? dto.facility_type),
     region: dto.region ?? dto.region_name ?? '',
     accountStatus: normalizeAccountStatus(dto.account_status ?? dto.status),

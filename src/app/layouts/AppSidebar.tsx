@@ -14,6 +14,8 @@ import {
   UserIcon,
   LogoutIcon,
   MessageCircleIcon,
+  CalendarIcon,
+  CreditCardIcon,
 } from '@ui';
 import { useAuthStore, useAuthUser, useAuthRole, type UserRole } from '@shared/stores/authStore';
 import { useUiStore } from '@shared/stores/uiStore';
@@ -36,6 +38,8 @@ const NAV_ITEMS: NavItem[] = [
   { to: PATHS.ownerManagement, key: 'nav.ownerManagement', Icon: BuildingIcon, superAdminOnly: true },
   { to: PATHS.playerManagement, key: 'nav.playerManagement', Icon: TrophyIcon, superAdminOnly: true },
   { to: PATHS.facilityManagement, key: 'nav.facilityManagement', Icon: StadiumIcon, superAdminOnly: false },
+  { to: PATHS.bookingManagement, key: 'nav.bookingManagement', Icon: CalendarIcon, superAdminOnly: false },
+  { to: PATHS.clubSubscriptions, key: 'nav.clubSubscriptions', Icon: CreditCardIcon, superAdminOnly: false },
   { to: PATHS.communityManagement, key: 'nav.communityManagement', Icon: MessageCircleIcon, superAdminOnly: false },
   { to: PATHS.profile, key: 'nav.profile', Icon: UserIcon, superAdminOnly: false },
 ];

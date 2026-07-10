@@ -1,5 +1,7 @@
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card, Badge, Button, Spinner, EmptyState, ErrorState, InboxIcon } from '@ui';
+import { PATHS } from '@app/router/paths';
 import { reportStatusBadgeVariant, type PlayerReport } from '../api/player.types';
 import { usePlayerReports } from '../hooks/usePlayerRelated';
 import { useReportModeration } from '../hooks/usePlayerModeration';
@@ -12,6 +14,7 @@ interface Props {
 /** Reports filed by, or against, the player — with resolve/dismiss moderation. */
 export function PlayerReportsCard({ playerId }: Props) {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = usePlayerReports(playerId);
   const moderation = useReportModeration(playerId);
   // Scope the in-flight spinner/lockout to the row being moderated.
@@ -47,7 +50,17 @@ export function PlayerReportsCard({ playerId }: Props) {
                   <Badge variant={report.direction === 'against' ? 'danger' : 'neutral'} size="sm">
                     {t(`player.reports.direction.${report.direction}`)}
                   </Badge>
-                  <span className={styles.ratingTarget}>{report.counterpartyName}</span>
+                  {report.counterpartyId ? (
+                    <button
+                      type="button"
+                      className={styles.linkTarget}
+                      onClick={() => navigate(`${PATHS.playerManagement}/${report.counterpartyId}`)}
+                    >
+                      {report.counterpartyName}
+                    </button>
+                  ) : (
+                    <span className={styles.ratingTarget}>{report.counterpartyName}</span>
+                  )}
                   <Badge variant={reportStatusBadgeVariant(report.status)} size="sm">
                     {t(`player.reportStatus.${report.status}`)}
                   </Badge>

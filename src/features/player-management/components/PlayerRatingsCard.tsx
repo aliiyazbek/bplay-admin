@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Card,
@@ -12,6 +13,7 @@ import {
   InboxIcon,
   clsx,
 } from '@ui';
+import { PATHS } from '@app/router/paths';
 import { type PlayerRating } from '../api/player.types';
 import { usePlayerRatings } from '../hooks/usePlayerRelated';
 import { useRatingModeration } from '../hooks/usePlayerModeration';
@@ -24,6 +26,7 @@ interface Props {
 /** Ratings + written comments the player left, with hide/un-hide moderation. */
 export function PlayerRatingsCard({ playerId }: Props) {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = usePlayerRatings(playerId);
   const moderation = useRatingModeration(playerId);
   const locale = i18n.language.startsWith('ar') ? 'ar-SY' : 'en-US';
@@ -57,7 +60,17 @@ export function PlayerRatingsCard({ playerId }: Props) {
             >
               <div className={styles.ratingMain}>
                 <div className={styles.ratingHead}>
-                  <span className={styles.ratingTarget}>{rating.targetName}</span>
+                  {rating.targetId ? (
+                    <button
+                      type="button"
+                      className={styles.linkTarget}
+                      onClick={() => navigate(`${PATHS.facilityManagement}/${rating.targetId}`)}
+                    >
+                      {rating.targetName}
+                    </button>
+                  ) : (
+                    <span className={styles.ratingTarget}>{rating.targetName}</span>
+                  )}
                   <Badge variant="neutral" size="sm">
                     {t(`player.ratingTarget.${rating.target}`)}
                   </Badge>

@@ -268,3 +268,43 @@
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }
+
+/* Club logo + name cell (memberships) */
+.clubCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+/* Clickable entity name → opens its profile (ratings / reports) */
+.linkTarget {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  color: var(--color-primary-accent);
+  cursor: pointer;
+  text-align: start;
+}
+.linkTarget:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* External profile / social link (about card) */
+.profileLink {
+  display: inline-block;
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-primary-accent);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+}
+.profileLink:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}

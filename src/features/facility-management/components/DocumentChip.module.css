@@ -10,20 +10,6 @@
   color: var(--color-text-muted);
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
-  text-decoration: none;
-  transition: background var(--transition-fast), color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.chip:hover {
-  background: var(--color-glass-strong);
-  border-color: var(--color-glass-border-strong);
-  color: var(--color-text);
-}
-
-.chip:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
 }
 
 .icon {

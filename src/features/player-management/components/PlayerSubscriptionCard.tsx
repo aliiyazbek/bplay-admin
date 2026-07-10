@@ -68,12 +68,6 @@ export function PlayerSubscriptionCard({ playerId }: Props) {
               <dt className={styles.label}>{t('player.subscription.renews')}</dt>
               <dd className={styles.value}>{fmt(sub.renewalDate)}</dd>
             </div>
-            <div className={styles.row}>
-              <dt className={styles.label}>{t('player.subscription.autoRenew')}</dt>
-              <dd className={styles.value}>
-                {t(sub.autoRenew ? 'player.memberships.autoOn' : 'player.memberships.autoOff')}
-              </dd>
-            </div>
           </dl>
 
           {sub.invoices.length > 0 && (
