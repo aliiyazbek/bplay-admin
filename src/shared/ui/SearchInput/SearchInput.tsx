@@ -8,6 +8,9 @@ export interface SearchInputProps {
   onChange: (value: string) => void;
   placeholder?: string;
   debounceMs?: number;
+  /** Explicit accessible label when the placeholder isn't descriptive enough. */
+  ariaLabel?: string;
+  testId?: string;
 }
 
 export function SearchInput({
@@ -15,6 +18,8 @@ export function SearchInput({
   onChange,
   placeholder,
   debounceMs = SEARCH_DEBOUNCE_MS,
+  ariaLabel,
+  testId,
 }: SearchInputProps) {
   const [local, setLocal] = useState(value);
   const onChangeRef = useRef(onChange);
@@ -41,9 +46,10 @@ export function SearchInput({
       type="search"
       leftIcon={<SearchIcon />}
       placeholder={placeholder}
-      aria-label={placeholder ?? 'Search'}
+      aria-label={ariaLabel ?? placeholder ?? 'Search'}
       value={local}
       onChange={(event) => setLocal(event.target.value)}
+      data-testid={testId}
     />
   );
 }

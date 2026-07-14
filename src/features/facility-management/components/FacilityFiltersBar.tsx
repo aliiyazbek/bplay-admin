@@ -5,10 +5,20 @@ import {
   Badge,
   Button,
   DateRange,
+  FilterField,
   FilterIcon,
-  Input,
   SearchInput,
   Select,
+  BuildingIcon,
+  CalendarIcon,
+  CheckIcon,
+  GlobeIcon,
+  MapPinIcon,
+  SearchIcon,
+  SparklesIcon,
+  StadiumIcon,
+  StarIcon,
+  TrophyIcon,
   clsx,
   EMPTY_DATE_RANGE,
   isDateRangeActive,
@@ -119,11 +129,13 @@ export function FacilityFiltersBar({
     <div className={styles.bar}>
       <div className={styles.row}>
         <div className={styles.search}>
-          <SearchInput
-            value={params.q ?? ''}
-            onChange={(q) => onChange({ q })}
-            placeholder={t('facility.search')}
-          />
+          <FilterField label={t('common.search')} icon={<SearchIcon />}>
+            <SearchInput
+              value={params.q ?? ''}
+              onChange={(q) => onChange({ q })}
+              placeholder={t('facility.search')}
+            />
+          </FilterField>
         </div>
         <Button
           variant="secondary"
@@ -180,139 +192,159 @@ export function FacilityFiltersBar({
           >
             <div className={styles.panel}>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('facility.filters.kind')}
-                  value={params.kind ?? 'all'}
-                  onChange={(value) => onChange({ kind: value as FacilityListParams['kind'] })}
-                  options={[
-                    allOption,
-                    ...FACILITY_KINDS.map((kind) => ({
-                      value: kind,
-                      label: t(`facility.kind.${kind}`),
-                    })),
-                  ]}
-                />
+                <FilterField label={t('facility.filters.kind')} icon={<StadiumIcon />}>
+                  <Select
+                    aria-label={t('facility.filters.kind')}
+                    value={params.kind ?? 'all'}
+                    onChange={(value) => onChange({ kind: value as FacilityListParams['kind'] })}
+                    options={[
+                      allOption,
+                      ...FACILITY_KINDS.map((kind) => ({
+                        value: kind,
+                        label: t(`facility.kind.${kind}`),
+                      })),
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('facility.filters.source')}
-                  value={params.source ?? 'all'}
-                  onChange={(value) => onChange({ source: value as FacilityListParams['source'] })}
-                  options={[
-                    allOption,
-                    ...FACILITY_SOURCES.map((source) => ({
-                      value: source,
-                      label: t(`facility.source.${source}`),
-                    })),
-                  ]}
-                />
+                <FilterField label={t('facility.filters.source')} icon={<SparklesIcon />}>
+                  <Select
+                    aria-label={t('facility.filters.source')}
+                    value={params.source ?? 'all'}
+                    onChange={(value) => onChange({ source: value as FacilityListParams['source'] })}
+                    options={[
+                      allOption,
+                      ...FACILITY_SOURCES.map((source) => ({
+                        value: source,
+                        label: t(`facility.source.${source}`),
+                      })),
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('facility.filters.sport')}
-                  value={params.sport ?? 'all'}
-                  onChange={(value) => onChange({ sport: value as FacilityListParams['sport'] })}
-                  options={[
-                    allOption,
-                    ...SPORT_TYPES.map((sport) => ({
-                      value: sport,
-                      label: t(`facility.sport.${sport}`),
-                    })),
-                  ]}
-                />
+                <FilterField label={t('facility.filters.sport')} icon={<TrophyIcon />}>
+                  <Select
+                    aria-label={t('facility.filters.sport')}
+                    value={params.sport ?? 'all'}
+                    onChange={(value) => onChange({ sport: value as FacilityListParams['sport'] })}
+                    options={[
+                      allOption,
+                      ...SPORT_TYPES.map((sport) => ({
+                        value: sport,
+                        label: t(`facility.sport.${sport}`),
+                      })),
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('facility.filters.region')}
-                  value={params.regionId ?? 'all'}
-                  onChange={(value) => onChange({ regionId: value })}
-                  options={regionOptions}
-                />
+                <FilterField label={t('facility.filters.region')} icon={<MapPinIcon />}>
+                  <Select
+                    aria-label={t('facility.filters.region')}
+                    value={params.regionId ?? 'all'}
+                    onChange={(value) => onChange({ regionId: value })}
+                    options={regionOptions}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('facility.filters.owner')}
-                  value={params.ownerId ?? 'all'}
-                  onChange={(value) => onChange({ ownerId: value })}
-                  options={[
-                    allOption,
-                    ...(ownersQuery.data ?? []).map((owner) => ({
-                      value: owner.id,
-                      label: owner.name,
-                    })),
-                  ]}
-                />
+                <FilterField label={t('facility.filters.owner')} icon={<BuildingIcon />}>
+                  <Select
+                    aria-label={t('facility.filters.owner')}
+                    value={params.ownerId ?? 'all'}
+                    onChange={(value) => onChange({ ownerId: value })}
+                    options={[
+                      allOption,
+                      ...(ownersQuery.data ?? []).map((owner) => ({
+                        value: owner.id,
+                        label: owner.name,
+                      })),
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('facility.filters.governorate')}
-                  value={params.governorate ?? 'all'}
-                  onChange={(value) =>
-                    onChange({ governorate: value as FacilityListParams['governorate'] })
-                  }
-                  options={[
-                    allOption,
-                    ...SYRIAN_GOVERNORATES.map((governorate) => ({
-                      value: governorate,
-                      label: t(`facility.governorate.${governorate}`),
-                    })),
-                  ]}
-                />
+                <FilterField label={t('facility.filters.governorate')} icon={<GlobeIcon />}>
+                  <Select
+                    aria-label={t('facility.filters.governorate')}
+                    value={params.governorate ?? 'all'}
+                    onChange={(value) =>
+                      onChange({ governorate: value as FacilityListParams['governorate'] })
+                    }
+                    options={[
+                      allOption,
+                      ...SYRIAN_GOVERNORATES.map((governorate) => ({
+                        value: governorate,
+                        label: t(`facility.governorate.${governorate}`),
+                      })),
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Input
-                  value={params.city ?? ''}
-                  onChange={(event) => onChange({ city: event.target.value })}
-                  placeholder={t('facility.filters.cityPlaceholder')}
-                  aria-label={t('facility.filters.city')}
-                  data-testid="facility-filter-city"
-                />
+                <FilterField label={t('facility.filters.city')} icon={<MapPinIcon />}>
+                  <SearchInput
+                    value={params.city ?? ''}
+                    onChange={(city) => onChange({ city })}
+                    placeholder={t('facility.filters.cityPlaceholder')}
+                    ariaLabel={t('facility.filters.city')}
+                    testId="facility-filter-city"
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('facility.filters.verification')}
-                  value={params.verification ?? 'all'}
-                  onChange={(value) =>
-                    onChange({ verification: value as FacilityListParams['verification'] })
-                  }
-                  options={[
-                    allOption,
-                    ...FACILITY_VERIFICATIONS.map((verification) => ({
-                      value: verification,
-                      label: t(`facility.verification.${verification}`),
-                    })),
-                  ]}
-                />
+                <FilterField label={t('facility.filters.verification')} icon={<CheckIcon />}>
+                  <Select
+                    aria-label={t('facility.filters.verification')}
+                    value={params.verification ?? 'all'}
+                    onChange={(value) =>
+                      onChange({ verification: value as FacilityListParams['verification'] })
+                    }
+                    options={[
+                      allOption,
+                      ...FACILITY_VERIFICATIONS.map((verification) => ({
+                        value: verification,
+                        label: t(`facility.verification.${verification}`),
+                      })),
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('facility.filters.rating')}
-                  value={typeof params.minRating === 'number' ? String(params.minRating) : 'any'}
-                  onChange={(value) =>
-                    onChange({ minRating: value === 'any' ? undefined : Number(value) })
-                  }
-                  options={[
-                    { value: 'any', label: t('facility.filters.ratingAny') },
-                    { value: '3', label: t('facility.filters.rating3') },
-                    { value: '4', label: t('facility.filters.rating4') },
-                    { value: '4.5', label: t('facility.filters.rating45') },
-                  ]}
-                />
+                <FilterField label={t('facility.filters.rating')} icon={<StarIcon />}>
+                  <Select
+                    aria-label={t('facility.filters.rating')}
+                    value={typeof params.minRating === 'number' ? String(params.minRating) : 'any'}
+                    onChange={(value) =>
+                      onChange({ minRating: value === 'any' ? undefined : Number(value) })
+                    }
+                    options={[
+                      { value: 'any', label: t('facility.filters.ratingAny') },
+                      { value: '3', label: t('facility.filters.rating3') },
+                      { value: '4', label: t('facility.filters.rating4') },
+                      { value: '4.5', label: t('facility.filters.rating45') },
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filterWide}>
-                <DateRange
-                  value={params.dateRange ?? EMPTY_DATE_RANGE}
-                  onChange={(value) => onChange({ dateRange: value })}
-                  ariaLabel={t('facility.filters.dateAdded')}
-                  allLabel={t('facility.filters.dateAll')}
-                  last7Label={t('facility.filters.date7')}
-                  last30Label={t('facility.filters.date30')}
-                  last90Label={t('facility.filters.date90')}
-                  customLabel={t('facility.filters.dateCustom')}
-                  fromLabel={t('facility.filters.dateFrom')}
-                  toLabel={t('facility.filters.dateTo')}
-                  testId="facility-filter-date"
-                />
+                <FilterField label={t('facility.filters.dateAdded')} icon={<CalendarIcon />}>
+                  <DateRange
+                    value={params.dateRange ?? EMPTY_DATE_RANGE}
+                    onChange={(value) => onChange({ dateRange: value })}
+                    ariaLabel={t('facility.filters.dateAdded')}
+                    allLabel={t('facility.filters.dateAll')}
+                    last7Label={t('facility.filters.date7')}
+                    last30Label={t('facility.filters.date30')}
+                    last90Label={t('facility.filters.date90')}
+                    customLabel={t('facility.filters.dateCustom')}
+                    fromLabel={t('facility.filters.dateFrom')}
+                    toLabel={t('facility.filters.dateTo')}
+                    testId="facility-filter-date"
+                  />
+                </FilterField>
               </div>
 
               <div className={styles.amenities} role="group" aria-label={t('facility.filters.amenities')}>

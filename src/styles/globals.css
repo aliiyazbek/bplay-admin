@@ -1,7 +1,6 @@
 /* tokens.css = the single Pitch-Forest design-token source (app colors, one place).
-   variables.css is the legacy alias layer, retired per-feature during the /playadmin migration. */
+   The legacy blue variables.css alias layer has been fully retired. */
 @import "./tokens.css";
-@import "./variables.css";
 
 *,
 *::before,

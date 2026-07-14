@@ -48,10 +48,11 @@ const MembershipDetailPage = lazy(
 );
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const DashboardLayout = lazy(() => import('@app/layouts/DashboardLayout'));
+const DashboardPage = lazy(() => import('@features/dashboard/pages/DashboardPage'));
 
 function DashboardIndexRedirect() {
   const role = useAuthRole();
-  if (role === 'super_admin') return <Navigate replace to={PATHS.adminManagement} />;
+  if (role === 'super_admin') return <Navigate replace to={PATHS.dashboard} />;
   if (role === 'admin') return <Navigate replace to={PATHS.facilityManagement} />;
   return <Navigate replace to={PATHS.profile} />;
 }
@@ -85,6 +86,14 @@ export default function AppRouter() {
             }
           >
             <Route index element={<DashboardIndexRedirect />} />
+            <Route
+              path="dashboard"
+              element={
+                <RequireRole role="super_admin">
+                  <DashboardPage />
+                </RequireRole>
+              }
+            />
             <Route path="profile" element={<ProfilePage />} />
             <Route
               path="admin-management"

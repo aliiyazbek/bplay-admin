@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ErrorState } from '../ErrorState/ErrorState';
 import { EmptyState } from '../EmptyState/EmptyState';
 import { ArrowUpDownIcon, ChevronUpIcon, ChevronDownIcon } from '../icons';
@@ -55,9 +56,11 @@ export function DataTable<T>({
   onRowClick,
   sort,
   onSortChange,
-  actionsLabel = 'Actions',
+  actionsLabel,
 }: DataTableProps<T>) {
+  const { t } = useTranslation();
   const colCount = columns.length + (rowActions ? 1 : 0);
+  const resolvedActionsLabel = actionsLabel ?? t('common.actions');
 
   return (
     <div className={styles.wrap}>
@@ -109,7 +112,11 @@ export function DataTable<T>({
               );
             })}
             {rowActions && (
-              <th scope="col" className={clsx(styles.th, styles.end)} aria-label={actionsLabel} />
+              <th
+                scope="col"
+                className={clsx(styles.th, styles.end)}
+                aria-label={resolvedActionsLabel}
+              />
             )}
           </tr>
         </thead>
@@ -127,13 +134,18 @@ export function DataTable<T>({
           ) : error ? (
             <tr>
               <td colSpan={colCount} className={styles.state}>
-                <ErrorState message={error} onRetry={onRetry} />
+                <ErrorState
+                  title={t('common.errorTitle')}
+                  message={error}
+                  retryLabel={t('common.retry')}
+                  onRetry={onRetry}
+                />
               </td>
             </tr>
           ) : data.length === 0 ? (
             <tr>
               <td colSpan={colCount} className={styles.state}>
-                {emptyState ?? <EmptyState title="Nothing here yet" />}
+                {emptyState ?? <EmptyState title={t('common.emptyDefault')} />}
               </td>
             </tr>
           ) : (

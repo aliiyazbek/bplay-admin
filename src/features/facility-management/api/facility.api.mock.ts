@@ -115,6 +115,15 @@ function court(
   };
 }
 
+/** Owner avatar photos, matched to the owner-management seeds so the same owner
+ *  shows the same face wherever their cell appears (real backend supplies this). */
+const OWNER_PHOTO: Record<string, number> = {
+  '300': 11, '301': 45, '302': 13, '303': 5, '304': 14, '306': 33,
+  '308': 52, '309': 9, '310': 15, '311': 47, '312': 60,
+};
+const ownerPhoto = (ownerId: string): string | undefined =>
+  ownerId in OWNER_PHOTO ? `https://i.pravatar.cc/512?img=${OWNER_PHOTO[ownerId]}` : undefined;
+
 interface ClubSpec {
   id: string;
   name: string;
@@ -149,6 +158,7 @@ function makeClub(spec: ClubSpec): ClubFacility {
     images: images(spec.id, spec.imageCount),
     ownerId: spec.ownerId,
     ownerName: spec.ownerName,
+    ownerPhotoUrl: ownerPhoto(spec.ownerId),
     createdAt: spec.createdAt,
     adminNotes: spec.adminNotes,
     suspensionReason: spec.suspensionReason,
@@ -197,6 +207,7 @@ function makePitch(spec: PitchSpec): PitchFacility {
     images: images(spec.id, spec.imageCount),
     ownerId: spec.ownerId,
     ownerName: spec.ownerName,
+    ownerPhotoUrl: ownerPhoto(spec.ownerId),
     createdAt: spec.createdAt,
     adminNotes: spec.adminNotes,
     suspensionReason: spec.suspensionReason,

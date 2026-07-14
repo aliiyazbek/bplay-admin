@@ -22,8 +22,10 @@ import {
   PhoneIcon,
   StadiumIcon,
   EditIcon,
+  ChevronEndIcon,
 } from '@ui';
 import { PATHS } from '@app/router/paths';
+import { useAuthRole } from '@shared/stores/authStore';
 import { useFacilityQuery } from '../hooks/useFacilityQuery';
 import { FacilityStatusActions } from '../components/FacilityStatusActions';
 import { FacilityStatusBadge } from '../components/FacilityStatusBadge';
@@ -118,6 +120,8 @@ function FacilityProfile({ facility }: { facility: Facility }) {
   const reduceMotion = useReducedMotion();
   const [tab, setTab] = useState<ProfileTab>('overview');
   const [lightbox, setLightbox] = useState<string | null>(null);
+  // Owner profiles live on a super_admin-only route — only super_admins can open them.
+  const canViewOwner = useAuthRole() === 'super_admin';
   const editPath = `${PATHS.facilityManagement}/${facility.id}/edit`;
 
   const numberLocale = i18n.language.startsWith('ar') ? 'ar-SY' : 'en-US';
@@ -372,20 +376,30 @@ function FacilityProfile({ facility }: { facility: Facility }) {
       )}
 
       <section className={styles.ownerCard} data-testid="facility-owner-card">
-        <Avatar name={facility.ownerName} size="md" />
-        <div className={styles.ownerInfo}>
-          <span className={styles.ownerLabel}>{t('facility.profile.owner')}</span>
-          <span className={styles.ownerName}>{facility.ownerName}</span>
-        </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          className={styles.ownerButton}
-          onClick={() => navigate(`${PATHS.ownerManagement}/${facility.ownerId}`)}
-          data-testid="facility-view-owner"
-        >
-          {t('facility.profile.viewOwner')}
-        </Button>
+        {canViewOwner ? (
+          <button
+            type="button"
+            className={styles.ownerLink}
+            onClick={() => navigate(`${PATHS.ownerManagement}/${facility.ownerId}`)}
+            data-testid="facility-view-owner"
+            title={t('facility.profile.viewOwner')}
+          >
+            <Avatar src={facility.ownerPhotoUrl} name={facility.ownerName} size="md" />
+            <span className={styles.ownerInfo}>
+              <span className={styles.ownerLabel}>{t('facility.profile.owner')}</span>
+              <span className={styles.ownerName}>{facility.ownerName}</span>
+            </span>
+            <ChevronEndIcon className={styles.ownerChevron} aria-hidden />
+          </button>
+        ) : (
+          <>
+            <Avatar src={facility.ownerPhotoUrl} name={facility.ownerName} size="md" />
+            <div className={styles.ownerInfo}>
+              <span className={styles.ownerLabel}>{t('facility.profile.owner')}</span>
+              <span className={styles.ownerName}>{facility.ownerName}</span>
+            </div>
+          </>
+        )}
       </section>
 
       <ImageLightbox

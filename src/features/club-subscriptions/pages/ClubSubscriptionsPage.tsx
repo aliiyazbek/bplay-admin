@@ -7,6 +7,7 @@ import {
   Toolbar,
   SearchInput,
   Select,
+  FilterField,
   DataTable,
   Pagination,
   Button,
@@ -15,6 +16,13 @@ import {
   DateRange,
   DownloadIcon,
   InboxIcon,
+  SearchIcon,
+  PowerIcon,
+  BuildingIcon,
+  CreditCardIcon,
+  StarIcon,
+  MapPinIcon,
+  CalendarIcon,
   EMPTY_DATE_RANGE,
   isDateRangeActive,
   type DateRangeValue,
@@ -137,78 +145,92 @@ export default function ClubSubscriptionsPage() {
           ) : null
         }
       >
-        <SearchInput
-          value={params.q ?? ''}
-          onChange={(q) => patch({ q })}
-          placeholder={t('membership.search')}
-        />
-        <Select
-          aria-label={t('membership.col.status')}
-          value={params.status ?? 'all'}
-          onChange={(value) => patch({ status: value as MembershipListParams['status'] })}
-          options={[
-            { value: 'all', label: t('membership.filters.allStatus') },
-            ...MEMBERSHIP_STATUSES.map((status) => ({
-              value: status,
-              label: t(`membership.status.${status}`),
-            })),
-          ]}
-        />
-        <Select
-          aria-label={t('membership.col.club')}
-          value={params.clubId ?? 'all'}
-          onChange={(value) => patch({ clubId: value })}
-          options={[
-            { value: 'all', label: t('membership.filters.allClubs') },
-            ...(clubs ?? []).map((club) => ({ value: club.id, label: club.name })),
-          ]}
-        />
-        <Select
-          aria-label={t('membership.col.plan')}
-          value={params.planName ?? 'all'}
-          onChange={(value) => patch({ planName: value })}
-          options={[
-            { value: 'all', label: t('membership.filters.allPlans') },
-            ...PLAN_CATALOG.map((plan) => ({ value: plan.name, label: plan.name })),
-          ]}
-        />
-        <Select
-          aria-label={t('membership.col.segments')}
-          value={params.segment ?? 'all'}
-          onChange={(value) => patch({ segment: value as MembershipListParams['segment'] })}
-          options={[
-            { value: 'all', label: t('membership.filters.allSegments') },
-            ...MEMBER_SEGMENTS.map((segment) => ({
-              value: segment,
-              label: t(`membership.segment.${segment}`),
-            })),
-          ]}
-        />
-        <Select
-          aria-label={t('membership.filters.region')}
-          value={params.regionId ?? 'all'}
-          onChange={(value) => patch({ regionId: value })}
-          options={[
-            { value: 'all', label: t('membership.filters.allRegions') },
-            ...(isSuperAdmin
-              ? [{ value: 'orphans', label: t('membership.filters.orphansOption') }]
-              : []),
-            ...scopedRegions.map((region) => ({ value: region.name, label: region.name })),
-          ]}
-        />
-        <DateRange
-          value={dateRange}
-          onChange={(value: DateRangeValue) => patch({ dateRange: value })}
-          ariaLabel={t('membership.filters.dateStarted')}
-          allLabel={t('membership.filters.dateAll')}
-          last7Label={t('membership.filters.date7')}
-          last30Label={t('membership.filters.date30')}
-          last90Label={t('membership.filters.date90')}
-          customLabel={t('membership.filters.dateCustom')}
-          fromLabel={t('membership.filters.dateFrom')}
-          toLabel={t('membership.filters.dateTo')}
-          testId="membership-date-range"
-        />
+        <FilterField label={t('common.search')} icon={<SearchIcon />}>
+          <SearchInput
+            value={params.q ?? ''}
+            onChange={(q) => patch({ q })}
+            placeholder={t('membership.search')}
+          />
+        </FilterField>
+        <FilterField label={t('membership.col.status')} icon={<PowerIcon />}>
+          <Select
+            aria-label={t('membership.col.status')}
+            value={params.status ?? 'all'}
+            onChange={(value) => patch({ status: value as MembershipListParams['status'] })}
+            options={[
+              { value: 'all', label: t('membership.filters.allStatus') },
+              ...MEMBERSHIP_STATUSES.map((status) => ({
+                value: status,
+                label: t(`membership.status.${status}`),
+              })),
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('membership.col.club')} icon={<BuildingIcon />}>
+          <Select
+            aria-label={t('membership.col.club')}
+            value={params.clubId ?? 'all'}
+            onChange={(value) => patch({ clubId: value })}
+            options={[
+              { value: 'all', label: t('membership.filters.allClubs') },
+              ...(clubs ?? []).map((club) => ({ value: club.id, label: club.name })),
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('membership.col.plan')} icon={<CreditCardIcon />}>
+          <Select
+            aria-label={t('membership.col.plan')}
+            value={params.planName ?? 'all'}
+            onChange={(value) => patch({ planName: value })}
+            options={[
+              { value: 'all', label: t('membership.filters.allPlans') },
+              ...PLAN_CATALOG.map((plan) => ({ value: plan.name, label: plan.name })),
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('membership.col.segments')} icon={<StarIcon />}>
+          <Select
+            aria-label={t('membership.col.segments')}
+            value={params.segment ?? 'all'}
+            onChange={(value) => patch({ segment: value as MembershipListParams['segment'] })}
+            options={[
+              { value: 'all', label: t('membership.filters.allSegments') },
+              ...MEMBER_SEGMENTS.map((segment) => ({
+                value: segment,
+                label: t(`membership.segment.${segment}`),
+              })),
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('membership.filters.region')} icon={<MapPinIcon />}>
+          <Select
+            aria-label={t('membership.filters.region')}
+            value={params.regionId ?? 'all'}
+            onChange={(value) => patch({ regionId: value })}
+            options={[
+              { value: 'all', label: t('membership.filters.allRegions') },
+              ...(isSuperAdmin
+                ? [{ value: 'orphans', label: t('membership.filters.orphansOption') }]
+                : []),
+              ...scopedRegions.map((region) => ({ value: region.name, label: region.name })),
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('membership.filters.dateStarted')} icon={<CalendarIcon />}>
+          <DateRange
+            value={dateRange}
+            onChange={(value: DateRangeValue) => patch({ dateRange: value })}
+            ariaLabel={t('membership.filters.dateStarted')}
+            allLabel={t('membership.filters.dateAll')}
+            last7Label={t('membership.filters.date7')}
+            last30Label={t('membership.filters.date30')}
+            last90Label={t('membership.filters.date90')}
+            customLabel={t('membership.filters.dateCustom')}
+            fromLabel={t('membership.filters.dateFrom')}
+            toLabel={t('membership.filters.dateTo')}
+            testId="membership-date-range"
+          />
+        </FilterField>
       </Toolbar>
 
       <DataTable<MembershipListItem>

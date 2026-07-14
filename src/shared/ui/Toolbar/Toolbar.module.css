@@ -1,7 +1,9 @@
 .toolbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  /* Controls bottom-align so labeled filters (caption above) and unlabeled ones
+     line up on the same baseline. */
+  align-items: end;
   gap: var(--space-3);
 }
 /* Search (first child) grows; filters keep a compact fixed width beside it. */

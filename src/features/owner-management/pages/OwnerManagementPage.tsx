@@ -7,6 +7,7 @@ import {
   Toolbar,
   SearchInput,
   Select,
+  FilterField,
   DataTable,
   Pagination,
   Badge,
@@ -16,6 +17,10 @@ import {
   EmptyState,
   PlusIcon,
   InboxIcon,
+  SearchIcon,
+  PowerIcon,
+  BuildingIcon,
+  CalendarIcon,
   type Column,
 } from '@ui';
 import { useDisclosure } from '@shared/hooks/useDisclosure';
@@ -113,46 +118,54 @@ export default function OwnerManagementPage() {
           ) : null
         }
       >
-        <SearchInput
-          value={params.q ?? ''}
-          onChange={(q) => patch({ q })}
-          placeholder={t('owner.search')}
-        />
-        <Select
-          aria-label={t('owner.col.status')}
-          value={params.status ?? 'all'}
-          onChange={(value) => patch({ status: value as OwnerListParams['status'] })}
-          options={[
-            { value: 'all', label: t('owner.filter.allStatus') },
-            { value: 'under_review', label: t('owner.state.under_review') },
-            { value: 'active', label: t('owner.state.active') },
-            { value: 'rejected', label: t('owner.state.rejected') },
-            { value: 'suspended', label: t('owner.state.suspended') },
-            { value: 'blocked', label: t('owner.state.blocked') },
-          ]}
-        />
-        <Select
-          aria-label={t('owner.col.facilities')}
-          value={params.facilities ?? 'all'}
-          onChange={(value) => patch({ facilities: value as OwnerListParams['facilities'] })}
-          options={[
-            { value: 'all', label: t('owner.filter.allFacilities') },
-            { value: 'has', label: t('owner.filter.hasFacilities') },
-            { value: 'none', label: t('owner.filter.noFacilities') },
-          ]}
-        />
-        <Select
-          aria-label={t('owner.filter.joined')}
-          value={params.joined ?? 'all'}
-          onChange={(value) => patch({ joined: value as OwnerListParams['joined'] })}
-          options={[
-            { value: 'all', label: t('owner.filter.joinedAll') },
-            { value: '7d', label: t('owner.filter.joined7d') },
-            { value: '30d', label: t('owner.filter.joined30d') },
-            { value: '90d', label: t('owner.filter.joined90d') },
-            { value: 'year', label: t('owner.filter.joinedYear') },
-          ]}
-        />
+        <FilterField label={t('common.search')} icon={<SearchIcon />}>
+          <SearchInput
+            value={params.q ?? ''}
+            onChange={(q) => patch({ q })}
+            placeholder={t('owner.search')}
+          />
+        </FilterField>
+        <FilterField label={t('owner.col.status')} icon={<PowerIcon />}>
+          <Select
+            aria-label={t('owner.col.status')}
+            value={params.status ?? 'all'}
+            onChange={(value) => patch({ status: value as OwnerListParams['status'] })}
+            options={[
+              { value: 'all', label: t('owner.filter.allStatus') },
+              { value: 'under_review', label: t('owner.state.under_review') },
+              { value: 'active', label: t('owner.state.active') },
+              { value: 'rejected', label: t('owner.state.rejected') },
+              { value: 'suspended', label: t('owner.state.suspended') },
+              { value: 'blocked', label: t('owner.state.blocked') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('owner.col.facilities')} icon={<BuildingIcon />}>
+          <Select
+            aria-label={t('owner.col.facilities')}
+            value={params.facilities ?? 'all'}
+            onChange={(value) => patch({ facilities: value as OwnerListParams['facilities'] })}
+            options={[
+              { value: 'all', label: t('owner.filter.allFacilities') },
+              { value: 'has', label: t('owner.filter.hasFacilities') },
+              { value: 'none', label: t('owner.filter.noFacilities') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('owner.filter.joined')} icon={<CalendarIcon />}>
+          <Select
+            aria-label={t('owner.filter.joined')}
+            value={params.joined ?? 'all'}
+            onChange={(value) => patch({ joined: value as OwnerListParams['joined'] })}
+            options={[
+              { value: 'all', label: t('owner.filter.joinedAll') },
+              { value: '7d', label: t('owner.filter.joined7d') },
+              { value: '30d', label: t('owner.filter.joined30d') },
+              { value: '90d', label: t('owner.filter.joined90d') },
+              { value: 'year', label: t('owner.filter.joinedYear') },
+            ]}
+          />
+        </FilterField>
       </Toolbar>
 
       <DataTable<Owner>

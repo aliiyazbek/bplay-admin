@@ -7,6 +7,7 @@ import {
   Toolbar,
   SearchInput,
   Select,
+  FilterField,
   DataTable,
   Pagination,
   Badge,
@@ -15,6 +16,12 @@ import {
   ClearFiltersBar,
   EmptyState,
   InboxIcon,
+  SearchIcon,
+  PowerIcon,
+  CreditCardIcon,
+  MapPinIcon,
+  TrophyIcon,
+  CalendarIcon,
   type Column,
 } from '@ui';
 import { PATHS } from '@app/router/paths';
@@ -126,62 +133,74 @@ export default function PlayerManagementPage() {
           ) : null
         }
       >
-        <SearchInput
-          value={params.q ?? ''}
-          onChange={(q) => patch({ q })}
-          placeholder={t('player.search')}
-        />
-        <Select
-          aria-label={t('player.col.status')}
-          value={params.status ?? 'all'}
-          onChange={(value) => patch({ status: value as PlayerListParams['status'] })}
-          options={[
-            { value: 'all', label: t('player.filter.allStatus') },
-            { value: 'active', label: t('player.state.active') },
-            { value: 'suspended', label: t('player.state.suspended') },
-            { value: 'blocked', label: t('player.state.blocked') },
-          ]}
-        />
-        <Select
-          aria-label={t('player.col.plan')}
-          value={params.accountType ?? 'all'}
-          onChange={(value) => patch({ accountType: value as PlayerListParams['accountType'] })}
-          options={[
-            { value: 'all', label: t('player.filter.allPlans') },
-            { value: 'paid', label: t('player.accountType.paid') },
-            { value: 'free', label: t('player.accountType.free') },
-          ]}
-        />
-        <Select
-          aria-label={t('player.col.city')}
-          value={params.city ?? 'all'}
-          onChange={(value) => patch({ city: value })}
-          options={[
-            { value: 'all', label: t('player.filter.allCities') },
-            ...GOVERNORATES.map((city) => ({ value: city, label: city })),
-          ]}
-        />
-        <Select
-          aria-label={t('player.filter.sport')}
-          value={params.sport ?? 'all'}
-          onChange={(value) => patch({ sport: value as PlayerListParams['sport'] })}
-          options={[
-            { value: 'all', label: t('player.filter.allSports') },
-            ...SPORTS.map((sport) => ({ value: sport, label: t(`player.sport.${sport}`) })),
-          ]}
-        />
-        <Select
-          aria-label={t('player.filter.joined')}
-          value={params.joined ?? 'all'}
-          onChange={(value) => patch({ joined: value as PlayerListParams['joined'] })}
-          options={[
-            { value: 'all', label: t('player.filter.joinedAll') },
-            { value: '7d', label: t('player.filter.joined7d') },
-            { value: '30d', label: t('player.filter.joined30d') },
-            { value: '90d', label: t('player.filter.joined90d') },
-            { value: 'year', label: t('player.filter.joinedYear') },
-          ]}
-        />
+        <FilterField label={t('common.search')} icon={<SearchIcon />}>
+          <SearchInput
+            value={params.q ?? ''}
+            onChange={(q) => patch({ q })}
+            placeholder={t('player.search')}
+          />
+        </FilterField>
+        <FilterField label={t('player.col.status')} icon={<PowerIcon />}>
+          <Select
+            aria-label={t('player.col.status')}
+            value={params.status ?? 'all'}
+            onChange={(value) => patch({ status: value as PlayerListParams['status'] })}
+            options={[
+              { value: 'all', label: t('player.filter.allStatus') },
+              { value: 'active', label: t('player.state.active') },
+              { value: 'suspended', label: t('player.state.suspended') },
+              { value: 'blocked', label: t('player.state.blocked') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('player.col.plan')} icon={<CreditCardIcon />}>
+          <Select
+            aria-label={t('player.col.plan')}
+            value={params.accountType ?? 'all'}
+            onChange={(value) => patch({ accountType: value as PlayerListParams['accountType'] })}
+            options={[
+              { value: 'all', label: t('player.filter.allPlans') },
+              { value: 'paid', label: t('player.accountType.paid') },
+              { value: 'free', label: t('player.accountType.free') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('player.col.city')} icon={<MapPinIcon />}>
+          <Select
+            aria-label={t('player.col.city')}
+            value={params.city ?? 'all'}
+            onChange={(value) => patch({ city: value })}
+            options={[
+              { value: 'all', label: t('player.filter.allCities') },
+              ...GOVERNORATES.map((city) => ({ value: city, label: city })),
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('player.filter.sport')} icon={<TrophyIcon />}>
+          <Select
+            aria-label={t('player.filter.sport')}
+            value={params.sport ?? 'all'}
+            onChange={(value) => patch({ sport: value as PlayerListParams['sport'] })}
+            options={[
+              { value: 'all', label: t('player.filter.allSports') },
+              ...SPORTS.map((sport) => ({ value: sport, label: t(`player.sport.${sport}`) })),
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('player.filter.joined')} icon={<CalendarIcon />}>
+          <Select
+            aria-label={t('player.filter.joined')}
+            value={params.joined ?? 'all'}
+            onChange={(value) => patch({ joined: value as PlayerListParams['joined'] })}
+            options={[
+              { value: 'all', label: t('player.filter.joinedAll') },
+              { value: '7d', label: t('player.filter.joined7d') },
+              { value: '30d', label: t('player.filter.joined30d') },
+              { value: '90d', label: t('player.filter.joined90d') },
+              { value: 'year', label: t('player.filter.joinedYear') },
+            ]}
+          />
+        </FilterField>
       </Toolbar>
 
       <DataTable<Player>

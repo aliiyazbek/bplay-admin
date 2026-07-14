@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Button, Input, Spinner, useToast } from '@ui';
+import { Modal, Button, Input, useToast } from '@ui';
 import { useResetAdminPassword } from '../hooks/useAdminMutations';
 import type { Admin } from '../api/admin.types';
 import styles from './adminForm.module.css';
@@ -23,24 +23,25 @@ export function ResetPasswordModal({ isOpen, onClose, admin }: Props) {
   const [password, setPassword] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // Reset local + mutation state whenever the modal (re)opens — but never auto-fire;
+  // a password reset must be an explicit, deliberate action.
   useEffect(() => {
-    if (!isOpen || !admin) return;
-    setPassword(null);
-    setCopied(false);
-    let cancelled = false;
-    reset
-      .mutateAsync(admin.id)
-      .then((value) => {
-        if (!cancelled) setPassword(value);
-      })
-      .catch(() => {
-        /* surfaced by the mutation's error state */
-      });
-    return () => {
-      cancelled = true;
-    };
+    if (isOpen) {
+      setPassword(null);
+      setCopied(false);
+      reset.reset();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, admin]);
+
+  const runReset = async () => {
+    if (!admin) return;
+    try {
+      setPassword(await reset.mutateAsync(admin.id));
+    } catch {
+      /* error surfaced via reset.isError below */
+    }
+  };
 
   const copy = async () => {
     if (!password) return;
@@ -64,9 +65,22 @@ export function ResetPasswordModal({ isOpen, onClose, admin }: Props) {
       footer={<Button onClick={onClose}>{t('common.close')}</Button>}
     >
       {password === null ? (
-        <div className={styles.loading}>
-          <Spinner />
-        </div>
+        <>
+          <p className={styles.revealWarn}>{t('admin.reset.confirmHint')}</p>
+          {reset.isError && (
+            <p className={styles.revealWarn} role="alert">
+              {t('admin.reset.error')}
+            </p>
+          )}
+          <Button
+            onClick={runReset}
+            isLoading={reset.isPending}
+            fullWidth
+            data-testid="admin-reset-run"
+          >
+            {t('admin.reset.confirm')}
+          </Button>
+        </>
       ) : (
         <>
           <div className={styles.revealRow}>

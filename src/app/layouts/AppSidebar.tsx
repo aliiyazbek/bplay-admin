@@ -6,6 +6,7 @@ import {
   Button,
   clsx,
   BrandMark,
+  LayoutGridIcon,
   UsersIcon,
   GlobeIcon,
   BuildingIcon,
@@ -19,6 +20,7 @@ import {
 } from '@ui';
 import { useAuthStore, useAuthUser, useAuthRole, type UserRole } from '@shared/stores/authStore';
 import { useUiStore } from '@shared/stores/uiStore';
+import { queryClient } from '@shared/lib/queryClient';
 import { logout as apiLogout } from '@features/auth/api';
 import { PATHS } from '@app/router/paths';
 import styles from './AppSidebar.module.css';
@@ -33,6 +35,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { to: PATHS.dashboard, key: 'nav.dashboard', Icon: LayoutGridIcon, superAdminOnly: true },
   { to: PATHS.adminManagement, key: 'nav.adminManagement', Icon: UsersIcon, superAdminOnly: true },
   { to: PATHS.regionManagement, key: 'nav.regionManagement', Icon: GlobeIcon, superAdminOnly: true },
   { to: PATHS.ownerManagement, key: 'nav.ownerManagement', Icon: BuildingIcon, superAdminOnly: true },
@@ -59,6 +62,9 @@ export function AppSidebar() {
       // Clear the local session regardless of the backend result.
     }
     useAuthStore.getState().logout();
+    // Drop all cached server data so the next session on this machine starts clean
+    // (the 401-interceptor path gets this for free via a full page reload).
+    queryClient.clear();
     navigate(PATHS.login, { replace: true });
   };
 

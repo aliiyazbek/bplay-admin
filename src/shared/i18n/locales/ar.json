@@ -19,6 +19,13 @@
     "clearFilters": "مسح عوامل التصفية",
     "resultsCount": "{{count}} نتيجة",
     "loadError": "فشل التحميل. حاول مرة أخرى.",
+    "errorTitle": "حدث خطأ ما",
+    "emptyDefault": "لا يوجد شيء بعد",
+    "notFound": {
+      "title": "الصفحة غير موجودة",
+      "message": "الصفحة التي تبحث عنها غير موجودة أو ربما تم نقلها.",
+      "backHome": "العودة إلى لوحة التحكم"
+    },
     "signOut": "تسجيل الخروج",
     "language": "اللغة",
     "skipToContent": "تخطَّ إلى المحتوى",
@@ -26,7 +33,8 @@
     "notifications": "الإشعارات",
     "outsideRegions": "خارج المناطق",
     "export": "تصدير",
-    "exporting": "جارٍ التصدير…"
+    "exporting": "جارٍ التصدير…",
+    "currencySyp": "ل.س"
   },
   "nav": {
     "adminManagement": "المدراء",
@@ -59,8 +67,15 @@
       "phone": "الهاتف",
       "joined": "تاريخ الانضمام"
     },
-    "state": { "active": "نشط", "suspended": "موقوف", "blocked": "محظور" },
-    "accountType": { "free": "مجاني", "paid": "مدفوع" },
+    "state": {
+      "active": "نشط",
+      "suspended": "موقوف",
+      "blocked": "محظور"
+    },
+    "accountType": {
+      "free": "مجاني",
+      "paid": "مدفوع"
+    },
     "filter": {
       "allStatus": "كل الحالات",
       "allPlans": "كل الحسابات",
@@ -82,10 +97,22 @@
       "unblock": "رفع الحظر"
     },
     "confirm": {
-      "suspend": { "title": "إيقاف هذا اللاعب؟", "message": "سيفقد {{name}} الوصول حتى إعادة التفعيل." },
-      "activate": { "title": "تفعيل هذا اللاعب؟", "message": "سيستعيد {{name}} الوصول فوراً." },
-      "block": { "title": "حظر هذا اللاعب؟", "message": "سيتم حظر {{name}} نهائياً من المنصة." },
-      "unblock": { "title": "رفع الحظر عن هذا اللاعب؟", "message": "سيتمكن {{name}} من استخدام المنصة مجدداً." },
+      "suspend": {
+        "title": "إيقاف هذا اللاعب؟",
+        "message": "سيفقد {{name}} الوصول حتى إعادة التفعيل."
+      },
+      "activate": {
+        "title": "تفعيل هذا اللاعب؟",
+        "message": "سيستعيد {{name}} الوصول فوراً."
+      },
+      "block": {
+        "title": "حظر هذا اللاعب؟",
+        "message": "سيتم حظر {{name}} نهائياً من المنصة."
+      },
+      "unblock": {
+        "title": "رفع الحظر عن هذا اللاعب؟",
+        "message": "سيتمكن {{name}} من استخدام المنصة مجدداً."
+      },
       "reasonLabel": "السبب",
       "reasonPlaceholder": "اشرح سبب هذا الإجراء (10 أحرف على الأقل)…"
     },
@@ -100,7 +127,10 @@
       "reportDismissed": "تم رفض البلاغ",
       "suspensionLifted": "تم رفع إيقاف الحجز"
     },
-    "empty": { "title": "لا يوجد لاعبون", "desc": "لا يوجد لاعبون يطابقون عوامل التصفية الحالية." },
+    "empty": {
+      "title": "لا يوجد لاعبون",
+      "desc": "لا يوجد لاعبون يطابقون عوامل التصفية الحالية."
+    },
     "profile": {
       "title": "اللاعب",
       "subtitle": "ملف اللاعب ونشاطه",
@@ -148,7 +178,10 @@
       "viewOnMap": "عرض على خرائط جوجل",
       "empty": "لم يشارك هذا اللاعب موقعه."
     },
-    "gender": { "male": "ذكر", "female": "أنثى" },
+    "gender": {
+      "male": "ذكر",
+      "female": "أنثى"
+    },
     "sport": {
       "football": "كرة القدم",
       "padel": "بادل",
@@ -157,7 +190,12 @@
       "volleyball": "كرة الطائرة",
       "swimming": "سباحة"
     },
-    "skill": { "beginner": "مبتدئ", "intermediate": "متوسط", "advanced": "متقدم", "pro": "محترف" },
+    "skill": {
+      "beginner": "مبتدئ",
+      "intermediate": "متوسط",
+      "advanced": "متقدم",
+      "pro": "محترف"
+    },
     "account": {
       "title": "الحساب والأمان",
       "type": "العضوية",
@@ -188,10 +226,25 @@
       "status": "الحالة",
       "empty": "لا توجد غرف لعب بعد."
     },
-    "matchStyle": { "friendly": "ودية", "competitive": "تنافسية", "training": "تدريب" },
-    "roomType": { "public": "عامة", "private": "خاصة" },
-    "roomRole": { "leader": "قائد", "member": "عضو" },
-    "roomStatus": { "open": "مفتوحة", "full": "مكتملة", "ended": "منتهية", "cancelled": "ملغاة" },
+    "matchStyle": {
+      "friendly": "ودية",
+      "competitive": "تنافسية",
+      "training": "تدريب"
+    },
+    "roomType": {
+      "public": "عامة",
+      "private": "خاصة"
+    },
+    "roomRole": {
+      "leader": "قائد",
+      "member": "عضو"
+    },
+    "roomStatus": {
+      "open": "مفتوحة",
+      "full": "مكتملة",
+      "ended": "منتهية",
+      "cancelled": "ملغاة"
+    },
     "memberships": {
       "title": "اشتراكات الأندية",
       "club": "النادي",
@@ -209,19 +262,47 @@
       "renews": "يُجدَّد في",
       "invoices": "سجل الفواتير"
     },
-    "subscriptionStatus": { "active": "نشط", "expired": "منتهٍ" },
-    "billing": { "monthly": "شهري", "annual": "سنوي" },
-    "ratings": { "empty": "لم يترك أي تقييمات بعد.", "hiddenTag": "مخفي", "show": "إظهار التقييم", "hide": "إخفاء التقييم" },
-    "ratingTarget": { "facility": "منشأة", "club": "نادٍ", "player": "لاعب" },
+    "subscriptionStatus": {
+      "active": "نشط",
+      "expired": "منتهٍ"
+    },
+    "billing": {
+      "monthly": "شهري",
+      "annual": "سنوي"
+    },
+    "ratings": {
+      "empty": "لم يترك أي تقييمات بعد.",
+      "hiddenTag": "مخفي",
+      "show": "إظهار التقييم",
+      "hide": "إخفاء التقييم"
+    },
+    "ratingTarget": {
+      "facility": "منشأة",
+      "club": "نادٍ",
+      "player": "لاعب"
+    },
     "reports": {
       "empty": "لا توجد بلاغات.",
       "resolve": "معالجة",
       "dismiss": "رفض",
       "resolution": "القرار",
-      "direction": { "filed": "بلاغ من اللاعب", "against": "بلاغ ضد اللاعب" },
-      "context": { "room": "غرفة لعب", "chat": "محادثة", "community": "المجتمع", "booking": "حجز" }
+      "direction": {
+        "filed": "بلاغ من اللاعب",
+        "against": "بلاغ ضد اللاعب"
+      },
+      "context": {
+        "room": "غرفة لعب",
+        "chat": "محادثة",
+        "community": "المجتمع",
+        "booking": "حجز"
+      }
     },
-    "reportStatus": { "open": "مفتوح", "reviewing": "قيد المراجعة", "resolved": "تمت المعالجة", "dismissed": "مرفوض" }
+    "reportStatus": {
+      "open": "مفتوح",
+      "reviewing": "قيد المراجعة",
+      "resolved": "تمت المعالجة",
+      "dismissed": "مرفوض"
+    }
   },
   "status": {
     "all": "الكل",
@@ -277,7 +358,12 @@
       "regional": "مدراء المناطق",
       "unassigned": "بلا منطقة"
     },
-    "col": { "name": "الاسم", "scope": "الدور", "regions": "المناطق", "status": "الحالة" },
+    "col": {
+      "name": "الاسم",
+      "scope": "الدور",
+      "regions": "المناطق",
+      "status": "الحالة"
+    },
     "scope": {
       "general": "إشراف عام",
       "regional": "مدير منطقة",
@@ -291,8 +377,14 @@
       "noRegion": "بلا منطقة بعد",
       "showDeleted": "عرض المحذوفين"
     },
-    "empty": { "title": "لا يوجد مدراء", "desc": "أضف أول مدير للبدء." },
-    "emptyDeleted": { "title": "لا يوجد مدراء محذوفون", "desc": "سيظهر المدراء المحذوفون هنا." },
+    "empty": {
+      "title": "لا يوجد مدراء",
+      "desc": "أضف أول مدير للبدء."
+    },
+    "emptyDeleted": {
+      "title": "لا يوجد مدراء محذوفون",
+      "desc": "سيظهر المدراء المحذوفون هنا."
+    },
     "form": {
       "createTitle": "إضافة مدير",
       "editTitle": "تعديل المدير",
@@ -338,7 +430,10 @@
       "copy": "نسخ",
       "copied": "تم النسخ",
       "copiedToast": "تم نسخ كلمة المرور",
-      "warn": "هذه كلمة المرور الأصلية التي أصدرناها. شاركها بأمان — يمكن للمدير تغييرها بعد تسجيل الدخول."
+      "warn": "هذه كلمة المرور الأصلية التي أصدرناها. شاركها بأمان — يمكن للمدير تغييرها بعد تسجيل الدخول.",
+      "confirm": "إعادة تعيين كلمة المرور",
+      "confirmHint": "يعيد هذا كلمة مرور المدير إلى القيمة الأصلية التي أصدرناها ويكشفها مرة واحدة لتشاركها بأمان.",
+      "error": "تعذّرت إعادة تعيين كلمة المرور. حاول مرة أخرى."
     },
     "actions": {
       "viewDetails": "عرض التفاصيل",
@@ -352,28 +447,64 @@
       "delete": "حذف",
       "restore": "استعادة"
     },
-    "suspend": { "title": "تعليق هذا المدير؟", "message": "سيفقد الوصول حتى إعادة التفعيل.", "confirm": "تعليق" },
-    "activate": { "title": "تفعيل هذا المدير؟", "message": "سيستعيد الوصول فوراً.", "confirm": "تفعيل" },
-    "delete": { "title": "حذف هذا المدير؟", "message": "يُنقل المدير إلى قائمة المحذوفين ويمكن استعادته.", "confirm": "حذف" },
-    "restore": { "title": "استعادة هذا المدير؟", "message": "يعود إلى القائمة النشطة.", "confirm": "استعادة" },
-    "promote": { "title": "الترقية لإشراف عام؟", "message": "سيشرف على المنصة كاملة وستُلغى إسنادات مناطقه.", "confirm": "ترقية" },
-    "demote": { "title": "تعيين كمدير منطقة؟", "message": "يصبح إشرافه على مستوى المناطق. أسند المناطق تالياً.", "confirm": "تعيين كمدير منطقة" },
+    "suspend": {
+      "title": "تعليق هذا المدير؟",
+      "message": "سيفقد الوصول حتى إعادة التفعيل.",
+      "confirm": "تعليق"
+    },
+    "activate": {
+      "title": "تفعيل هذا المدير؟",
+      "message": "سيستعيد الوصول فوراً.",
+      "confirm": "تفعيل"
+    },
+    "delete": {
+      "title": "حذف هذا المدير؟",
+      "message": "يُنقل المدير إلى قائمة المحذوفين ويمكن استعادته.",
+      "confirm": "حذف"
+    },
+    "restore": {
+      "title": "استعادة هذا المدير؟",
+      "message": "يعود إلى القائمة النشطة.",
+      "confirm": "استعادة"
+    },
+    "promote": {
+      "title": "الترقية لإشراف عام؟",
+      "message": "سيشرف على المنصة كاملة وستُلغى إسنادات مناطقه.",
+      "confirm": "ترقية"
+    },
+    "demote": {
+      "title": "تعيين كمدير منطقة؟",
+      "message": "يصبح إشرافه على مستوى المناطق. أسند المناطق تالياً.",
+      "confirm": "تعيين كمدير منطقة"
+    },
     "detail": {
       "title": "المدير",
       "subtitle": "ملف المدير والإشراف",
       "notFound": "المدير غير موجود",
       "createdAt": "أُضيف في",
       "viewPhoto": "عرض الصورة",
-      "sections": { "map": "خريطة التغطية", "regions": "المناطق المُدارة", "facilities": "المنشآت" },
+      "sections": {
+        "map": "خريطة التغطية",
+        "regions": "المناطق المُدارة",
+        "facilities": "المنشآت"
+      },
       "stats": {
         "regions": "المناطق المُدارة",
         "facilities": "المنشآت في نطاقه",
         "activeFacilities": "منشآت نشطة",
         "pendingFacilities": "قيد المراجعة"
       },
-      "map": { "empty": "لا توجد منشآت في المناطق المُسندة بعد." },
-      "regions": { "manage": "إدارة المناطق", "empty": "لا مناطق مُسندة بعد." },
-      "facilities": { "empty": "لا توجد منشآت في المناطق المُسندة.", "view": "عرض المنشأة" },
+      "map": {
+        "empty": "لا توجد منشآت في المناطق المُسندة بعد."
+      },
+      "regions": {
+        "manage": "إدارة المناطق",
+        "empty": "لا مناطق مُسندة بعد."
+      },
+      "facilities": {
+        "empty": "لا توجد منشآت في المناطق المُسندة.",
+        "view": "عرض المنشأة"
+      },
       "attention": {
         "title": "يحتاج انتباهاً",
         "noRegion": "مدير المنطقة هذا بلا منطقة مُسندة بعد.",
@@ -406,7 +537,10 @@
     "changePassword": "تغيير كلمة المرور",
     "editPhoto": "تغيير الصورة",
     "viewPhoto": "عرض الصورة",
-    "roles": { "super_admin": "مدير أعلى", "admin": "مشرف" },
+    "roles": {
+      "super_admin": "مدير أعلى",
+      "admin": "مشرف"
+    },
     "edit": {
       "title": "تعديل الملف الشخصي",
       "photoLabel": "الصورة الشخصية",
@@ -426,7 +560,9 @@
       "hint": "8 أحرف على الأقل مع حرف كبير ورقم ورمز.",
       "submit": "تحديث كلمة المرور"
     },
-    "viewer": { "title": "الصورة الشخصية" },
+    "viewer": {
+      "title": "الصورة الشخصية"
+    },
     "toast": {
       "updated": "تم تحديث الملف",
       "passwordChanged": "تم تحديث كلمة المرور"
@@ -471,8 +607,15 @@
       "suspended": "موقوف",
       "blocked": "محظور"
     },
-    "trust": { "basic": "أساسي", "verified": "موثّق", "trusted": "موثوق عالياً" },
-    "intent": { "sports_club": "نادٍ رياضي", "independent_court": "ملعب مستقل" },
+    "trust": {
+      "basic": "أساسي",
+      "verified": "موثّق",
+      "trusted": "موثوق عالياً"
+    },
+    "intent": {
+      "sports_club": "نادٍ رياضي",
+      "independent_court": "ملعب مستقل"
+    },
     "filter": {
       "allStatus": "كل الحالات",
       "allFacilities": "كل المُلاك",
@@ -483,9 +626,12 @@
       "joined7d": "آخر ٧ أيام",
       "joined30d": "آخر ٣٠ يوماً",
       "joined90d": "آخر ٩٠ يوماً",
-      "joinedYear": "هذه السنة"
+      "joinedYear": "آخر سنة"
     },
-    "empty": { "title": "لا يوجد مُلاك", "desc": "لا يوجد مُلاك يطابقون عوامل التصفية الحالية." },
+    "empty": {
+      "title": "لا يوجد مُلاك",
+      "desc": "لا يوجد مُلاك يطابقون عوامل التصفية الحالية."
+    },
     "actions": {
       "view": "عرض",
       "approve": "موافقة",
@@ -498,12 +644,30 @@
     "confirm": {
       "reasonLabel": "السبب",
       "reasonPlaceholder": "وضّح القرار — يُبلَّغ المالك به.",
-      "approve": { "title": "الموافقة على هذا المالك؟", "message": "ستتم الموافقة على {{name}} وتفعيل حسابه." },
-      "reject": { "title": "رفض هذا المالك؟", "message": "سيُرفَض حساب {{name}} ويُبلَّغ بالسبب." },
-      "suspend": { "title": "إيقاف هذا المالك؟", "message": "سيفقد {{name}} الوصول حتى إعادة التفعيل." },
-      "activate": { "title": "تفعيل هذا المالك؟", "message": "سيستعيد {{name}} الوصول فورًا." },
-      "block": { "title": "حظر هذا المالك؟", "message": "سيُحظَر {{name}} نهائياً، وتُعطَّل كل منشآته وتُلغى حجوزاتها المستقبلية." },
-      "unblock": { "title": "إلغاء حظر هذا المالك؟", "message": "سيستعيد {{name}} الوصول إلى المنصة." }
+      "approve": {
+        "title": "الموافقة على هذا المالك؟",
+        "message": "ستتم الموافقة على {{name}} وتفعيل حسابه."
+      },
+      "reject": {
+        "title": "رفض هذا المالك؟",
+        "message": "سيُرفَض حساب {{name}} ويُبلَّغ بالسبب."
+      },
+      "suspend": {
+        "title": "إيقاف هذا المالك؟",
+        "message": "سيفقد {{name}} الوصول حتى إعادة التفعيل."
+      },
+      "activate": {
+        "title": "تفعيل هذا المالك؟",
+        "message": "سيستعيد {{name}} الوصول فورًا."
+      },
+      "block": {
+        "title": "حظر هذا المالك؟",
+        "message": "سيُحظَر {{name}} نهائياً، وتُعطَّل كل منشآته وتُلغى حجوزاتها المستقبلية."
+      },
+      "unblock": {
+        "title": "إلغاء حظر هذا المالك؟",
+        "message": "سيستعيد {{name}} الوصول إلى المنصة."
+      }
     },
     "toast": {
       "approve": "تمت الموافقة على المالك",
@@ -557,8 +721,15 @@
         "ownership_proof": "إثبات الملكية",
         "other": "وثيقة أخرى"
       },
-      "status": { "under_review": "قيد المراجعة", "accepted": "مقبولة", "rejected": "مرفوضة" },
-      "toast": { "accepted": "تم قبول الوثيقة", "rejected": "تم رفض الوثيقة" }
+      "status": {
+        "under_review": "قيد المراجعة",
+        "accepted": "مقبولة",
+        "rejected": "مرفوضة"
+      },
+      "toast": {
+        "accepted": "تم قبول الوثيقة",
+        "rejected": "تم رفض الوثيقة"
+      }
     },
     "about": {
       "title": "التفاصيل",
@@ -577,11 +748,22 @@
       "upgrade": "ترقية",
       "currency": "ل.س",
       "expiringSoon": "قارب على الانتهاء",
-      "status": { "trial": "تجريبي", "active": "نشط", "expired": "منتهٍ", "pending_activation": "قيد التفعيل" },
+      "status": {
+        "trial": "تجريبي",
+        "active": "نشط",
+        "expired": "منتهٍ",
+        "pending_activation": "قيد التفعيل"
+      },
       "price": "السعر",
       "freePrice": "مجاني",
-      "per": { "monthly": "شهر", "yearly": "سنة" },
-      "period": { "monthly": "شهري", "yearly": "سنوي" },
+      "per": {
+        "monthly": "شهر",
+        "yearly": "سنة"
+      },
+      "period": {
+        "monthly": "شهري",
+        "yearly": "سنوي"
+      },
       "started": "بدأ في",
       "trialEnds": "تنتهي التجربة",
       "renews": "يتجدّد",
@@ -589,7 +771,11 @@
       "daysLeft": "بقي {{count}} يوماً",
       "history": "سجلّ المدفوعات",
       "noHistory": "لا مدفوعات بعد.",
-      "invoiceStatus": { "paid": "مدفوعة", "pending": "معلّقة", "failed": "فاشلة" },
+      "invoiceStatus": {
+        "paid": "مدفوعة",
+        "pending": "معلّقة",
+        "failed": "فاشلة"
+      },
       "changeTitle": "تغيير الاشتراك",
       "changeSubtitle": "الخطة الحالية: {{tier}}. رقِّ إلى خطة أعلى أو جدّد — لا يمكن التخفيض أو الإلغاء.",
       "billing": "دورة الفوترة",
@@ -600,7 +786,10 @@
       "campaigns": "حملات",
       "confirmRenew": "تجديد {{tier}}",
       "confirmUpgrade": "الترقية إلى {{tier}}",
-      "toast": { "upgraded": "تمت ترقية الاشتراك", "renewed": "تم تجديد الاشتراك" }
+      "toast": {
+        "upgraded": "تمت ترقية الاشتراك",
+        "renewed": "تم تجديد الاشتراك"
+      }
     },
     "profile": {
       "title": "ملف المالك",
@@ -611,9 +800,19 @@
       "noDocuments": "لم يتم رفع أي مستندات تحقق."
     },
     "detail": {
-      "sections": { "facilities": "المنشآت المملوكة" },
-      "stats": { "facilities": "المنشآت", "active": "نشطة", "pending": "قيد المراجعة", "rating": "متوسط التقييم" },
-      "facilities": { "location": "الموقع", "empty": "لا توجد منشآت لهذا المالك بعد." },
+      "sections": {
+        "facilities": "المنشآت المملوكة"
+      },
+      "stats": {
+        "facilities": "المنشآت",
+        "active": "نشطة",
+        "pending": "قيد المراجعة",
+        "rating": "متوسط التقييم"
+      },
+      "facilities": {
+        "location": "الموقع",
+        "empty": "لا توجد منشآت لهذا المالك بعد."
+      },
       "attention": {
         "title": "يحتاج انتباهاً",
         "blocked": "هذا المالك محظور ولا يمكنه الوصول إلى المنصة.",
@@ -628,7 +827,10 @@
   "facility": {
     "title": "إدارة المنشآت",
     "subtitle": "راجِع وتصفّح وأدِر كل نادٍ وملعب على المنصة.",
-    "tabs": { "queue": "قائمة المراجعة", "directory": "الدليل" },
+    "tabs": {
+      "queue": "قائمة المراجعة",
+      "directory": "الدليل"
+    },
     "scope": {
       "allRegions": "جميع المناطق",
       "yourRegion": "منطقتك: {{name}}",
@@ -680,8 +882,14 @@
       "status": "الحالة",
       "created": "تاريخ الإنشاء"
     },
-    "kind": { "club": "نادٍ", "pitch": "ملعب مستقل" },
-    "source": { "admin": "من اللوحة", "owner": "من المالك" },
+    "kind": {
+      "club": "نادٍ",
+      "pitch": "ملعب مستقل"
+    },
+    "source": {
+      "admin": "من اللوحة",
+      "owner": "من المالك"
+    },
     "sport": {
       "tennis": "تنس",
       "padel": "بادل",
@@ -734,8 +942,15 @@
       "acceptMessage": "سيتم اعتماد {{name}} كوثيقة مقبولة.",
       "reasonLabel": "السبب",
       "reasonPlaceholder": "وضّح القرار — يُبلَّغ المالك به.",
-      "status": { "pending": "قيد المراجعة", "approved": "مقبولة", "rejected": "مرفوضة" },
-      "toast": { "accepted": "تم قبول الوثيقة", "rejected": "تم رفض الوثيقة" }
+      "status": {
+        "pending": "قيد المراجعة",
+        "approved": "مقبولة",
+        "rejected": "مرفوضة"
+      },
+      "toast": {
+        "accepted": "تم قبول الوثيقة",
+        "rejected": "تم رفض الوثيقة"
+      }
     },
     "amenity": {
       "indoor": "مسقوف",
@@ -774,14 +989,24 @@
       "reasonPlaceholder": "اشرح بوضوح ما الذي يجب تصحيحه…"
     },
     "queue": {
-      "empty": { "title": "قائمة المراجعة فارغة", "desc": "ستظهر طلبات المنشآت الجديدة هنا فور وصولها." },
+      "empty": {
+        "title": "قائمة المراجعة فارغة",
+        "desc": "ستظهر طلبات المنشآت الجديدة هنا فور وصولها."
+      },
       "viewProfile": "عرض الملف",
       "submitted": "قُدِّم {{age}}",
       "orphan": "خارج المناطق",
       "docs": "المستندات"
     },
-    "empty": { "title": "لا توجد منشآت", "desc": "لا توجد منشآت تطابق عوامل التصفية الحالية." },
-    "age": { "justNow": "الآن", "hours": "منذ {{count}} ساعة", "days": "منذ {{count}} يوم" },
+    "empty": {
+      "title": "لا توجد منشآت",
+      "desc": "لا توجد منشآت تطابق عوامل التصفية الحالية."
+    },
+    "age": {
+      "justNow": "الآن",
+      "hours": "منذ {{count}} ساعة",
+      "days": "منذ {{count}} يوم"
+    },
     "actions": {
       "view": "عرض",
       "approve": "موافقة",
@@ -791,8 +1016,14 @@
       "add": "إضافة منشأة"
     },
     "confirm": {
-      "approve": { "title": "الموافقة على المنشأة؟", "message": "ستصبح «{{name}}» منشورة ومتاحة للحجز." },
-      "reactivate": { "title": "إعادة تفعيل المنشأة؟", "message": "ستعود «{{name}}» إلى الحالة النشطة وتصبح متاحة للحجز من جديد." }
+      "approve": {
+        "title": "الموافقة على المنشأة؟",
+        "message": "ستصبح «{{name}}» منشورة ومتاحة للحجز."
+      },
+      "reactivate": {
+        "title": "إعادة تفعيل المنشأة؟",
+        "message": "ستعود «{{name}}» إلى الحالة النشطة وتصبح متاحة للحجز من جديد."
+      }
     },
     "reason": {
       "reject": {
@@ -827,7 +1058,11 @@
       "title": "ملف المنشأة",
       "subtitle": "السجل الكامل للمنشأة مع الإحصاءات وإجراءات الإدارة",
       "notFound": "المنشأة غير موجودة",
-      "tabs": { "overview": "نظرة عامة", "courts": "الملاعب", "media": "الوسائط" },
+      "tabs": {
+        "overview": "نظرة عامة",
+        "courts": "الملاعب",
+        "media": "الوسائط"
+      },
       "stats": {
         "occupancy": "الإشغال",
         "revenue": "الإيراد الشهري",
@@ -1008,7 +1243,10 @@
       "facilities": "المنشآت",
       "status": "الحالة"
     },
-    "status": { "active": "نشطة", "inactive": "موقوفة" },
+    "status": {
+      "active": "نشطة",
+      "inactive": "موقوفة"
+    },
     "filter": {
       "all": "الكل",
       "assignment": "إسناد المدير",
@@ -1350,12 +1588,30 @@
     "features": {
       "title": "كل ما تحتاجه اللعبة",
       "subtitle": "منصة واحدة تغطّي الرحلة كاملة — من إيجاد ملعب إلى إدارة نادٍ.",
-      "facilities": { "title": "الملاعب والمنشآت", "desc": "أندية وملاعب مستقلة بملفّات غنية ومرافق ووسائط." },
-      "booking": { "title": "حجز فوري", "desc": "توفّر لحظي وتقويمات آنية — احجز موعدك خلال ثوانٍ." },
-      "members": { "title": "اللاعبون والأعضاء", "desc": "أدِر اللاعبين والاشتراكات وتسجيل الحضور من مكان واحد." },
-      "coverage": { "title": "المناطق والتغطية", "desc": "تغطية للمدن والأحياء تتوسّع عبر الخريطة." },
-      "ratings": { "title": "التقييمات والمراجعات", "desc": "تقييمات شفّافة تبني الثقة بين اللاعبين والمنشآت." },
-      "control": { "title": "لوحة الإدارة", "desc": "حوكمة وتحقّق ورؤى للمُلاك والمشرفين." }
+      "facilities": {
+        "title": "الملاعب والمنشآت",
+        "desc": "أندية وملاعب مستقلة بملفّات غنية ومرافق ووسائط."
+      },
+      "booking": {
+        "title": "حجز فوري",
+        "desc": "توفّر لحظي وتقويمات آنية — احجز موعدك خلال ثوانٍ."
+      },
+      "members": {
+        "title": "اللاعبون والأعضاء",
+        "desc": "أدِر اللاعبين والاشتراكات وتسجيل الحضور من مكان واحد."
+      },
+      "coverage": {
+        "title": "المناطق والتغطية",
+        "desc": "تغطية للمدن والأحياء تتوسّع عبر الخريطة."
+      },
+      "ratings": {
+        "title": "التقييمات والمراجعات",
+        "desc": "تقييمات شفّافة تبني الثقة بين اللاعبين والمنشآت."
+      },
+      "control": {
+        "title": "لوحة الإدارة",
+        "desc": "حوكمة وتحقّق ورؤى للمُلاك والمشرفين."
+      }
     },
     "audience": {
       "title": "مصمّمة لطرفَي اللعبة",
@@ -1416,8 +1672,16 @@
       "rejected": "مرفوض",
       "no_show": "عدم حضور"
     },
-    "paymentStatus": { "unpaid": "غير مدفوع", "paid": "مدفوع", "refunded": "مُسترد" },
-    "source": { "electronic": "إلكتروني", "manual": "يدوي", "private": "حجز خاص" },
+    "paymentStatus": {
+      "unpaid": "غير مدفوع",
+      "paid": "مدفوع",
+      "refunded": "مُسترد"
+    },
+    "source": {
+      "electronic": "إلكتروني",
+      "manual": "يدوي",
+      "private": "حجز خاص"
+    },
     "sport": {
       "tennis": "تنس",
       "padel": "بادل",
@@ -1426,9 +1690,19 @@
       "swimming": "سباحة",
       "volleyball": "كرة طائرة"
     },
-    "blockReason": { "maintenance": "صيانة", "holiday": "عطلة", "event": "فعالية" },
-    "facilityKind": { "club": "نادٍ", "pitch": "ملعب" },
-    "checkInMethod": { "qr": "رمز QR", "manual": "يدوي" },
+    "blockReason": {
+      "maintenance": "صيانة",
+      "holiday": "عطلة",
+      "event": "فعالية"
+    },
+    "facilityKind": {
+      "club": "نادٍ",
+      "pitch": "ملعب"
+    },
+    "checkInMethod": {
+      "qr": "رمز QR",
+      "manual": "يدوي"
+    },
     "stats": {
       "total": "إجمالي الحجوزات",
       "underReview": "قيد المراجعة",
@@ -1457,7 +1731,10 @@
       "dateFrom": "من",
       "dateTo": "إلى"
     },
-    "party": { "guest": "زائر", "block": "محجوز" },
+    "party": {
+      "guest": "زائر",
+      "block": "محجوز"
+    },
     "detail": {
       "party": "الحاجز",
       "reputation": "السمعة",
@@ -1482,8 +1759,13 @@
       "duration": "المدة",
       "hours": "{{n}} ساعة"
     },
-    "empty": { "title": "لا توجد حجوزات", "desc": "جرّب تعديل عوامل التصفية أو البحث." },
-    "actions": { "view": "عرض الحجز" }
+    "empty": {
+      "title": "لا توجد حجوزات",
+      "desc": "جرّب تعديل عوامل التصفية أو البحث."
+    },
+    "actions": {
+      "view": "عرض الحجز"
+    }
   },
   "membership": {
     "title": "اشتراكات النوادي",
@@ -1491,12 +1773,48 @@
     "search": "ابحث عن لاعب أو نادٍ أو باقة",
     "currency": "ل.س",
     "exportError": "تعذّر تصدير الاشتراكات. يرجى المحاولة مرة أخرى.",
-    "col": { "player": "اللاعب", "club": "النادي", "plan": "الباقة", "period": "المدة", "segments": "الشرائح", "status": "الحالة", "price": "السعر" },
-    "status": { "pending_activation": "بانتظار التفعيل", "active": "نشط", "paused": "موقوف مؤقتًا", "expired": "منتهٍ", "cancelled": "ملغى" },
-    "segment": { "premium": "مميّز", "new": "جديد", "near_expiry": "قارب على الانتهاء", "churn_risk": "معرّض للفقد" },
-    "planType": { "individual": "فردي", "family": "عائلي", "corporate": "شركات", "trial": "تجريبي" },
-    "billingCycle": { "monthly": "شهري", "quarterly": "ربع سنوي", "yearly": "سنوي", "day_pass": "تذكرة يومية" },
-    "stats": { "total": "الإجمالي", "active": "نشط", "nearExpiry": "قارب على الانتهاء", "churnRisk": "معرّض للفقد", "expired": "منتهٍ", "revenue": "الإيرادات" },
+    "col": {
+      "player": "اللاعب",
+      "club": "النادي",
+      "plan": "الباقة",
+      "period": "المدة",
+      "segments": "الشرائح",
+      "status": "الحالة",
+      "price": "السعر"
+    },
+    "status": {
+      "pending_activation": "بانتظار التفعيل",
+      "active": "نشط",
+      "paused": "موقوف مؤقتًا",
+      "expired": "منتهٍ",
+      "cancelled": "ملغى"
+    },
+    "segment": {
+      "premium": "مميّز",
+      "new": "جديد",
+      "near_expiry": "قارب على الانتهاء",
+      "churn_risk": "معرّض للفقد"
+    },
+    "planType": {
+      "individual": "فردي",
+      "family": "عائلي",
+      "corporate": "شركات",
+      "trial": "تجريبي"
+    },
+    "billingCycle": {
+      "monthly": "شهري",
+      "quarterly": "ربع سنوي",
+      "yearly": "سنوي",
+      "day_pass": "تذكرة يومية"
+    },
+    "stats": {
+      "total": "الإجمالي",
+      "active": "نشط",
+      "nearExpiry": "قارب على الانتهاء",
+      "churnRisk": "معرّض للفقد",
+      "expired": "منتهٍ",
+      "revenue": "الإيرادات"
+    },
     "filters": {
       "allStatus": "كل الحالات",
       "allClubs": "كل النوادي",
@@ -1547,10 +1865,215 @@
       "noCheckIns": "لا توجد تسجيلات دخول",
       "notFound": "الاشتراك غير موجود"
     },
-    "paymentMethod": { "cash": "نقدًا", "transfer": "تحويل" },
-    "paymentStatus": { "unpaid": "غير مدفوع", "paid": "مدفوع", "refunded": "مسترجع" },
-    "checkInMethod": { "qr": "رمز QR", "manual": "يدوي" },
-    "empty": { "title": "لا توجد اشتراكات", "desc": "لا توجد اشتراكات نوادٍ مطابقة للمرشّحات الحالية." },
-    "actions": { "view": "عرض الاشتراك" }
+    "paymentMethod": {
+      "cash": "نقدًا",
+      "transfer": "تحويل"
+    },
+    "paymentStatus": {
+      "unpaid": "غير مدفوع",
+      "paid": "مدفوع",
+      "refunded": "مسترجع"
+    },
+    "checkInMethod": {
+      "qr": "رمز QR",
+      "manual": "يدوي"
+    },
+    "empty": {
+      "title": "لا توجد اشتراكات",
+      "desc": "لا توجد اشتراكات نوادٍ مطابقة للمرشّحات الحالية."
+    },
+    "actions": {
+      "view": "عرض الاشتراك"
+    }
+  },
+  "dashboard": {
+    "title": "نظرة عامة على المنصة",
+    "heroEyebrow": "المشرف العام · نظرة عامة على المنصة",
+    "northStar": "الحجوزات المؤكدة · النجم الشمالي",
+    "ofTarget": "{{pct}}٪ من الهدف",
+    "vsPrev": "مقارنةً بـ{{range}} السابقة",
+    "rangeLabel": "النطاق الزمني",
+    "regionLabel": "نطاق المنطقة",
+    "refresh": "تحديث",
+    "freshness": "البيانات حتى {{time}}",
+    "exported": "تم تصدير النظرة العامة",
+    "viewAll": "عرض الكل",
+    "superAdminOnly": "للمشرف العام فقط",
+    "greeting": {
+      "morning": "صباح الخير",
+      "afternoon": "مساء الخير",
+      "evening": "مساء الخير"
+    },
+    "range": {
+      "today": "اليوم",
+      "7d": "٧ أيام",
+      "30d": "٣٠ يوم",
+      "90d": "٩٠ يوم",
+      "month": "هذا الشهر"
+    },
+    "region": {
+      "all": "كل المناطق",
+      "orphan": "خارج المناطق",
+      "col": {
+        "region": "المنطقة",
+        "players": "اللاعبون",
+        "facilities": "المنشآت",
+        "bookings": "الحجوزات",
+        "gmv": "الإيراد (م)",
+        "occupancy": "الإشغال",
+        "rating": "التقييم"
+      }
+    },
+    "kpi": {
+      "gmv": "إيراد الحجوزات",
+      "facilities": "منشآت نشطة",
+      "players": "لاعبون نشطون",
+      "subscriptions": "اشتراكات نشطة",
+      "owners": "مُلّاك نشطون",
+      "regions": "مناطق فعّالة",
+      "community": "منشورات المجتمع",
+      "b2bRevenue": "إيراد المنصة B2B"
+    },
+    "extra": {
+      "reactions": "تفاعل",
+      "unassigned": "غير مُسندة"
+    },
+    "note": {
+      "newThisPeriod": "+{{count}} جديد",
+      "underReview": "{{count}} قيد المراجعة"
+    },
+    "section": {
+      "pulse": {
+        "eyebrow": "نبض المنصة",
+        "title": "حالة السوق"
+      },
+      "liquidity": {
+        "eyebrow": "سيولة السوق",
+        "title": "التقاء العرض بالطلب"
+      },
+      "trends": {
+        "eyebrow": "الاتجاهات والتركيب",
+        "title": "التغيّر عبر الزمن"
+      },
+      "demand": {
+        "eyebrow": "الطلب · الحجوزات والعمليات",
+        "title": "كيف تُحسم الحجوزات"
+      },
+      "region": {
+        "eyebrow": "التوزّع الإقليمي",
+        "title": "أداء المناطق"
+      },
+      "domains": {
+        "eyebrow": "المجالات",
+        "title": "تفاصيل عند الطلب"
+      },
+      "activity": {
+        "eyebrow": "مباشر",
+        "title": "النشاط الأخير"
+      }
+    },
+    "attention": {
+      "heading": "يحتاج انتباهك",
+      "pendingFacilities": "منشآت بانتظار الموافقة",
+      "pendingOwners": "مُلّاك بانتظار الموافقة",
+      "playerReports": "بلاغات لاعبين مفتوحة",
+      "flaggedPosts": "منشورات مبلّغ عنها",
+      "orphanFacilities": "منشآت خارج المناطق",
+      "nearExpiry": "اشتراكات قاربت الانتهاء",
+      "idleFacilities": "منشآت خاملة/إشغال منخفض",
+      "newSubscriptions": "اشتراكات مدفوعة جديدة"
+    },
+    "attentionMeta": {
+      "oldest4d": "أقدمها ٤ أيام",
+      "oldest2d": "أقدمها يومان",
+      "recent": "حديث",
+      "coverageGap": "فجوة تغطية",
+      "within7d": "خلال ٧ أيام",
+      "lowOccupancy": "إشغال أقل من ٢٠٪",
+      "today": "اليوم"
+    },
+    "liquidity": {
+      "balance": "العرض مقابل الطلب حسب المنطقة",
+      "balanceHint": "حجم الفقاعة = الإيراد · على الخط = متوازن",
+      "funnel": "قمع السيولة",
+      "supplyAxis": "→ العرض (ساعات الملاعب)",
+      "demandAxis": "→ الطلب (الحجوزات)",
+      "balanced": "متوازن"
+    },
+    "trends": {
+      "title": "الحجوزات والإيراد",
+      "mix": "مزيج الإنجاز"
+    },
+    "series": {
+      "bookings": "الحجوزات",
+      "gmv": "الإيراد"
+    },
+    "demand": {
+      "peak": "ذروة الطلب · يوم × ساعة",
+      "low": "منخفض",
+      "peakLabel": "ذروة"
+    },
+    "domains": {
+      "supply": "العرض · مسار المنشآت",
+      "recurring": "المتكرر · الاشتراكات",
+      "topFacilities": "أعلى المنشآت إيراداً (ل.س)"
+    },
+    "recurring": {
+      "mrr": "الإيراد الشهري المتكرر",
+      "churn": "معدل التسرّب",
+      "nearExpiry": "قاربت الانتهاء"
+    },
+    "status": {
+      "confirmed": "مؤكد",
+      "completed": "مكتمل",
+      "cancelled": "ملغى",
+      "noShow": "لم يحضر",
+      "underReview": "قيد المراجعة",
+      "active": "نشط",
+      "pending": "معلّق",
+      "rejected": "مرفوض",
+      "suspended": "موقوف",
+      "ownerSuspended": "موقوف من المالك",
+      "paused": "متوقف",
+      "expired": "منتهٍ",
+      "requested": "مطلوب",
+      "paid": "مدفوع"
+    },
+    "day": {
+      "mon": "إثن",
+      "tue": "ثلا",
+      "wed": "أرب",
+      "thu": "خمي",
+      "fri": "جمع",
+      "sat": "سبت",
+      "sun": "أحد"
+    },
+    "activity": {
+      "booking_confirmed": "تأكيد الحجز #{{ref}} · {{facility}} · {{region}}",
+      "facility_submitted": "منشأة جديدة قيد المراجعة · {{facility}} · {{region}}",
+      "subscription_new": "اشتراك Pro جديد · اللاعب #{{player}}",
+      "player_report": "بلاغ ضد لاعب · نزاع عدم حضور",
+      "owner_approved": "تمت الموافقة على المالك · {{owner}}",
+      "post_flagged": "منشور مجتمع مبلّغ عنه للمراجعة"
+    },
+    "export": {
+      "metric": "المؤشّر",
+      "value": "القيمة",
+      "status": "الحالة",
+      "stage": "المرحلة",
+      "delta": "التغيّر مقارنةً بالسابق",
+      "target": "٪ من الهدف",
+      "generatedAt": "تاريخ التوليد",
+      "sheet": {
+        "overview": "نظرة عامة",
+        "kpis": "المؤشّرات",
+        "bookings": "الحجوزات",
+        "subscriptions": "الاشتراكات",
+        "facilities": "المنشآت",
+        "funnel": "القمع",
+        "attention": "التنبيهات",
+        "regions": "المناطق"
+      }
+    }
   }
 }

@@ -19,8 +19,10 @@ import {
   StadiumIcon,
   PhoneIcon,
   UserIcon,
+  UserCell,
 } from '@ui';
 import { PATHS } from '@app/router/paths';
+import { useAuthRole } from '@shared/stores/authStore';
 import { getPlayerById } from '@features/player-management/api';
 import { useBookingQuery } from '../hooks/useBookingQuery';
 import { useFacilityScopeQuery } from '../hooks/useFacilityScopeQuery';
@@ -263,18 +265,21 @@ function BookingDetailContent({ booking }: { booking: Booking }) {
 function PlayerReputation({ playerId, name }: { playerId: string; name: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // Player profiles live on a super_admin-only route — only make the cell/button
+  // navigate for super_admins so it never dead-ends on a redirect.
+  const canViewPlayer = useAuthRole() === 'super_admin';
   const { data: player } = useQuery({
     queryKey: ['booking', 'player-reputation', playerId],
     queryFn: () => getPlayerById(playerId),
   });
   return (
     <div className={styles.stack}>
-      <div className={styles.partyHead}>
-        <span className={styles.kindGlyph} aria-hidden>
-          <UserIcon />
-        </span>
-        <span className={styles.partyName}>{name}</span>
-      </div>
+      <UserCell
+        name={name}
+        photoUrl={player?.photoUrl}
+        onClick={canViewPlayer ? () => navigate(`${PATHS.playerManagement}/${playerId}`) : undefined}
+        testId="booking-party-player"
+      />
       <span className={styles.subhead}>{t('booking.detail.reputation')}</span>
       <div className={styles.rows}>
         <div className={styles.row}>
@@ -290,15 +295,17 @@ function PlayerReputation({ playerId, name }: { playerId: string; name: string }
           </span>
         </div>
       </div>
-      <Button
-        variant="secondary"
-        size="sm"
-        leftIcon={<UserIcon />}
-        onClick={() => navigate(`${PATHS.playerManagement}/${playerId}`)}
-        data-testid="booking-view-player"
-      >
-        {t('booking.detail.viewPlayer')}
-      </Button>
+      {canViewPlayer && (
+        <Button
+          variant="secondary"
+          size="sm"
+          leftIcon={<UserIcon />}
+          onClick={() => navigate(`${PATHS.playerManagement}/${playerId}`)}
+          data-testid="booking-view-player"
+        >
+          {t('booking.detail.viewPlayer')}
+        </Button>
+      )}
     </div>
   );
 }

@@ -6,6 +6,8 @@ import { toAppError } from './errors';
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1',
   headers: { 'Content-Type': 'application/json' },
+  // Fail fast instead of hanging forever if the backend stalls (axios default is no timeout).
+  timeout: 15_000,
 });
 
 // Request: attach the Bearer token from the auth store (not a raw localStorage read).

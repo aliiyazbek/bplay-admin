@@ -13,8 +13,9 @@ export function useLoginMutation() {
     mutationFn: login,
     onSuccess: (session) => {
       setSession(session);
-      // Admins land on their review desk; super admins on admin management.
-      navigate(session.role === 'super_admin' ? PATHS.adminManagement : PATHS.facilityManagement, {
+      // Super admins land on the platform overview dashboard; regional admins on
+      // their facility review desk.
+      navigate(session.role === 'super_admin' ? PATHS.dashboard : PATHS.facilityManagement, {
         replace: true,
       });
     },

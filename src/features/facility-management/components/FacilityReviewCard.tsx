@@ -1,6 +1,9 @@
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Avatar, Button, CheckIcon, clsx, RegionTag } from '@ui';
+import { PATHS } from '@app/router/paths';
+import { useAuthRole } from '@shared/stores/authStore';
 import { PhotoStrip } from './PhotoStrip';
 import { AgeBadge } from './AgeBadge';
 import { DocumentChip } from './DocumentChip';
@@ -44,7 +47,10 @@ export function FacilityReviewCard({
   onToggleSelect,
 }: FacilityReviewCardProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
+  // Owner profiles live on a super_admin-only route.
+  const canViewOwner = useAuthRole() === 'super_admin';
   const approveBlocked = !facilityDocsAllApproved(item.documents);
 
   const cardVariants: Variants = {
@@ -74,10 +80,23 @@ export function FacilityReviewCard({
       <div className={styles.body}>
         <div className={styles.identity}>
           <h3 className={styles.name}>{item.name}</h3>
-          <div className={styles.owner}>
-            <Avatar name={item.ownerName} size="sm" />
-            <span className={styles.ownerName}>{item.ownerName}</span>
-          </div>
+          {canViewOwner ? (
+            <button
+              type="button"
+              className={styles.ownerLink}
+              onClick={() => navigate(`${PATHS.ownerManagement}/${item.ownerId}`)}
+              title={t('facility.profile.viewOwner')}
+              data-testid={`facility-card-owner-${item.id}`}
+            >
+              <Avatar src={item.ownerPhotoUrl} name={item.ownerName} size="sm" />
+              <span className={styles.ownerName}>{item.ownerName}</span>
+            </button>
+          ) : (
+            <div className={styles.owner}>
+              <Avatar src={item.ownerPhotoUrl} name={item.ownerName} size="sm" />
+              <span className={styles.ownerName}>{item.ownerName}</span>
+            </div>
+          )}
         </div>
 
         <div className={styles.meta}>

@@ -7,7 +7,7 @@ import {
   ClockIcon,
   AlertTriangleIcon,
   BanIcon,
-  DownloadIcon,
+  BuildingIcon,
 } from '@ui';
 import type { MembershipStats } from '../api';
 import styles from './MembershipStatCards.module.css';
@@ -20,8 +20,18 @@ export interface MembershipStatCardsProps {
 export function MembershipStatCards({ stats }: MembershipStatCardsProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language.startsWith('ar') ? 'ar-SY' : 'en-US';
-  const nf = useMemo(() => new Intl.NumberFormat(locale), [locale]);
-  const revenue = stats ? `${nf.format(stats.revenueSyp)} ${t('membership.currency')}` : '—';
+  // Compact notation ("38.23M") keeps big SYP sums short; the currency lives in the
+  // label so the tile never wraps a number mid-digit. Normalise Intl's non-breaking
+  // space (U+00A0 / U+202F) so the tile can wrap at the word boundary if needed.
+  const revenue = useMemo(
+    () =>
+      stats
+        ? new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 2 })
+            .format(stats.revenueSyp)
+            .replace(/[  ]/g, ' ')
+        : '—',
+    [stats, locale],
+  );
 
   return (
     <div className={styles.grid} data-testid="membership-stats">
@@ -61,9 +71,9 @@ export function MembershipStatCards({ stats }: MembershipStatCardsProps) {
         countUp
       />
       <StatCard
-        label={t('membership.stats.revenue')}
+        label={`${t('membership.stats.revenue')} · ${t('membership.currency')}`}
         value={revenue}
-        icon={<DownloadIcon />}
+        icon={<BuildingIcon />}
         accent="secondary"
       />
     </div>

@@ -25,6 +25,18 @@ export function isAppError(error: unknown): error is AppError {
   return error instanceof AppError;
 }
 
+/**
+ * True when an error represents a "not found" outcome — a real 404 (AppError.status)
+ * or the mock sources' `Error('X not found')` convention. Detail pages use this to
+ * render their own not-found EmptyState; the query client uses it to skip retries
+ * and the global error toast for these expected outcomes.
+ */
+export function isNotFoundError(error: unknown): boolean {
+  if (isAppError(error)) return error.status === 404;
+  if (error instanceof Error) return /\bnot found\.?$/i.test(error.message.trim());
+  return false;
+}
+
 export function toAppError(error: unknown): AppError {
   if (isAppError(error)) return error;
 

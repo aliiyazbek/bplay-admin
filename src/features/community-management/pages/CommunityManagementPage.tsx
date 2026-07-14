@@ -7,6 +7,7 @@ import {
   Toolbar,
   SearchInput,
   Select,
+  FilterField,
   DateRange,
   DataTable,
   Pagination,
@@ -17,6 +18,11 @@ import {
   InboxIcon,
   HeartIcon,
   MessageCircleIcon,
+  SearchIcon,
+  PowerIcon,
+  UserIcon,
+  EyeIcon,
+  CalendarIcon,
   EMPTY_DATE_RANGE,
   isDateRangeActive,
   type Column,
@@ -143,64 +149,76 @@ export default function CommunityManagementPage() {
           ) : null
         }
       >
-        <SearchInput
-          value={params.q ?? ''}
-          onChange={(q) => patch({ q })}
-          placeholder={t('community.search')}
-        />
-        <Select
-          aria-label={t('community.col.author')}
-          value={params.authorType ?? 'all'}
-          onChange={(value) => patch({ authorType: value as PostListParams['authorType'] })}
-          options={[
-            { value: 'all', label: t('community.filter.allAuthorTypes') },
-            { value: 'player', label: t('community.actorType.player') },
-            { value: 'facility', label: t('community.actorType.facility') },
-          ]}
-        />
-        <Select
-          aria-label={t('community.col.status')}
-          value={params.status ?? 'all'}
-          onChange={(value) => patch({ status: value as PostListParams['status'] })}
-          options={[
-            { value: 'all', label: t('community.filter.allStatus') },
-            { value: 'published', label: t('community.status.published') },
-            { value: 'removed', label: t('community.status.removed') },
-          ]}
-        />
-        <Select
-          aria-label={t('community.col.media')}
-          value={params.hasMedia ?? 'all'}
-          onChange={(value) => patch({ hasMedia: value as PostListParams['hasMedia'] })}
-          options={[
-            { value: 'all', label: t('community.filter.allMedia') },
-            { value: 'yes', label: t('community.filter.hasMedia') },
-            { value: 'no', label: t('community.filter.noMedia') },
-          ]}
-        />
-        <Select
-          aria-label={t('community.col.visibility')}
-          value={params.visibility ?? 'all'}
-          onChange={(value) => patch({ visibility: value as PostListParams['visibility'] })}
-          options={[
-            { value: 'all', label: t('community.filter.allVisibility') },
-            { value: 'public', label: t('community.visibility.public') },
-            { value: 'private', label: t('community.visibility.private') },
-          ]}
-        />
-        <DateRange
-          value={params.dateRange ?? EMPTY_DATE_RANGE}
-          onChange={(dateRange) => patch({ dateRange })}
-          ariaLabel={t('community.filter.date')}
-          allLabel={t('community.filter.dateAll')}
-          last7Label={t('community.filter.date7d')}
-          last30Label={t('community.filter.date30d')}
-          last90Label={t('community.filter.date90d')}
-          customLabel={t('community.filter.dateCustom')}
-          fromLabel={t('community.filter.dateFrom')}
-          toLabel={t('community.filter.dateTo')}
-          testId="community-date-range"
-        />
+        <FilterField label={t('common.search')} icon={<SearchIcon />}>
+          <SearchInput
+            value={params.q ?? ''}
+            onChange={(q) => patch({ q })}
+            placeholder={t('community.search')}
+          />
+        </FilterField>
+        <FilterField label={t('community.col.author')} icon={<UserIcon />}>
+          <Select
+            aria-label={t('community.col.author')}
+            value={params.authorType ?? 'all'}
+            onChange={(value) => patch({ authorType: value as PostListParams['authorType'] })}
+            options={[
+              { value: 'all', label: t('community.filter.allAuthorTypes') },
+              { value: 'player', label: t('community.actorType.player') },
+              { value: 'facility', label: t('community.actorType.facility') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('community.col.status')} icon={<PowerIcon />}>
+          <Select
+            aria-label={t('community.col.status')}
+            value={params.status ?? 'all'}
+            onChange={(value) => patch({ status: value as PostListParams['status'] })}
+            options={[
+              { value: 'all', label: t('community.filter.allStatus') },
+              { value: 'published', label: t('community.status.published') },
+              { value: 'removed', label: t('community.status.removed') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('community.col.media')} icon={<MessageCircleIcon />}>
+          <Select
+            aria-label={t('community.col.media')}
+            value={params.hasMedia ?? 'all'}
+            onChange={(value) => patch({ hasMedia: value as PostListParams['hasMedia'] })}
+            options={[
+              { value: 'all', label: t('community.filter.allMedia') },
+              { value: 'yes', label: t('community.filter.hasMedia') },
+              { value: 'no', label: t('community.filter.noMedia') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('community.col.visibility')} icon={<EyeIcon />}>
+          <Select
+            aria-label={t('community.col.visibility')}
+            value={params.visibility ?? 'all'}
+            onChange={(value) => patch({ visibility: value as PostListParams['visibility'] })}
+            options={[
+              { value: 'all', label: t('community.filter.allVisibility') },
+              { value: 'public', label: t('community.visibility.public') },
+              { value: 'private', label: t('community.visibility.private') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('community.filter.date')} icon={<CalendarIcon />}>
+          <DateRange
+            value={params.dateRange ?? EMPTY_DATE_RANGE}
+            onChange={(dateRange) => patch({ dateRange })}
+            ariaLabel={t('community.filter.date')}
+            allLabel={t('community.filter.dateAll')}
+            last7Label={t('community.filter.date7d')}
+            last30Label={t('community.filter.date30d')}
+            last90Label={t('community.filter.date90d')}
+            customLabel={t('community.filter.dateCustom')}
+            fromLabel={t('community.filter.dateFrom')}
+            toLabel={t('community.filter.dateTo')}
+            testId="community-date-range"
+          />
+        </FilterField>
         <ViewToggle value={view} onChange={setView} />
       </Toolbar>
 

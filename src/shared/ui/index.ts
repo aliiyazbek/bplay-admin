@@ -42,4 +42,5 @@ export * from './PageContainer/PageContainer';
 export * from './PageHeader/PageHeader';
 export * from './Toolbar/Toolbar';
 export * from './ClearFiltersBar/ClearFiltersBar';
+export * from './FilterField/FilterField';
 export * from './Toast';

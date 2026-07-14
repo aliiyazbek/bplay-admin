@@ -4,6 +4,7 @@ export const PATHS = {
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
   app: '/app',
+  dashboard: '/app/dashboard',
   profile: '/app/profile',
   adminManagement: '/app/admin-management',
   regionManagement: '/app/region-management',

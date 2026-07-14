@@ -382,6 +382,117 @@ export const ChevronStartIcon = (p: IconProps) => (
   </Icon>
 );
 
+/* ── Dashboard / analytics glyphs ─────────────────────────────────────────── */
+
+export const TrendingUpIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M22 7 13.5 15.5 8.5 10.5 2 17" />
+    <path d="M16 7h6v6" />
+  </Icon>
+);
+
+export const ActivityIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+  </Icon>
+);
+
+export const BarChartIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 20V10M18 20V4M6 20v-4" />
+  </Icon>
+);
+
+export const LineChartIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 3v18h18" />
+    <path d="m19 9-5 5-4-4-3 3" />
+  </Icon>
+);
+
+export const GaugeIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m12 14 4-4" />
+    <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+  </Icon>
+);
+
+export const WalletIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-3a2 2 0 0 1 0-4h4" />
+    <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-3" />
+  </Icon>
+);
+
+export const LayersIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m12 2 9 5-9 5-9-5 9-5Z" />
+    <path d="m3 12 9 5 9-5" />
+    <path d="m3 17 9 5 9-5" />
+  </Icon>
+);
+
+export const BellIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+  </Icon>
+);
+
+export const ShieldAlertIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+    <path d="M12 8v4" />
+    <path d="M12 16h.01" />
+  </Icon>
+);
+
+export const FlagIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1Z" />
+    <path d="M4 22v-7" />
+  </Icon>
+);
+
+export const FileWarningIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+    <path d="M14 2v6h6" />
+    <path d="M12 11v3" />
+    <path d="M12 17h.01" />
+  </Icon>
+);
+
+export const UserCheckIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="m16 11 2 2 4-4" />
+  </Icon>
+);
+
+export const AlertCircleIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 8v4" />
+    <path d="M12 16h.01" />
+  </Icon>
+);
+
+/** Trend-up glyph for a positive delta; pair with a color from status tokens. */
+export const ArrowUpRightIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M7 17 17 7M7 7h10v10" />
+  </Icon>
+);
+
+/** Trend-down glyph for a negative delta. */
+export const ArrowDownRightIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="m7 7 10 10M17 7v10H7" />
+  </Icon>
+);
+
 /** The Bplay brand mark — a mint gradient tile (a legitimate brand asset, so brand hexes live here). */
 export function BrandMark({ size = 34 }: { size?: number }) {
   return (

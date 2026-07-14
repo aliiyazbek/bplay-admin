@@ -330,6 +330,43 @@
   margin-inline-start: auto;
 }
 
+/* The whole owner cell is a clickable link to the owner profile (super_admin). */
+.ownerLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  inline-size: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: start;
+  color: inherit;
+  border-radius: var(--radius-md);
+  transition: opacity var(--transition-fast);
+}
+
+.ownerLink:hover .ownerName {
+  text-decoration: underline;
+}
+
+.ownerLink:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.ownerChevron {
+  margin-inline-start: auto;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  color: var(--color-text-muted);
+}
+
+/* Chevron points to the reading-end; flip it under RTL. */
+:global([dir='rtl']) .ownerChevron {
+  transform: scaleX(-1);
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1024px) {

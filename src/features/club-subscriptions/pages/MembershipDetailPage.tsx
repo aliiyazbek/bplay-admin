@@ -270,50 +270,52 @@ function MembershipDetailContent({ membership }: { membership: Membership }) {
           </Button>
         </Card>
 
-        {/* Dates */}
-        <Card padding="lg" className={styles.card} data-testid="membership-dates-card">
-          <div className={styles.cardHead}>
-            <h2 className={styles.cardTitle}>{t('membership.detail.dates')}</h2>
-          </div>
-          <dl className={styles.rows}>
-            <div className={styles.row}>
-              <dt className={styles.label}>{t('membership.detail.start')}</dt>
-              <dd className={styles.value} dir="ltr">
-                {fmt(membership.startDate)}
-              </dd>
+        {/* Right column: Dates + Payments stacked beside the tall plan card. */}
+        <div className={styles.side}>
+          <Card padding="lg" className={styles.card} data-testid="membership-dates-card">
+            <div className={styles.cardHead}>
+              <h2 className={styles.cardTitle}>{t('membership.detail.dates')}</h2>
             </div>
-            <div className={styles.row}>
-              <dt className={styles.label}>{t('membership.detail.end')}</dt>
-              <dd className={styles.value} dir="ltr">
-                {fmt(membership.endDate)}
-              </dd>
-            </div>
-            <div className={styles.row}>
-              <dt className={styles.label}>{t('membership.detail.daysLeft')}</dt>
-              <dd className={styles.value}>
-                {daysLeft >= 0 ? nf.format(daysLeft) : nf.format(0)}
-              </dd>
-            </div>
-          </dl>
-        </Card>
-      </div>
+            <dl className={styles.rows}>
+              <div className={styles.row}>
+                <dt className={styles.label}>{t('membership.detail.start')}</dt>
+                <dd className={styles.value} dir="ltr">
+                  {fmt(membership.startDate)}
+                </dd>
+              </div>
+              <div className={styles.row}>
+                <dt className={styles.label}>{t('membership.detail.end')}</dt>
+                <dd className={styles.value} dir="ltr">
+                  {fmt(membership.endDate)}
+                </dd>
+              </div>
+              <div className={styles.row}>
+                <dt className={styles.label}>{t('membership.detail.daysLeft')}</dt>
+                <dd className={styles.value}>
+                  {daysLeft >= 0 ? nf.format(daysLeft) : nf.format(0)}
+                </dd>
+              </div>
+            </dl>
+          </Card>
 
-      {/* Payments */}
-      <Card padding="lg" className={styles.card} data-testid="membership-payments-card">
-        <div className={styles.cardHead}>
-          <h2 className={styles.cardTitle}>{t('membership.detail.payments')}</h2>
+          {/* Payments */}
+          <Card padding="lg" className={styles.card} data-testid="membership-payments-card">
+            <div className={styles.cardHead}>
+              <h2 className={styles.cardTitle}>{t('membership.detail.payments')}</h2>
+            </div>
+            {membership.payments.length === 0 ? (
+              <EmptyState icon={<InboxIcon />} title={t('membership.detail.noPayments')} />
+            ) : (
+              <DataTable<MembershipPayment>
+                columns={paymentColumns}
+                data={membership.payments}
+                getRowId={(payment) => payment.id}
+                actionsLabel={t('common.actions')}
+              />
+            )}
+          </Card>
         </div>
-        {membership.payments.length === 0 ? (
-          <EmptyState icon={<InboxIcon />} title={t('membership.detail.noPayments')} />
-        ) : (
-          <DataTable<MembershipPayment>
-            columns={paymentColumns}
-            data={membership.payments}
-            getRowId={(payment) => payment.id}
-            actionsLabel={t('common.actions')}
-          />
-        )}
-      </Card>
+      </div>
 
       {/* Usage */}
       <Card padding="lg" className={styles.card} data-testid="membership-usage-card">

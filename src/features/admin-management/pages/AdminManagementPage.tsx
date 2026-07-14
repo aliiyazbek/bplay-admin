@@ -7,6 +7,7 @@ import {
   Toolbar,
   SearchInput,
   Select,
+  FilterField,
   DataTable,
   Pagination,
   Badge,
@@ -16,6 +17,10 @@ import {
   EmptyState,
   PlusIcon,
   InboxIcon,
+  SearchIcon,
+  PowerIcon,
+  UsersIcon,
+  MapPinIcon,
   type Column,
   type BadgeVariant,
 } from '@ui';
@@ -145,51 +150,59 @@ export default function AdminManagementPage() {
           ) : null
         }
       >
-        <SearchInput
-          value={params.q ?? ''}
-          onChange={(q) => setParams((prev) => ({ ...prev, q, page: 1 }))}
-          placeholder={t('admin.search')}
-        />
-        <Select
-          aria-label={t('admin.col.status')}
-          value={params.status ?? 'all'}
-          onChange={(value) =>
-            setParams((prev) => ({ ...prev, status: value as AdminListParams['status'], page: 1 }))
-          }
-          options={[
-            { value: 'all', label: t('status.all') },
-            { value: 'active', label: t('status.active') },
-            { value: 'suspended', label: t('status.suspended') },
-          ]}
-        />
-        <Select
-          aria-label={t('admin.col.scope')}
-          value={params.scope ?? 'all'}
-          onChange={(value) =>
-            setParams((prev) => ({ ...prev, scope: value as AdminListParams['scope'], page: 1 }))
-          }
-          options={[
-            { value: 'all', label: t('admin.filter.allScope') },
-            { value: 'general', label: t('admin.scope.general') },
-            { value: 'regional', label: t('admin.scope.regional') },
-          ]}
-        />
-        <Select
-          aria-label={t('admin.filter.assignment')}
-          value={params.assignment ?? 'all'}
-          onChange={(value) =>
-            setParams((prev) => ({
-              ...prev,
-              assignment: value as AdminListParams['assignment'],
-              page: 1,
-            }))
-          }
-          options={[
-            { value: 'all', label: t('admin.filter.allAssignment') },
-            { value: 'assigned', label: t('admin.filter.withRegion') },
-            { value: 'unassigned', label: t('admin.filter.noRegion') },
-          ]}
-        />
+        <FilterField label={t('common.search')} icon={<SearchIcon />}>
+          <SearchInput
+            value={params.q ?? ''}
+            onChange={(q) => setParams((prev) => ({ ...prev, q, page: 1 }))}
+            placeholder={t('admin.search')}
+          />
+        </FilterField>
+        <FilterField label={t('admin.col.status')} icon={<PowerIcon />}>
+          <Select
+            aria-label={t('admin.col.status')}
+            value={params.status ?? 'all'}
+            onChange={(value) =>
+              setParams((prev) => ({ ...prev, status: value as AdminListParams['status'], page: 1 }))
+            }
+            options={[
+              { value: 'all', label: t('status.all') },
+              { value: 'active', label: t('status.active') },
+              { value: 'suspended', label: t('status.suspended') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('admin.col.scope')} icon={<UsersIcon />}>
+          <Select
+            aria-label={t('admin.col.scope')}
+            value={params.scope ?? 'all'}
+            onChange={(value) =>
+              setParams((prev) => ({ ...prev, scope: value as AdminListParams['scope'], page: 1 }))
+            }
+            options={[
+              { value: 'all', label: t('admin.filter.allScope') },
+              { value: 'general', label: t('admin.scope.general') },
+              { value: 'regional', label: t('admin.scope.regional') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('admin.filter.assignment')} icon={<MapPinIcon />}>
+          <Select
+            aria-label={t('admin.filter.assignment')}
+            value={params.assignment ?? 'all'}
+            onChange={(value) =>
+              setParams((prev) => ({
+                ...prev,
+                assignment: value as AdminListParams['assignment'],
+                page: 1,
+              }))
+            }
+            options={[
+              { value: 'all', label: t('admin.filter.allAssignment') },
+              { value: 'assigned', label: t('admin.filter.withRegion') },
+              { value: 'unassigned', label: t('admin.filter.noRegion') },
+            ]}
+          />
+        </FilterField>
         <label className={styles.deletedToggle}>
           <input
             type="checkbox"

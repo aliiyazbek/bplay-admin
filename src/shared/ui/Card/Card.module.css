@@ -7,3 +7,13 @@
 .sm { padding: var(--space-4); }
 .md { padding: var(--space-6); }
 .lg { padding: var(--space-8); }
+
+/* Frosted forest-glass surface (dashboard panels) — overrides the solid look;
+   depth comes from the glass sheen + hairline, not a heavy shadow. */
+.glass {
+  background: var(--gradient-glass);
+  border-color: var(--color-glass-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(12px);
+}

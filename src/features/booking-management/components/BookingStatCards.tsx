@@ -19,8 +19,18 @@ interface Props {
 export function BookingStatCards({ stats }: Props) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language.startsWith('ar') ? 'ar-SY' : 'en-US';
-  const nf = useMemo(() => new Intl.NumberFormat(locale), [locale]);
-  const revenue = stats ? `${nf.format(stats.revenueSyp)} ${t('booking.currency')}` : '—';
+  // Compact notation ("6.86M") keeps big SYP sums short; the currency lives in the
+  // label so the tile never wraps a number mid-digit. Normalise Intl's non-breaking
+  // space (U+00A0 / U+202F) so the tile can wrap at the word boundary if needed.
+  const revenue = useMemo(
+    () =>
+      stats
+        ? new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 2 })
+            .format(stats.revenueSyp)
+            .replace(/[  ]/g, ' ')
+        : '—',
+    [stats, locale],
+  );
 
   return (
     <div className={styles.grid} data-testid="booking-stats">
@@ -60,7 +70,7 @@ export function BookingStatCards({ stats }: Props) {
         countUp
       />
       <StatCard
-        label={t('booking.stats.revenue')}
+        label={`${t('booking.stats.revenue')} · ${t('booking.currency')}`}
         value={revenue}
         icon={<BuildingIcon />}
         accent="secondary"

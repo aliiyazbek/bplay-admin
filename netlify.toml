@@ -1,0 +1,19 @@
+# Netlify config for the STANDALONE DEMO of the Bplay super-admin.
+# Builds the app on in-memory mock data (no backend / no server) and serves
+# it as a single-page app with working client-side routing.
+
+[build]
+  command = "npm run build:demo"
+  publish = "dist"
+
+# Force mock mode during Netlify's build (overrides .env.production's false).
+# NODE_VERSION pins a modern Node so Vite 8 / React 19 build correctly.
+[build.environment]
+  VITE_USE_MOCKS = "true"
+  NODE_VERSION = "22"
+
+# SPA fallback: every path serves index.html so refresh & deep links work.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

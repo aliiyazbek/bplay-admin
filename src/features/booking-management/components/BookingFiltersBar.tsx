@@ -5,10 +5,18 @@ import {
   Badge,
   Button,
   DateRange,
+  FilterField,
   FilterIcon,
   SearchInput,
   Select,
   clsx,
+  CalendarIcon,
+  CreditCardIcon,
+  MapPinIcon,
+  SearchIcon,
+  SparklesIcon,
+  StadiumIcon,
+  TrophyIcon,
   EMPTY_DATE_RANGE,
   isDateRangeActive,
 } from '@ui';
@@ -85,11 +93,13 @@ export function BookingFiltersBar({ params, onChange }: BookingFiltersBarProps) 
     <div className={styles.bar}>
       <div className={styles.row}>
         <div className={styles.search}>
-          <SearchInput
-            value={params.q ?? ''}
-            onChange={(q) => onChange({ q })}
-            placeholder={t('booking.search')}
-          />
+          <FilterField label={t('common.search')} icon={<SearchIcon />}>
+            <SearchInput
+              value={params.q ?? ''}
+              onChange={(q) => onChange({ q })}
+              placeholder={t('booking.search')}
+            />
+          </FilterField>
         </div>
         <Button
           variant="secondary"
@@ -140,85 +150,97 @@ export function BookingFiltersBar({ params, onChange }: BookingFiltersBarProps) 
           >
             <div className={styles.panel}>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('booking.filters.paymentStatus')}
-                  value={params.paymentStatus ?? 'all'}
-                  onChange={(value) =>
-                    onChange({ paymentStatus: value as BookingListParams['paymentStatus'] })
-                  }
-                  options={[
-                    allOption,
-                    ...PAYMENT_STATUSES.map((paymentStatus) => ({
-                      value: paymentStatus,
-                      label: t(`booking.paymentStatus.${paymentStatus}`),
-                    })),
-                  ]}
-                />
+                <FilterField label={t('booking.filters.paymentStatus')} icon={<CreditCardIcon />}>
+                  <Select
+                    aria-label={t('booking.filters.paymentStatus')}
+                    value={params.paymentStatus ?? 'all'}
+                    onChange={(value) =>
+                      onChange({ paymentStatus: value as BookingListParams['paymentStatus'] })
+                    }
+                    options={[
+                      allOption,
+                      ...PAYMENT_STATUSES.map((paymentStatus) => ({
+                        value: paymentStatus,
+                        label: t(`booking.paymentStatus.${paymentStatus}`),
+                      })),
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('booking.filters.facility')}
-                  value={params.facilityId ?? 'all'}
-                  onChange={(value) => onChange({ facilityId: value })}
-                  options={[
-                    allOption,
-                    ...(facilitiesQuery.data ?? []).map((facility) => ({
-                      value: facility.id,
-                      label: facility.name,
-                    })),
-                  ]}
-                />
+                <FilterField label={t('booking.filters.facility')} icon={<StadiumIcon />}>
+                  <Select
+                    aria-label={t('booking.filters.facility')}
+                    value={params.facilityId ?? 'all'}
+                    onChange={(value) => onChange({ facilityId: value })}
+                    options={[
+                      allOption,
+                      ...(facilitiesQuery.data ?? []).map((facility) => ({
+                        value: facility.id,
+                        label: facility.name,
+                      })),
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('booking.filters.sport')}
-                  value={params.sport ?? 'all'}
-                  onChange={(value) => onChange({ sport: value as BookingListParams['sport'] })}
-                  options={[
-                    allOption,
-                    ...BOOKING_SPORTS.map((sport) => ({
-                      value: sport,
-                      label: t(`booking.sport.${sport}`),
-                    })),
-                  ]}
-                />
+                <FilterField label={t('booking.filters.sport')} icon={<TrophyIcon />}>
+                  <Select
+                    aria-label={t('booking.filters.sport')}
+                    value={params.sport ?? 'all'}
+                    onChange={(value) => onChange({ sport: value as BookingListParams['sport'] })}
+                    options={[
+                      allOption,
+                      ...BOOKING_SPORTS.map((sport) => ({
+                        value: sport,
+                        label: t(`booking.sport.${sport}`),
+                      })),
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('booking.filters.source')}
-                  value={params.source ?? 'all'}
-                  onChange={(value) => onChange({ source: value as BookingListParams['source'] })}
-                  options={[
-                    allOption,
-                    ...BOOKING_SOURCES.map((source) => ({
-                      value: source,
-                      label: t(`booking.source.${source}`),
-                    })),
-                  ]}
-                />
+                <FilterField label={t('booking.filters.source')} icon={<SparklesIcon />}>
+                  <Select
+                    aria-label={t('booking.filters.source')}
+                    value={params.source ?? 'all'}
+                    onChange={(value) => onChange({ source: value as BookingListParams['source'] })}
+                    options={[
+                      allOption,
+                      ...BOOKING_SOURCES.map((source) => ({
+                        value: source,
+                        label: t(`booking.source.${source}`),
+                      })),
+                    ]}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filter}>
-                <Select
-                  aria-label={t('booking.filters.region')}
-                  value={params.regionId ?? 'all'}
-                  onChange={(value) => onChange({ regionId: value })}
-                  options={regionOptions}
-                />
+                <FilterField label={t('booking.filters.region')} icon={<MapPinIcon />}>
+                  <Select
+                    aria-label={t('booking.filters.region')}
+                    value={params.regionId ?? 'all'}
+                    onChange={(value) => onChange({ regionId: value })}
+                    options={regionOptions}
+                  />
+                </FilterField>
               </div>
               <div className={styles.filterWide}>
-                <DateRange
-                  value={params.dateRange ?? EMPTY_DATE_RANGE}
-                  onChange={(value) => onChange({ dateRange: value })}
-                  ariaLabel={t('booking.filters.dateAdded')}
-                  allLabel={t('booking.filters.dateAll')}
-                  last7Label={t('booking.filters.date7')}
-                  last30Label={t('booking.filters.date30')}
-                  last90Label={t('booking.filters.date90')}
-                  customLabel={t('booking.filters.dateCustom')}
-                  fromLabel={t('booking.filters.dateFrom')}
-                  toLabel={t('booking.filters.dateTo')}
-                  testId="booking-filter-date"
-                />
+                <FilterField label={t('booking.filters.dateAdded')} icon={<CalendarIcon />}>
+                  <DateRange
+                    value={params.dateRange ?? EMPTY_DATE_RANGE}
+                    onChange={(value) => onChange({ dateRange: value })}
+                    ariaLabel={t('booking.filters.dateAdded')}
+                    allLabel={t('booking.filters.dateAll')}
+                    last7Label={t('booking.filters.date7')}
+                    last30Label={t('booking.filters.date30')}
+                    last90Label={t('booking.filters.date90')}
+                    customLabel={t('booking.filters.dateCustom')}
+                    fromLabel={t('booking.filters.dateFrom')}
+                    toLabel={t('booking.filters.dateTo')}
+                    testId="booking-filter-date"
+                  />
+                </FilterField>
               </div>
             </div>
           </motion.div>

@@ -134,11 +134,17 @@ export function buildBookingListResult(
 
   const dateRange = params.dateRange;
   if (dateRange && dateRange.preset !== 'all') {
-    const { fromMs, toMs } = resolveDateRange(dateRange, Date.now());
+    const nowMs = Date.now();
+    const { fromMs, toMs } = resolveDateRange(dateRange, nowMs);
+    // A booking's `date` is the SCHEDULED slot — it spans past AND future. The
+    // "last N days" presets have an open upper bound, so cap them at today here;
+    // otherwise a future-dated booking would leak into e.g. "Last 7 days". Custom
+    // ranges keep whatever bound the user chose.
+    const upperMs = toMs ?? (dateRange.preset === 'custom' ? null : nowMs);
     items = items.filter((item) => {
       const when = Date.parse(item.date);
       if (fromMs !== null && when < fromMs) return false;
-      if (toMs !== null && when > toMs) return false;
+      if (upperMs !== null && when > upperMs) return false;
       return true;
     });
   }

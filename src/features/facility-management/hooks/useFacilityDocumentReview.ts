@@ -35,5 +35,6 @@ export function useFacilityDocumentReview() {
         ),
       );
     },
+    onError: () => toast.error(t('facility.toast.error')),
   });
 }

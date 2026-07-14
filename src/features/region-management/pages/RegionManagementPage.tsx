@@ -7,6 +7,7 @@ import {
   Toolbar,
   SearchInput,
   Select,
+  FilterField,
   DataTable,
   Pagination,
   Badge,
@@ -15,6 +16,9 @@ import {
   EmptyState,
   PlusIcon,
   InboxIcon,
+  SearchIcon,
+  PowerIcon,
+  MapPinIcon,
   type Column,
 } from '@ui';
 import { useDisclosure } from '@shared/hooks/useDisclosure';
@@ -158,43 +162,49 @@ export default function RegionManagementPage() {
           ) : null
         }
       >
-        <SearchInput
-          value={params.q ?? ''}
-          onChange={(q) => setParams((prev) => ({ ...prev, q, page: 1 }))}
-          placeholder={t('region.search')}
-        />
-        <Select
-          aria-label={t('region.col.status')}
-          value={params.status ?? 'all'}
-          onChange={(value) =>
-            setParams((prev) => ({
-              ...prev,
-              status: value as RegionListParams['status'],
-              page: 1,
-            }))
-          }
-          options={[
-            { value: 'all', label: t('region.filter.all') },
-            { value: 'active', label: t('region.status.active') },
-            { value: 'inactive', label: t('region.status.inactive') },
-          ]}
-        />
-        <Select
-          aria-label={t('region.filter.assignment')}
-          value={params.assignment ?? 'all'}
-          onChange={(value) =>
-            setParams((prev) => ({
-              ...prev,
-              assignment: value as RegionListParams['assignment'],
-              page: 1,
-            }))
-          }
-          options={[
-            { value: 'all', label: t('region.filter.allAssignment') },
-            { value: 'assigned', label: t('region.filter.withAdmin') },
-            { value: 'unassigned', label: t('region.filter.noAdmin') },
-          ]}
-        />
+        <FilterField label={t('common.search')} icon={<SearchIcon />}>
+          <SearchInput
+            value={params.q ?? ''}
+            onChange={(q) => setParams((prev) => ({ ...prev, q, page: 1 }))}
+            placeholder={t('region.search')}
+          />
+        </FilterField>
+        <FilterField label={t('region.col.status')} icon={<PowerIcon />}>
+          <Select
+            aria-label={t('region.col.status')}
+            value={params.status ?? 'all'}
+            onChange={(value) =>
+              setParams((prev) => ({
+                ...prev,
+                status: value as RegionListParams['status'],
+                page: 1,
+              }))
+            }
+            options={[
+              { value: 'all', label: t('region.filter.all') },
+              { value: 'active', label: t('region.status.active') },
+              { value: 'inactive', label: t('region.status.inactive') },
+            ]}
+          />
+        </FilterField>
+        <FilterField label={t('region.filter.assignment')} icon={<MapPinIcon />}>
+          <Select
+            aria-label={t('region.filter.assignment')}
+            value={params.assignment ?? 'all'}
+            onChange={(value) =>
+              setParams((prev) => ({
+                ...prev,
+                assignment: value as RegionListParams['assignment'],
+                page: 1,
+              }))
+            }
+            options={[
+              { value: 'all', label: t('region.filter.allAssignment') },
+              { value: 'assigned', label: t('region.filter.withAdmin') },
+              { value: 'unassigned', label: t('region.filter.noAdmin') },
+            ]}
+          />
+        </FilterField>
         <label className={styles.deletedToggle}>
           <input
             type="checkbox"

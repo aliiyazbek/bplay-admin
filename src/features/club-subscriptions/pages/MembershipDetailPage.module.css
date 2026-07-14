@@ -24,6 +24,15 @@
   align-items: start;
 }
 
+/* The right column: Dates + Payments stacked beside the tall plan card, so the
+   column fills instead of leaving a gap under the short Dates card. */
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-inline-size: 0;
+}
+
 .card {
   display: flex;
   flex-direction: column;

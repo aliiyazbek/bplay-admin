@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Card,
   Badge,
+  Avatar,
   DataTable,
   EmptyState,
   IconButton,
@@ -61,7 +62,18 @@ export function AdminFacilitiesCard({ facilities, isLoading }: Props) {
       {
         key: 'owner',
         header: t('facility.col.owner'),
-        render: (facility) => <span className={styles.owner}>{facility.ownerName}</span>,
+        render: (facility) => (
+          <button
+            type="button"
+            className={styles.ownerLink}
+            onClick={() => navigate(`${PATHS.ownerManagement}/${facility.ownerId}`)}
+            title={facility.ownerName}
+            data-testid={`admin-facility-owner-${facility.id}`}
+          >
+            <Avatar src={facility.ownerPhotoUrl} name={facility.ownerName} size="sm" />
+            <span className={styles.ownerName}>{facility.ownerName}</span>
+          </button>
+        ),
       },
       {
         key: 'rating',

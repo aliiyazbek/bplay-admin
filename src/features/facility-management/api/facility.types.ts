@@ -265,6 +265,8 @@ export interface FacilityBase {
   images: string[];
   ownerId: string;
   ownerName: string;
+  /** Owner's avatar photo (for the clickable owner cell); falls back to initials. */
+  ownerPhotoUrl?: string;
   createdAt: string;
   /** Origin: 'admin' (created from this dashboard — editable here) or 'owner' (via the app). */
   source: FacilitySource;
@@ -313,6 +315,8 @@ export interface FacilityListItem {
   isOrphan: boolean;
   ownerId: string;
   ownerName: string;
+  /** Owner's avatar photo (for the clickable owner cell); falls back to initials. */
+  ownerPhotoUrl?: string;
   /** Origin: 'admin' (created from the dashboard) or 'owner' (via the app). */
   source: FacilitySource;
   rating?: number;
@@ -404,6 +408,7 @@ export function toFacilityListItem(
     isOrphan,
     ownerId: facility.ownerId,
     ownerName: facility.ownerName,
+    ownerPhotoUrl: facility.ownerPhotoUrl,
     source: facility.source,
     rating: facility.rating,
     thumbnailUrl: facility.images[0],
@@ -426,6 +431,7 @@ export interface RegionFacility {
   status: FacilityStatus;
   ownerId: string;
   ownerName: string;
+  ownerPhotoUrl?: string;
   rating?: number;
   thumbnailUrl?: string;
   lat: number;
@@ -442,6 +448,7 @@ export function toRegionFacility(facility: Facility): RegionFacility {
     status: facility.status,
     ownerId: facility.ownerId,
     ownerName: facility.ownerName,
+    ownerPhotoUrl: facility.ownerPhotoUrl,
     rating: facility.rating,
     thumbnailUrl: facility.images[0],
     lat: facility.location.lat,
