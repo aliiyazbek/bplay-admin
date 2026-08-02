@@ -46,7 +46,433 @@
     "bookingManagement": "Bookings",
     "clubSubscriptions": "Subscriptions",
     "profile": "Profile",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "plans": "Plans",
+    "feedback": "Feedback",
+    "notifications": "Notifications",
+    "chat": "Chat",
+    "audit": "Audit log"
+  },
+  "notification": {
+    "title": "Notifications",
+    "subtitle": "Everything the platform needs you to look at, with a direct link to it",
+    "search": "Search the notification text",
+    "tab": {
+      "inbox": "Inbox",
+      "preferences": "Delivery settings"
+    },
+    "stats": {
+      "total": "Total",
+      "unread": "Unread",
+      "today": "Today",
+      "highPriority": "Needs attention"
+    },
+    "col": {
+      "unread": "Read state",
+      "type": "Event",
+      "message": "Notification",
+      "category": "Category",
+      "region": "Region",
+      "received": "Received"
+    },
+    "type": {
+      "owner_request": "Owner request",
+      "facility_request": "Facility request",
+      "feedback_new": "New feedback",
+      "community_report": "Community report",
+      "plan_subscription": "Paid subscription",
+      "pending_reminder": "Pending too long",
+      "platform_event": "Platform event",
+      "coverage_gap": "Coverage gap",
+      "other": "Other"
+    },
+    "category": {
+      "governance": "Approvals",
+      "service": "Service",
+      "community": "Community",
+      "billing": "Billing",
+      "system": "System"
+    },
+    "channel": {
+      "inapp": "In the panel",
+      "inappHint": "Appears in this notification centre.",
+      "realtime": "Live",
+      "realtimeHint": "Pushed to an open panel the moment it happens.",
+      "push": "Mobile push",
+      "pushHint": "Sent to the Bplay app on your phone.",
+      "email": "Email",
+      "emailHint": "Sent to your account email address."
+    },
+    "filter": {
+      "allTypes": "All events",
+      "allCategories": "All categories",
+      "allStates": "Read and unread",
+      "allRegions": "All regions",
+      "platform": "Platform-wide",
+      "readState": "Read state",
+      "date": "Received",
+      "dateAll": "Any time",
+      "date7d": "Last 7 days",
+      "date30d": "Last 30 days",
+      "date90d": "Last 90 days",
+      "dateCustom": "Custom",
+      "dateFrom": "From",
+      "dateTo": "To"
+    },
+    "state": {
+      "unread": "Unread",
+      "read": "Read",
+      "emptyTitle": "Nothing to review",
+      "emptyDesc": "New owner and facility requests, feedback, community reports and paid subscriptions will land here.",
+      "filteredTitle": "No notification matches these filters",
+      "filteredDesc": "Try a wider date range, or clear the filters to see everything again."
+    },
+    "scope": {
+      "allRegions": "You are seeing notifications from every region, platform-wide notices included.",
+      "oversight": "You are seeing every notification addressed to you.",
+      "yourRegion": "You are seeing notifications for {{name}}, plus platform-wide notices.",
+      "yourRegions": "You are seeing notifications for {{names}}, plus platform-wide notices.",
+      "noLiveRegions": "None of the regions assigned to you is active right now, so only platform-wide notices reach you."
+    },
+    "actions": {
+      "open": "Open the related item",
+      "markRead": "Mark as read",
+      "markAllRead": "Mark all as read"
+    },
+    "bell": {
+      "label": "Notifications",
+      "labelWithCount": "Notifications — {{n}} unread",
+      "panelLabel": "Recent notifications",
+      "title": "Notifications",
+      "empty": "You are all caught up.",
+      "viewAll": "View all notifications"
+    },
+    "prefs": {
+      "intro": "Choose how each kind of notification reaches you. The panel and live updates stay on — they are how the notification centre works.",
+      "alwaysOn": "Always on — this is how the panel receives it.",
+      "loadError": "Could not load your delivery settings. Please try again.",
+      "hint": {
+        "governance": "New owner accounts and new facilities waiting for your approval.",
+        "service": "Notes, complaints and suggestions sent to the Bplay team.",
+        "community": "Posts and comments reported by players or owners.",
+        "billing": "New paid subscriptions on the platform.",
+        "system": "Reminders, coverage gaps and platform-level events."
+      }
+    },
+    "toast": {
+      "allRead": "{{n}} notifications marked as read.",
+      "preferenceSaved": "Delivery setting saved."
+    }
+  },
+  "feedback": {
+    "title": "Feedback",
+    "subtitle": "Notes, complaints and suggestions sent to the Bplay team",
+    "search": "Search the message or the sender",
+    "stats": {
+      "total": "Total",
+      "new": "Awaiting reply",
+      "replied": "Replied",
+      "closed": "Closed"
+    },
+    "col": {
+      "sender": "Sender",
+      "kind": "Type",
+      "excerpt": "Message",
+      "status": "Status",
+      "region": "Region",
+      "created": "Received"
+    },
+    "senderType": {
+      "player": "Player",
+      "owner": "Owner"
+    },
+    "kind": {
+      "note": "Note",
+      "complaint": "Complaint",
+      "suggestion": "Suggestion",
+      "technical": "Technical issue"
+    },
+    "status": {
+      "new": "New",
+      "replied": "Replied",
+      "closed": "Closed"
+    },
+    "role": {
+      "admin": "Admin",
+      "super_admin": "Super admin"
+    },
+    "filter": {
+      "allSenders": "All senders",
+      "allKinds": "All types",
+      "allRegions": "All regions",
+      "orphans": "Outside regions",
+      "date": "Received",
+      "dateAll": "Any time",
+      "date7d": "Last 7 days",
+      "date30d": "Last 30 days",
+      "date90d": "Last 90 days",
+      "dateCustom": "Custom",
+      "dateFrom": "From",
+      "dateTo": "To"
+    },
+    "scope": {
+      "allRegions": "You are seeing feedback from every region.",
+      "oversight": "You are seeing feedback from every region except senders no region covers.",
+      "yourRegion": "You are seeing feedback from senders in {{name}}.",
+      "yourRegions": "You are seeing feedback from senders in {{names}}.",
+      "noLiveRegions": "None of the regions assigned to you is active right now, so no feedback is in your scope."
+    },
+    "actions": {
+      "view": "Open feedback",
+      "close": "Close",
+      "reopen": "Reopen"
+    },
+    "confirm": {
+      "closeTitle": "Close this feedback?",
+      "closeMessage": "It moves out of the open queue. You can reopen it at any time, and a new reply reopens it automatically.",
+      "reopenTitle": "Reopen this feedback?",
+      "reopenMessage": "It returns to the open queue so it can be followed up."
+    },
+    "detail": {
+      "pageTitle": "{{kind}} from {{name}}",
+      "notFound": "Feedback not found",
+      "notFoundDesc": "It may have been removed, or it belongs to a region outside your scope.",
+      "city": "City",
+      "received": "Received",
+      "attachments": "Attachments",
+      "openAttachment": "Open {{name}}",
+      "attachmentBlocked": "Blocked — unsafe link",
+      "attachmentEmpty": "Nothing to display.",
+      "openInNewTab": "Open in a new tab",
+      "view": "View",
+      "replies": "Replies",
+      "noReplies": "No reply has been sent yet.",
+      "replyLabel": "Your reply",
+      "replyHint": "The sender is notified. This is an answer, not a chat — they cannot reply back here.",
+      "replyPlaceholder": "Write your reply…",
+      "replyReopensNote": "This feedback is closed. Sending a reply reopens it.",
+      "sendReply": "Send reply",
+      "closedBy": "Closed by {{name}} on {{date}}.",
+      "device": "Reported from"
+    },
+    "state": {
+      "emptyTitle": "No feedback yet",
+      "emptyDesc": "Messages players and owners send to the Bplay team land here.",
+      "filteredTitle": "No feedback matches your filters",
+      "filteredDesc": "Try adjusting your search or filters.",
+      "errorTitle": "Failed to load the feedback"
+    },
+    "errors": {
+      "replyRequired": "Write a reply before sending.",
+      "replyLong": "The reply is too long."
+    },
+    "toast": {
+      "replied": "Reply sent.",
+      "closed": "Feedback closed.",
+      "reopened": "Feedback reopened."
+    }
+  },
+  "plan": {
+    "title": "Platform Plans",
+    "subtitle": "The subscription catalog the player and owner apps load at runtime",
+    "search": "Search plans by name, key or feature",
+    "create": "Add plan",
+    "stats": {
+      "total": "Plans",
+      "active": "Active",
+      "paid": "Paid",
+      "subscribers": "Subscribers"
+    },
+    "col": {
+      "name": "Plan",
+      "audience": "Audience",
+      "kind": "Type",
+      "price": "Price",
+      "duration": "Duration",
+      "features": "Features",
+      "status": "Status",
+      "subscribers": "Subscribers"
+    },
+    "audience": {
+      "player": "Player",
+      "owner": "Owner",
+      "playerPlural": "Player plans",
+      "ownerPlural": "Owner tiers",
+      "playerHint": "What a player buys in the Bplay app. A paid plan is what unlocks posting in the community.",
+      "ownerHint": "What a facility owner subscribes to. The tier caps facilities, banners, campaigns and statistics."
+    },
+    "kind": {
+      "free": "Free",
+      "paid": "Paid"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Deactivated"
+    },
+    "badge": {
+      "recommended": "Most popular",
+      "community": "Unlocks community",
+      "trial": "{{n}}-day trial"
+    },
+    "price": {
+      "free": "Free",
+      "perMonth": "/ month",
+      "perYear": "/ year",
+      "perTerm": "/ {{n}} days",
+      "ongoing": "Ongoing",
+      "monthlyOrYearly": "Monthly or yearly"
+    },
+    "value": {
+      "days": "{{n}} days",
+      "unlimited": "Unlimited",
+      "included": "Included",
+      "excluded": "Not included",
+      "notAllowed": "Not allowed"
+    },
+    "entitlement": {
+      "communityPost": "Post in the community",
+      "communityPostHint": "The paid plan's key perk — a player without it can read the feed but not publish.",
+      "communityMedia": "Photos and video in posts",
+      "advancedStats": "Advanced statistics",
+      "prioritySupport": "Priority support",
+      "monthlyBookingLimit": "Bookings per month"
+    },
+    "gate": {
+      "maxFacilities": "Facilities",
+      "statsRetentionDays": "Statistics retention",
+      "bannerUpload": "Banner & cover uploads",
+      "reviewReply": "Review replies",
+      "campaigns": "Marketing campaigns",
+      "prioritySupport": "Priority support"
+    },
+    "filter": {
+      "allAudiences": "All audiences",
+      "allKinds": "All types",
+      "community": "Community access",
+      "allCommunity": "Any access",
+      "communityUnlocks": "Unlocks posting",
+      "communityLocked": "No posting"
+    },
+    "view": {
+      "label": "View mode",
+      "grid": "Card view",
+      "table": "Table view"
+    },
+    "card": {
+      "deactivatedNote": "Deactivated — hidden from the apps. Current subscribers keep it until renewal."
+    },
+    "actions": {
+      "view": "View plan",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
+    },
+    "confirm": {
+      "deactivateTitle": "Deactivate this plan?",
+      "deactivateMessage": "“{{name}}” will disappear from the apps and nobody can subscribe to it. Current subscribers keep it until their term ends."
+    },
+    "delete": {
+      "title": "Delete this plan?",
+      "message": "“{{name}}” will be removed from the catalog. This cannot be undone.",
+      "blockedTitle": "This plan cannot be deleted",
+      "blockedMessage": "“{{name}}” has {{n}} subscribers. A plan with subscribers is never deleted — deactivate it instead so nobody new can subscribe."
+    },
+    "form": {
+      "createTitle": "Add a plan",
+      "editTitle": "Edit plan",
+      "subtitle": "The apps read this catalog at runtime — nothing here is hardcoded in the app.",
+      "tabs": "Plan sections",
+      "tab": {
+        "basics": "Basics",
+        "pricing": "Pricing",
+        "features": "Features",
+        "highlights": "Highlights"
+      },
+      "editNotice": "Changes never affect a live subscription — they apply from the next renewal.",
+      "audience": "Audience",
+      "audienceHint": "Who buys this plan. It decides the pricing model and the features below.",
+      "audienceLocked": "The audience cannot change after the plan is created.",
+      "kind": "Type",
+      "kindHint": "A paid plan must carry a price; a free plan is priced at zero.",
+      "name": "Name",
+      "tier": "Plan key",
+      "tierHint": "The stable key the apps match on — lowercase letters, digits and underscores.",
+      "tierLocked": "The plan key cannot change after creation — live subscriptions are stored against it.",
+      "description": "Description",
+      "recommended": "Mark as most popular",
+      "recommendedHint": "Highlights this plan in the apps. Only one plan per audience can hold it.",
+      "price": "Price",
+      "monthlyPrice": "Monthly price",
+      "freePriceHint": "A free plan is always priced at zero.",
+      "yearlyPrice": "Yearly price",
+      "yearlyHint": "The apps show the yearly saving against twelve monthly payments.",
+      "durationDays": "Duration (days)",
+      "durationHint": "How long one term lasts. Leave empty for an ongoing plan.",
+      "durationOngoing": "Ongoing",
+      "trialDays": "Free trial (days)",
+      "trialHint": "Leave empty when the plan has no trial.",
+      "trialNone": "No trial",
+      "pricePreview": "Preview",
+      "unlimitedHint": "Leave empty for unlimited, 0 to disable.",
+      "highlights": "Highlights",
+      "highlightsHint": "Up to {{n}} short bullets shown under the plan name in the apps.",
+      "highlightPlaceholder": "e.g. Unlimited bookings",
+      "highlightAdd": "Add",
+      "highlightEmpty": "No highlights yet.",
+      "highlightRemove": "Remove highlight",
+      "createSubmit": "Create plan",
+      "saveSubmit": "Save changes"
+    },
+    "state": {
+      "emptyTitle": "No plans yet",
+      "emptyDesc": "Add the first plan — the apps show nothing until this catalog has one.",
+      "filteredTitle": "No plans match your filters",
+      "filteredDesc": "Try adjusting your search or filters.",
+      "errorTitle": "Failed to load the plan catalog"
+    },
+    "detail": {
+      "notFound": "Plan not found",
+      "pricing": "Pricing",
+      "trial": "Free trial",
+      "reach": "Reach & catalog",
+      "position": "Position",
+      "updatedAt": "Last updated",
+      "createdAt": "Created",
+      "featureGate": "Feature gate",
+      "entitlements": "Entitlements",
+      "highlights": "Highlights",
+      "deleteBlockedNote": "This plan has subscribers, so it can only be deactivated — never deleted.",
+      "deletableNote": "Nobody is subscribed to this plan, so it can be deleted.",
+      "communityTitle": "Community access",
+      "communityGranted": "Players on this plan may publish in the community.",
+      "communityDenied": "Players on this plan can read the community but not publish.",
+      "communityInactive": "This plan grants community posting, but it is deactivated — nobody can subscribe to it right now."
+    },
+    "errors": {
+      "negative": "This value cannot be negative.",
+      "tierRequired": "A plan key is required.",
+      "tierLong": "The plan key is too long.",
+      "tierFormat": "Use lowercase letters, digits and underscores only.",
+      "nameRequired": "A plan name is required.",
+      "nameLong": "The name is too long.",
+      "descriptionLong": "The description is too long.",
+      "priceNegative": "The price cannot be negative.",
+      "durationPositive": "The duration must be at least one day.",
+      "tooManyHighlights": "Too many highlights.",
+      "paidNeedsPrice": "A paid plan must carry a price.",
+      "freeMustBeZero": "A free plan must be priced at zero.",
+      "playerNeedsDuration": "A paid player plan must state its duration in days.",
+      "ownerNeedsYearly": "A paid owner tier must carry a yearly price."
+    },
+    "toast": {
+      "created": "Plan created.",
+      "updated": "Plan updated.",
+      "activated": "Plan activated.",
+      "deactivated": "Plan deactivated.",
+      "reordered": "Catalog order updated.",
+      "deleted": "Plan deleted."
+    }
   },
   "player": {
     "title": "Player Management",
@@ -2074,6 +2500,240 @@
         "attention": "Attention",
         "regions": "Regions"
       }
+    }
+  },
+  "chat": {
+    "title": "Chat",
+    "subtitle": "Direct conversations between the administration and facility owners.",
+    "rail": {
+      "label": "Conversations",
+      "title": "Conversations",
+      "youPrefix": "You:",
+      "noMessages": "No messages yet",
+      "unreadCount": "{{count}} unread messages",
+      "attachmentPreview_one": "Sent an attachment",
+      "attachmentPreview_other": "Sent {{count}} attachments"
+    },
+    "filters": {
+      "searchPlaceholder": "Search owner, facility or message…",
+      "channel": "Channel",
+      "region": "Region",
+      "allChannels": "All channels",
+      "allRegions": "All regions",
+      "unreadOnly": "Unread only"
+    },
+    "stats": {
+      "awaitingAdmin": "{{count}} awaiting a reply",
+      "awaitingAdminHint": "Threads where the owner wrote last and the administration has not answered."
+    },
+    "category": {
+      "facility_review": "Facility review",
+      "general_support": "General support"
+    },
+    "team": {
+      "review": "Review team",
+      "support": "Support team"
+    },
+    "status": {
+      "open": "Open",
+      "awaiting_owner": "Awaiting owner",
+      "awaiting_admin": "Awaiting reply",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "role": {
+      "admin": "Admin",
+      "super_admin": "Super admin"
+    },
+    "delivery": {
+      "sending": "Sending…",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "failed": "Not sent"
+    },
+    "systemEvent": {
+      "request_submitted": "Review requested",
+      "review_started": "Review started",
+      "document_requested": "Document requested",
+      "approved": "Facility approved",
+      "rejected": "Facility rejected",
+      "status_changed": "Status changed"
+    },
+    "thread": {
+      "label": "Conversation with {{name}}",
+      "paneLabel": "Conversation",
+      "administration": "Administration",
+      "typing": "typing…",
+      "typingBy": "{{name}} is typing",
+      "jumpToLatest": "Jump to latest",
+      "firstMessageTitle": "No messages with {{name}} yet",
+      "firstMessageHint": "Write the first message below — the owner receives it in the Bplay app together with a notification."
+    },
+    "composer": {
+      "label": "Message",
+      "placeholder": "Write to {{name}}…",
+      "hint": "Enter to send · Shift + Enter for a new line",
+      "closed": "This conversation is closed and can no longer receive messages."
+    },
+    "placeholder": {
+      "title": "Select a conversation",
+      "description": "Pick a thread on the left to read it, or start a new conversation with a facility owner."
+    },
+    "empty": {
+      "noConversations": "No conversations yet",
+      "noConversationsHint": "Start one with a facility owner and it will appear here.",
+      "noMatches": "No conversations match",
+      "noMatchesHint": "Try a different search, or clear the filters."
+    },
+    "actions": {
+      "new": "New",
+      "send": "Send message",
+      "retry": "Try again",
+      "backToList": "Back to conversations"
+    },
+    "newConversation": {
+      "title": "New conversation",
+      "description": "Pick a facility owner and the channel to write on. If a thread already exists, it opens instead of a new one.",
+      "owner": "Facility owner",
+      "searchOwners": "Search owners…",
+      "noOwners": "No owners found",
+      "noOwnersHint": "Only owners inside the regions you cover can be messaged.",
+      "facilityCount_one": "{{count}} facility",
+      "facilityCount_other": "{{count}} facilities",
+      "noFacilities": "No facilities yet",
+      "channel": "Channel",
+      "facility": "Facility",
+      "selectFacility": "Select a facility",
+      "submit": "Open conversation"
+    },
+    "attachment": {
+      "image": "Attached image",
+      "openImage": "Open {{name}}",
+      "unsafe": "Link blocked for safety"
+    },
+    "scope": {
+      "allRegions": "You are seeing conversations from every region.",
+      "oversight": "You are seeing conversations from every region except owners no region covers.",
+      "yourRegion": "You are seeing conversations with owners in {{name}}.",
+      "yourRegions": "You are seeing conversations with owners in {{names}}.",
+      "noLiveRegions": "None of the regions assigned to you is active right now, so no conversation is in your scope."
+    },
+    "time": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "justNow": "just now",
+      "minutes": "{{count}}m ago",
+      "hours": "{{count}}h ago",
+      "days": "{{count}}d ago"
+    },
+    "toast": {
+      "started": "Conversation opened."
+    },
+    "errors": {
+      "messageRequired": "Write a message before sending.",
+      "messageLong": "A message cannot exceed {{max}} characters.",
+      "ownerRequired": "Pick a facility owner first.",
+      "facilityRequired": "Pick the facility this review thread is about.",
+      "sendFailed": "Message not sent.",
+      "notFoundTitle": "Conversation not available",
+      "notFoundHint": "It may have been removed, or it is outside the regions you cover."
+    }
+  },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Who changed what, when, and from where.",
+    "appendOnlyNotice": "This log is append-only — entries can be read and exported, never edited or deleted.",
+    "actionPattern": "{{verb}} {{entity}}",
+    "columns": {
+      "timestamp": "Time",
+      "actor": "Performed by",
+      "email": "Email",
+      "action": "Action",
+      "entityType": "Type",
+      "entityId": "Record",
+      "ip": "IP address"
+    },
+    "verb": {
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "approve": "Approve",
+      "reject": "Reject",
+      "suspend": "Suspend",
+      "restore": "Restore",
+      "block": "Block",
+      "unblock": "Unblock",
+      "assign": "Assign",
+      "reset_password": "Reset password for",
+      "login": "Sign in",
+      "logout": "Sign out"
+    },
+    "entity": {
+      "admin": "admin",
+      "owner": "owner",
+      "player": "player",
+      "facility": "facility",
+      "region": "region",
+      "plan": "plan",
+      "booking": "booking",
+      "subscription": "subscription",
+      "post": "post",
+      "feedback": "feedback",
+      "conversation": "conversation"
+    },
+    "role": {
+      "admin": "Admin",
+      "super_admin": "Super admin"
+    },
+    "actor": {
+      "system": "System",
+      "unknown": "Unknown user"
+    },
+    "filters": {
+      "search": "Performed by",
+      "searchPlaceholder": "Search by name or email…",
+      "allActions": "All actions",
+      "allEntities": "All types",
+      "date": "Date",
+      "allTime": "All time",
+      "last7": "Last 7 days",
+      "last30": "Last 30 days",
+      "last90": "Last 90 days",
+      "custom": "Custom",
+      "from": "From",
+      "to": "To"
+    },
+    "entityHistory": {
+      "banner": "Showing every entry for record",
+      "clear": "Show all entries"
+    },
+    "detail": {
+      "title": "Audit entry",
+      "actor": "Performed by",
+      "target": "Affected record",
+      "entityLabel": "Name",
+      "changes": "What changed",
+      "origin": "Origin",
+      "device": "Device / browser",
+      "noChanges": "This action recorded no field changes.",
+      "emptyValue": "—",
+      "unresolvedId": "Not recorded"
+    },
+    "actions": {
+      "entityHistory": "History of this record"
+    },
+    "empty": {
+      "noEntries": "No audit entries yet",
+      "noEntriesHint": "Administrative actions will appear here as they happen.",
+      "noMatches": "No entries match",
+      "noMatchesHint": "Try a different search or date range, or clear the filters."
+    },
+    "export": {
+      "done": "Exported {{count}} entries.",
+      "empty": "Nothing to export — no entry matches the current filters.",
+      "truncated": "Export capped at {{count}} rows. Narrow the filters for the rest."
     }
   }
 }

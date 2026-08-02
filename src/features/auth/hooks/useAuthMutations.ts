@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@shared/stores/authStore';
 import { useToast } from '@ui';
 import { PATHS } from '@app/router/paths';
+import { queryClient } from '@shared/lib/queryClient';
 import { forgotPassword, login, resetPassword } from '../api';
 
 export function useLoginMutation() {
@@ -12,6 +13,11 @@ export function useLoginMutation() {
   return useMutation({
     mutationFn: login,
     onSuccess: (session) => {
+      // Drop everything the PREVIOUS principal cached before the new session is
+      // installed. /login is reachable from an authenticated tab by client-side
+      // navigation, so without this a region-scoped list could be served from
+      // cache to the admin who just signed in. Mirrors AppSidebar.handleLogout.
+      queryClient.clear();
       setSession(session);
       // Super admins land on the platform overview dashboard; regional admins on
       // their facility review desk.

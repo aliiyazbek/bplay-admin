@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Badge } from '@ui';
-import { formatUrlLabel } from '@shared/utils/url';
+import { formatUrlLabel, safeHttpUrl } from '@shared/utils/url';
 import { ownerTrustTier, OWNER_TRUST_VARIANT, type Owner } from '../api/owner.types';
 import styles from './OwnerAboutCard.module.css';
 
@@ -33,19 +33,23 @@ export function OwnerAboutCard({ owner }: Props) {
   if (owner.city) rows.push({ key: 'city', label: t('owner.about.city'), value: owner.city });
   if (owner.address) rows.push({ key: 'address', label: t('owner.about.address'), value: owner.address });
   if (owner.link) {
+    // Owner-authored: only linkify an http(s) URL — see PlayerAboutCard.
+    const href = safeHttpUrl(owner.link);
     rows.push({
       key: 'website',
       label: t('owner.about.website'),
-      value: (
+      value: href ? (
         <a
           className={styles.profileLink}
-          href={owner.link}
+          href={href}
           target="_blank"
           rel="noreferrer noopener"
           dir="ltr"
         >
-          {formatUrlLabel(owner.link)}
+          {formatUrlLabel(href)}
         </a>
+      ) : (
+        <span dir="ltr">{owner.link}</span>
       ),
     });
   }

@@ -17,11 +17,17 @@ import {
   MessageCircleIcon,
   CalendarIcon,
   CreditCardIcon,
+  LayersIcon,
+  InboxIcon,
+  BellIcon,
+  SendIcon,
+  ShieldAlertIcon,
 } from '@ui';
 import { useAuthStore, useAuthUser, useAuthRole, type UserRole } from '@shared/stores/authStore';
 import { useUiStore } from '@shared/stores/uiStore';
 import { queryClient } from '@shared/lib/queryClient';
 import { logout as apiLogout } from '@features/auth/api';
+import { ChatNavBadge } from '@features/chat/components/ChatNavBadge';
 import { PATHS } from '@app/router/paths';
 import styles from './AppSidebar.module.css';
 
@@ -32,6 +38,8 @@ interface NavItem {
   superAdminOnly: boolean;
   /** Explicit role whitelist; when set it takes precedence over superAdminOnly. */
   roles?: UserRole[];
+  /** Optional trailing indicator (an unread count, a pending badge). */
+  Badge?: ComponentType;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -42,8 +50,21 @@ const NAV_ITEMS: NavItem[] = [
   { to: PATHS.playerManagement, key: 'nav.playerManagement', Icon: TrophyIcon, superAdminOnly: true },
   { to: PATHS.facilityManagement, key: 'nav.facilityManagement', Icon: StadiumIcon, superAdminOnly: false },
   { to: PATHS.bookingManagement, key: 'nav.bookingManagement', Icon: CalendarIcon, superAdminOnly: false },
+  { to: PATHS.plans, key: 'nav.plans', Icon: LayersIcon, superAdminOnly: true },
   { to: PATHS.clubSubscriptions, key: 'nav.clubSubscriptions', Icon: CreditCardIcon, superAdminOnly: false },
   { to: PATHS.communityManagement, key: 'nav.communityManagement', Icon: MessageCircleIcon, superAdminOnly: false },
+  { to: PATHS.feedback, key: 'nav.feedback', Icon: InboxIcon, superAdminOnly: false },
+  {
+    to: PATHS.chat,
+    key: 'nav.chat',
+    Icon: SendIcon,
+    superAdminOnly: false,
+    Badge: ChatNavBadge,
+  },
+  { to: PATHS.notifications, key: 'nav.notifications', Icon: BellIcon, superAdminOnly: false },
+  // AUD2 — the audit trail is a supervision tool aimed at admins, so it is
+  // super-admin only in the nav as well as on the route.
+  { to: PATHS.audit, key: 'nav.audit', Icon: ShieldAlertIcon, superAdminOnly: true },
   { to: PATHS.profile, key: 'nav.profile', Icon: UserIcon, superAdminOnly: false },
 ];
 
@@ -91,7 +112,7 @@ export function AppSidebar() {
       </NavLink>
 
       <nav className={styles.nav}>
-        {items.map(({ to, key, Icon }) => (
+        {items.map(({ to, key, Icon, Badge }) => (
           <NavLink
             key={to}
             to={to}
@@ -100,6 +121,7 @@ export function AppSidebar() {
           >
             <Icon className={styles.linkIcon} />
             <span>{t(key)}</span>
+            {Badge && <Badge />}
           </NavLink>
         ))}
       </nav>

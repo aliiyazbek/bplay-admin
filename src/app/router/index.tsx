@@ -46,6 +46,13 @@ const ClubSubscriptionsPage = lazy(
 const MembershipDetailPage = lazy(
   () => import('@features/club-subscriptions/pages/MembershipDetailPage'),
 );
+const PlansPage = lazy(() => import('@features/plans/pages/PlansPage'));
+const PlanDetailPage = lazy(() => import('@features/plans/pages/PlanDetailPage'));
+const FeedbackPage = lazy(() => import('@features/feedback/pages/FeedbackPage'));
+const FeedbackDetailPage = lazy(() => import('@features/feedback/pages/FeedbackDetailPage'));
+const NotificationsPage = lazy(() => import('@features/notifications/pages/NotificationsPage'));
+const ChatPage = lazy(() => import('@features/chat/pages/ChatPage'));
+const AuditPage = lazy(() => import('@features/audit/pages/AuditPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const DashboardLayout = lazy(() => import('@app/layouts/DashboardLayout'));
 const DashboardPage = lazy(() => import('@features/dashboard/pages/DashboardPage'));
@@ -237,6 +244,84 @@ export default function AppRouter() {
                 <RequireAnyRole roles={['super_admin', 'admin']}>
                   <MembershipDetailPage />
                 </RequireAnyRole>
+              }
+            />
+            {/* PN3 — the platform plan catalog is super-admin only, never region-scoped. */}
+            <Route
+              path="plans"
+              element={
+                <RequireRole role="super_admin">
+                  <PlansPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="plans/:planId"
+              element={
+                <RequireRole role="super_admin">
+                  <PlanDetailPage />
+                </RequireRole>
+              }
+            />
+            {/* FEED — a regional admin answers their own region's feedback, a
+                super-admin answers everything (FR-ADM-FEED-005). */}
+            <Route
+              path="feedback"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <FeedbackPage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
+              path="feedback/:feedbackId"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <FeedbackDetailPage />
+                </RequireAnyRole>
+              }
+            />
+            {/* SET ج — the notification centre is available to the regional admin
+                AND the super-admin (FR-ADM-SET-006); the regional admin's inbox is
+                narrowed by region at emit time (FR-ADM-SET-008). */}
+            <Route
+              path="notifications"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <NotificationsPage />
+                </RequireAnyRole>
+              }
+            />
+            {/* CHAT — administration ↔ facility owner (CH1). A regional admin
+                gets their own region's threads, a super-admin gets them all
+                (FR-ADM-CHAT-004). Both paths render the SAME page: the id only
+                decides which pane is visible on a narrow viewport, so the
+                browser Back button still means "back to the list" on a phone. */}
+            <Route
+              path="chat"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <ChatPage />
+                </RequireAnyRole>
+              }
+            />
+            <Route
+              path="chat/:conversationId"
+              element={
+                <RequireAnyRole roles={['super_admin', 'admin']}>
+                  <ChatPage />
+                </RequireAnyRole>
+              }
+            />
+            {/* AUDIT — SUPER-ADMIN ONLY (AUD2). The log names other admins'
+                actions and exists to supervise them, so a regional admin must
+                never reach it, by URL or otherwise. */}
+            <Route
+              path="audit"
+              element={
+                <RequireRole role="super_admin">
+                  <AuditPage />
+                </RequireRole>
               }
             />
           </Route>

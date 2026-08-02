@@ -43,4 +43,6 @@ export * from './PageHeader/PageHeader';
 export * from './Toolbar/Toolbar';
 export * from './ClearFiltersBar/ClearFiltersBar';
 export * from './FilterField/FilterField';
+export * from './ViewToggle/ViewToggle';
+export * from './Switch/Switch';
 export * from './Toast';

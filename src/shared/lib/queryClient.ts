@@ -36,6 +36,13 @@ export const queryClient = new QueryClient({
     },
   }),
   mutationCache: new MutationCache({
-    onError: (error) => toast.error(toAppError(error).message),
+    // A mutation may opt out with `meta: { silentError: true }` when its own UI
+    // already renders the failure AND offers the recovery — e.g. a chat bubble
+    // that stays in the thread marked "failed" with a retry button. Everything
+    // else toasts; silence is the exception, never the default.
+    onError: (error, _variables, _context, mutation) => {
+      if (mutation.meta?.silentError) return;
+      toast.error(toAppError(error).message);
+    },
   }),
 });

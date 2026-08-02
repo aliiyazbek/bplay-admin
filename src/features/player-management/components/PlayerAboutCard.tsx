@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@ui';
-import { formatUrlLabel } from '@shared/utils/url';
+import { formatUrlLabel, safeHttpUrl } from '@shared/utils/url';
 import type { Player } from '../api/player.types';
 import styles from './playerCards.module.css';
 
@@ -27,19 +27,24 @@ export function PlayerAboutCard({ player }: Props) {
   if (player.city) rows.push({ key: 'city', label: t('player.about.city'), value: player.city });
   if (joined) rows.push({ key: 'joined', label: t('player.about.joined'), value: joined });
   if (player.link) {
+    // The link is player-authored: only render it as a link when the scheme is
+    // http(s), otherwise a stored `javascript:…` would run with the admin session.
+    const href = safeHttpUrl(player.link);
     rows.push({
       key: 'link',
       label: t('player.about.link'),
-      value: (
+      value: href ? (
         <a
           className={styles.profileLink}
-          href={player.link}
+          href={href}
           target="_blank"
           rel="noreferrer noopener"
           dir="ltr"
         >
-          {formatUrlLabel(player.link)}
+          {formatUrlLabel(href)}
         </a>
+      ) : (
+        <span dir="ltr">{player.link}</span>
       ),
     });
   }

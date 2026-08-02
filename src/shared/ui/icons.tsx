@@ -493,6 +493,30 @@ export const ArrowDownRightIcon = (p: IconProps) => (
   </Icon>
 );
 
+/** Composer send action. Points to the inline-end; add className="flipInRtl" to mirror in RTL. */
+export const SendIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M22 2 11 13" />
+    <path d="M22 2 15 22l-4-9-9-4Z" />
+  </Icon>
+);
+
+/** Double tick — a message the recipient's client has acknowledged. */
+export const CheckCheckIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M18 6 7 17l-5-5" />
+    <path d="m22 10-7.5 7.5L13 16" />
+  </Icon>
+);
+
+/** In-flight glyph for a message that has not been acknowledged yet. */
+export const ClockDashedIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7.5V12l3 1.75" />
+  </Icon>
+);
+
 /** The Bplay brand mark — a mint gradient tile (a legitimate brand asset, so brand hexes live here). */
 export function BrandMark({ size = 34 }: { size?: number }) {
   return (
