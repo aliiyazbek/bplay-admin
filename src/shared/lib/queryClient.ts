@@ -1,5 +1,6 @@
 import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query';
-import { isAppError, isNotFoundError, toAppError } from './errors';
+import { isAppError, isNotFoundError } from './errors';
+import { translateError } from './errorMessage';
 import { toast } from '@ui/Toast';
 
 /**
@@ -32,7 +33,7 @@ export const queryClient = new QueryClient({
     // "Not found" is an expected outcome the detail pages render inline — don't toast it.
     onError: (error) => {
       if (isNotFoundError(error)) return;
-      toast.error(toAppError(error).message);
+      toast.error(translateError(error));
     },
   }),
   mutationCache: new MutationCache({
@@ -42,7 +43,7 @@ export const queryClient = new QueryClient({
     // else toasts; silence is the exception, never the default.
     onError: (error, _variables, _context, mutation) => {
       if (mutation.meta?.silentError) return;
-      toast.error(toAppError(error).message);
+      toast.error(translateError(error));
     },
   }),
 });

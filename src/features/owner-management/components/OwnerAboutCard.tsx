@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Badge } from '@ui';
 import { formatUrlLabel, safeHttpUrl } from '@shared/utils/url';
-import { ownerTrustTier, OWNER_TRUST_VARIANT, type Owner } from '../api/owner.types';
+import { OWNER_TRUST_VARIANT, type Owner } from '../api/owner.types';
 import styles from './OwnerAboutCard.module.css';
 
 interface Props {
@@ -25,7 +25,8 @@ export function OwnerAboutCard({ owner }: Props) {
     typeof owner.monthlyRevenueSyp === 'number'
       ? new Intl.NumberFormat(locale).format(owner.monthlyRevenueSyp)
       : null;
-  const tier = ownerTrustTier(owner.trustScore);
+  // The wire carries the tier itself — there is no 0-100 score to derive it from.
+  const tier = owner.trustTier;
 
   const rows: Array<{ key: string; label: string; value: ReactNode }> = [];
   if (owner.legalName) rows.push({ key: 'legal', label: t('owner.about.legalName'), value: owner.legalName });

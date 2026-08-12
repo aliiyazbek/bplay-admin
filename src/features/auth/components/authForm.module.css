@@ -4,6 +4,13 @@
   gap: var(--space-4);
   text-align: start;
 }
+/* Secondary guidance under a confirmation panel (e.g. "check your spam folder"). */
+.note {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
 .link {
   align-self: center;
   margin-block-start: var(--space-1);

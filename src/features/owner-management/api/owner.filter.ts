@@ -2,7 +2,8 @@ import { filterPaginate } from '@shared/lib/paginate';
 import { ownerState, type Owner, type OwnerListParams, type OwnerListResult } from './owner.types';
 
 /**
- * Shared search + filters + pagination (used by both the real and mock sources).
+ * Search + filters + pagination for the MOCK source only — the live API runs all
+ * three server-side and returns an already-narrowed page plus a `meta` total.
  * Filters mirror admin SRS FR-ADM-OWNER-003: a single account-state filter plus
  * region, facility-count and registration-date range.
  */

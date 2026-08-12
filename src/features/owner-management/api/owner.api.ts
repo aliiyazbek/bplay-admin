@@ -1,6 +1,6 @@
 import { apiClient } from '@lib/apiClient';
 import { unwrap, unwrapList } from '@shared/types/api';
-import { filterAndPaginateOwners } from './owner.filter';
+import { DEFAULT_PAGE_SIZE } from '@shared/lib/paginate';
 import {
   toOwner,
   type CreatedOwner,
@@ -17,10 +17,61 @@ import {
 const BASE = '/admin/owners-management';
 const OWNERS_PATH = `${BASE}/owners`;
 
+/** `meta` block returned by the backend's `paginated()` helper. */
+interface PageMeta {
+  page?: number;
+  pageSize?: number;
+  total?: number;
+  totalPages?: number;
+}
+
+/** Raw KPI payload from `/owners/stats` (mutually exclusive buckets). */
+interface OwnerStatsDto {
+  total?: number;
+  under_review?: number;
+  active?: number;
+  rejected?: number;
+  suspend?: number;
+  block?: number;
+}
+
+/**
+ * The querystring rejects unknown keys and requires `q` to be non-empty, so a
+ * blank search box must send nothing rather than `q=`.
+ */
+function toQuery(params: OwnerListParams): Record<string, string | number> {
+  const query: Record<string, string | number> = {
+    page: params.page && params.page > 0 ? params.page : 1,
+    pageSize: params.pageSize ?? DEFAULT_PAGE_SIZE,
+  };
+
+  const q = params.q?.trim();
+  if (q) query.q = q;
+  if (params.status && params.status !== 'all') query.status = params.status;
+  if (params.facilities && params.facilities !== 'all') query.facilities = params.facilities;
+  if (params.joined && params.joined !== 'all') query.joined = params.joined;
+
+  return query;
+}
+
+/**
+ * Search, filters and pagination all run server-side — re-filtering the page
+ * client-side would drop rows from an already-narrowed slice and report a total
+ * that only describes the current page.
+ */
 export async function getOwners(params: OwnerListParams): Promise<OwnerListResult> {
-  const res = await apiClient.get(OWNERS_PATH, { params });
-  const all = unwrapList<OwnerDto>(res.data, ['owners']).map(toOwner);
-  return filterAndPaginateOwners(all, params);
+  const query = toQuery(params);
+  const res = await apiClient.get(OWNERS_PATH, { params: query });
+
+  const items = unwrapList<OwnerDto>(res.data, ['owners']).map(toOwner);
+  const meta = (res.data as { meta?: PageMeta } | undefined)?.meta;
+
+  return {
+    items,
+    total: meta?.total ?? items.length,
+    page: meta?.page ?? Number(query.page),
+    pageCount: Math.max(1, meta?.totalPages ?? 1),
+  };
 }
 
 export async function getOwnerById(id: string): Promise<Owner> {
@@ -29,43 +80,60 @@ export async function getOwnerById(id: string): Promise<Owner> {
 }
 
 export async function getOwnerStats(): Promise<OwnerStats> {
-  // Derived client-side from the full list until a dedicated stats endpoint exists.
-  const res = await apiClient.get(OWNERS_PATH, { params: { pageSize: 1000 } });
-  const all = unwrapList<OwnerDto>(res.data, ['owners']).map(toOwner);
+  const res = await apiClient.get(`${OWNERS_PATH}/stats`);
+  const dto = unwrap<OwnerStatsDto>(res.data);
   return {
-    total: all.length,
-    underReview: all.filter((o) => o.accountStatus === 'under_review' && !o.isBlocked).length,
-    active: all.filter((o) => o.accountStatus === 'active' && !o.isBlocked).length,
-    blocked: all.filter((o) => o.isBlocked).length,
+    total: dto.total ?? 0,
+    underReview: dto.under_review ?? 0,
+    active: dto.active ?? 0,
+    rejected: dto.rejected ?? 0,
+    suspended: dto.suspend ?? 0,
+    blocked: dto.block ?? 0,
   };
 }
 
+/**
+ * approve / reject / suspend / activate / block / unblock.
+ * `reason` is required by the backend for reject, suspend and block; an empty
+ * string would fail its minLength, so it is omitted rather than sent blank.
+ */
 export async function updateOwnerStatus(
   id: string,
   action: OwnerAction,
   reason?: string,
 ): Promise<void> {
-  await apiClient.patch(`${OWNERS_PATH}/${id}/status`, { action, reason });
+  const trimmed = reason?.trim();
+  await apiClient.patch(`${OWNERS_PATH}/${id}/status`, {
+    action,
+    ...(trimmed ? { reason: trimmed } : {}),
+  });
 }
 
+/** The UI says accept/reject; the wire enum is approved/rejected. */
 export async function reviewOwnerDocument(
   id: string,
   documentId: string,
   action: OwnerDocAction,
   reason?: string,
 ): Promise<void> {
-  await apiClient.patch(`${OWNERS_PATH}/${id}/documents/${documentId}`, { action, reason });
+  const trimmed = reason?.trim();
+  await apiClient.patch(`${OWNERS_PATH}/${id}/documents/${documentId}`, {
+    action: action === 'accept' ? 'approved' : 'rejected',
+    ...(trimmed ? { reason: trimmed } : {}),
+  });
 }
 
 export async function createOwner(input: CreateOwnerInput): Promise<CreatedOwner> {
+  const address = input.address?.trim();
+  // The body rejects unknown keys — send exactly what createOwnerByAdminSchema declares.
   const res = await apiClient.post(OWNERS_PATH, {
-    name: input.name,
-    email: input.email,
+    full_name: input.name.trim(),
+    email: input.email.trim(),
     phone: `963${input.phone}`,
-    national_id: input.nationalId,
-    intended_facility_type: input.intendedFacilityType,
-    region: input.region,
+    national_id: input.nationalId.trim(),
+    ...(address ? { address } : {}),
   });
-  const data = unwrap<OwnerDto & { temp_password?: string }>(res.data);
-  return { owner: toOwner(data), tempPassword: data.temp_password ?? '' };
+
+  const data = unwrap<OwnerDto & { temporary_password?: string }>(res.data);
+  return { owner: toOwner(data), tempPassword: data.temporary_password ?? '' };
 }

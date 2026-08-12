@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { Modal, Field, Input, PhoneInput, Select, Button, useToast } from '@ui';
+import { Modal, Field, Input, PhoneInput, Button, useToast } from '@ui';
 import { createOwnerSchema, type CreateOwnerValues } from '../api/owner.schema';
 import { useCreateOwner } from '../hooks/useCreateOwner';
 import type { CreatedOwner } from '../api/owner.types';
@@ -18,7 +18,7 @@ const BLANK: CreateOwnerValues = {
   email: '',
   phone: '',
   nationalId: '',
-  intendedFacilityType: 'sports_club',
+  address: '',
 };
 
 /**
@@ -59,7 +59,7 @@ export function OwnerFormModal({ isOpen, onClose }: Props) {
       email: data.email,
       phone: data.phone,
       nationalId: data.nationalId,
-      intendedFacilityType: data.intendedFacilityType,
+      address: data.address,
     });
     setCreated(result);
   });
@@ -168,23 +168,13 @@ export function OwnerFormModal({ isOpen, onClose }: Props) {
             </Field>
           </div>
 
-          <Field label={t('owner.create.intent')} htmlFor="o-intent" error={err('intendedFacilityType')}>
-            <Controller
-              control={control}
-              name="intendedFacilityType"
-              render={({ field }) => (
-                <Select
-                  id="o-intent"
-                  value={field.value}
-                  onChange={field.onChange}
-                  aria-label={t('owner.create.intent')}
-                  options={[
-                    { value: 'sports_club', label: t('owner.intent.sports_club') },
-                    { value: 'independent_court', label: t('owner.intent.independent_court') },
-                  ]}
-                />
-              )}
-            />
+          <Field
+            label={t('owner.create.address')}
+            htmlFor="o-address"
+            hint={t('common.optional')}
+            error={err('address')}
+          >
+            <Input id="o-address" data-testid="owner-address" {...register('address')} />
           </Field>
 
           <p className={styles.hint}>{t('owner.create.hint')}</p>

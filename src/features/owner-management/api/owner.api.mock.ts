@@ -16,7 +16,19 @@ import type {
   OwnerListParams,
   OwnerListResult,
   OwnerStats,
+  OwnerTrustTier,
 } from './owner.types';
+
+/**
+ * The seeds carry a 0–100 reputation score; the domain (and the backend) speak
+ * in tiers. Derived here so the fixtures stay readable without re-introducing a
+ * score the wire does not have.
+ */
+function scoreToTier(score: number): OwnerTrustTier {
+  if (score >= 85) return 'premium';
+  if (score >= 60) return 'verified';
+  return 'basic';
+}
 
 // In-memory mutable db: mutations persist for the session and a refetch sees them.
 // Ids align 1:1 with the facility mock's owner ids (300…) so an owner's detail
@@ -126,9 +138,11 @@ const db: Owner[] = SEED.map((seed, index) => {
     statusReason: seed.statusReason,
     isBlocked: seed.isBlocked,
     blockedReason: seed.blockedReason,
-    trustScore: seed.trustScore,
+    trustTier: scoreToTier(seed.trustScore),
     monthlyRevenueSyp: seed.revenue,
     documents: seed.withDocs ? seedDocs(id, seed.accountStatus) : [],
+    // The mock always serves the full record, so the approve gate is decidable.
+    documentsLoaded: true,
     // Spread joins over recent months so the "Joined" recency filter is meaningful.
     createdAt: new Date(Date.now() - index * 12 * 86_400_000).toISOString(),
   };
@@ -184,10 +198,15 @@ export async function getOwnerById(id: string): Promise<Owner> {
 
 export async function getOwnerStats(): Promise<OwnerStats> {
   await mockDelay(200);
+  // Mutually exclusive buckets, exactly like the backend: blocked beats
+  // suspended, which beats the review outcome — so the parts sum to the total.
+  const live = db.filter((o) => !o.isBlocked && o.accountStatus !== 'suspended');
   return {
     total: db.length,
-    underReview: db.filter((o) => o.accountStatus === 'under_review' && !o.isBlocked).length,
-    active: db.filter((o) => o.accountStatus === 'active' && !o.isBlocked).length,
+    underReview: live.filter((o) => o.accountStatus === 'under_review').length,
+    active: live.filter((o) => o.accountStatus === 'active').length,
+    rejected: live.filter((o) => o.accountStatus === 'rejected').length,
+    suspended: db.filter((o) => !o.isBlocked && o.accountStatus === 'suspended').length,
     blocked: db.filter((o) => o.isBlocked).length,
   };
 }
@@ -236,12 +255,13 @@ export async function createOwner(input: CreateOwnerInput): Promise<CreatedOwner
     email: input.email,
     phone: `963${input.phone}`,
     nationalId: input.nationalId,
-    intendedFacilityType: input.intendedFacilityType,
-    region: input.region ?? '',
+    address: input.address,
+    region: '',
     accountStatus: 'under_review',
     isBlocked: false,
-    trustScore: 50,
+    trustTier: 'basic',
     documents: [],
+    documentsLoaded: true,
     facilitiesCount: 0,
     createdAt: new Date().toISOString(),
   };

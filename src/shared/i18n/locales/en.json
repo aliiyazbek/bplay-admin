@@ -34,7 +34,13 @@
     "outsideRegions": "Outside regions",
     "export": "Export",
     "exporting": "Exporting…",
-    "currencySyp": "SYP"
+    "currencySyp": "SYP",
+    "optional": "Optional",
+    "errors": {
+      "permissionDenied": "You do not have permission to do that.",
+      "tooManyRequests": "Too many attempts. Wait a moment and try again.",
+      "network": "Cannot reach the server. Check your connection and try again."
+    }
   },
   "nav": {
     "adminManagement": "Admins",
@@ -754,7 +760,6 @@
     "forgotSubtitle": "Enter your email and we'll send you a reset link",
     "sendReset": "Send reset link",
     "backToLogin": "Back to sign in",
-    "forgotSent": "If the email exists, a reset link is on its way.",
     "resetTitle": "Set a new password",
     "resetSubtitle": "Choose a strong password for your account",
     "newPassword": "New password",
@@ -769,8 +774,23 @@
       "passwordRequired": "Password is required",
       "passwordShort": "Password must be at least 8 characters",
       "passwordComplexity": "Include an uppercase letter, a number and a special character",
-      "passwordMismatch": "Passwords do not match"
-    }
+      "passwordMismatch": "Passwords do not match",
+      "signInFailed": "Sign-in failed",
+      "invalidCredentials": "Incorrect email or password.",
+      "accountLocked": "This account is locked for security. Contact a super admin.",
+      "accountLockedNow": "Account locked after 3 failed attempts. Security has been notified.",
+      "accountDisabled": "This admin account is disabled.",
+      "accessRevoked": "Your administrative access has been revoked.",
+      "domainForbidden": "The dashboard is not being served from an approved domain.",
+      "ipForbidden": "Your network is not allowed to reach the admin API.",
+      "sessionExpired": "Your session has expired. Please sign in again.",
+      "sessionRevoked": "Your session was signed out. Please sign in again.",
+      "sessionInvalid": "Your session is no longer valid. Please sign in again.",
+      "resetLinkInvalid": "This reset link has expired or was already used."
+    },
+    "forgotSentTitle": "Check your email",
+    "forgotSentBody": "If an account exists for {{email}}, we have sent it a link to set a new password.",
+    "forgotSentHint": "The link opens a secure page and works only once. If nothing arrives within a few minutes, check your spam folder."
   },
   "admin": {
     "title": "Admin Management",
@@ -991,7 +1011,7 @@
     },
     "toast": {
       "updated": "Profile updated",
-      "passwordChanged": "Password updated"
+      "passwordChangedSignOut": "Password updated. Sign in again with your new password."
     },
     "errors": {
       "nameRequired": "Name must be at least 2 characters",
@@ -1036,7 +1056,7 @@
     "trust": {
       "basic": "Basic",
       "verified": "Verified",
-      "trusted": "Trusted"
+      "premium": "Premium"
     },
     "intent": {
       "sports_club": "Sports club",
@@ -1110,7 +1130,16 @@
       "emailInvalid": "Enter a valid email",
       "phoneInvalid": "Enter a valid Syrian mobile (9 digits, e.g. 9XXXXXXXX)",
       "nationalIdRequired": "National number is required",
-      "nationalIdInvalid": "The national number must be exactly 11 digits"
+      "nationalIdInvalid": "The national number must be exactly 11 digits",
+      "addressTooLong": "The address must be 500 characters or fewer",
+      "noDocuments": "This owner has not uploaded any verification document yet.",
+      "incompleteDocs": "Approve every uploaded document before approving the account.",
+      "illegalTransition": "That action is not valid for this account in its current state.",
+      "reasonRequired": "This action requires a reason.",
+      "notFound": "This owner no longer exists.",
+      "duplicateEmail": "This email is already registered.",
+      "duplicatePhone": "This phone number is already registered.",
+      "duplicateNationalId": "This national number is already registered."
     },
     "create": {
       "title": "Add owner",
@@ -1119,14 +1148,14 @@
       "email": "Business email",
       "phone": "Phone",
       "nationalId": "National number",
-      "intent": "Intended facility",
       "hint": "A one-time temporary password is generated. The owner must change it on first sign-in.",
       "done": "{{name}} was created. Share the temporary password below — it is shown once.",
       "tempPassword": "Temporary password",
       "copy": "Copy",
       "copied": "Copied",
       "copiedToast": "Temporary password copied",
-      "warn": "This password is shown once. The owner is forced to change it on first sign-in; there is no admin reset."
+      "warn": "This password is shown once. The owner is forced to change it on first sign-in; there is no admin reset.",
+      "address": "Address"
     },
     "doc": {
       "view": "View",
@@ -1248,6 +1277,15 @@
         "rejectedDocs": "{{count}} document(s) were rejected — awaiting re-upload.",
         "noDocuments": "No verification documents have been uploaded yet."
       }
+    },
+    "gate": {
+      "noDocuments": "Approval needs at least one verification document, and this owner has uploaded none.",
+      "pendingDocs_one": "Review the documents first: {{count}} is still awaiting a decision.",
+      "pendingDocs_other": "Review the documents first: {{count}} are still awaiting a decision.",
+      "rejectedDocs_one": "{{count}} document was rejected. The owner must re-upload it before the account can be approved.",
+      "rejectedDocs_other": "{{count}} documents were rejected. The owner must re-upload them before the account can be approved.",
+      "pendingDocs": "Review the documents first: {{count}} still awaiting a decision.",
+      "rejectedDocs": "{{count}} rejected. The owner must re-upload before the account can be approved."
     }
   },
   "facility": {

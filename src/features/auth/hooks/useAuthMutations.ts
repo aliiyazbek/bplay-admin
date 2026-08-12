@@ -12,6 +12,9 @@ export function useLoginMutation() {
   const setSession = useAuthStore((s) => s.login);
   return useMutation({
     mutationFn: login,
+    // LoginForm renders the failure inline, right under the fields — a toast on
+    // top of it would say the same thing twice.
+    meta: { silentError: true },
     onSuccess: (session) => {
       // Drop everything the PREVIOUS principal cached before the new session is
       // installed. /login is reachable from an authenticated tab by client-side
@@ -28,16 +31,15 @@ export function useLoginMutation() {
   });
 }
 
+/**
+ * Request a reset link. The backend emails a link to its own hosted reset page,
+ * so there is nothing to navigate to here — the form switches to a "check your
+ * email" state on success.
+ */
 export function useForgotPasswordMutation() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const toast = useToast();
   return useMutation({
     mutationFn: forgotPassword,
-    onSuccess: () => {
-      toast.success(t('auth.forgotSent'));
-      navigate(PATHS.resetPassword);
-    },
+    meta: { silentError: true },
   });
 }
 

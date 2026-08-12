@@ -37,6 +37,15 @@ export function isNotFoundError(error: unknown): boolean {
   return false;
 }
 
+/** The bplay-backend envelope: `{ success: false, error: { code, message, details } }`. */
+interface BackendErrorBody {
+  message?: string;
+  /** Object on bplay-backend; a plain string on some generic middlewares. */
+  error?: string | { code?: string; message?: string; details?: unknown };
+  code?: string;
+  errors?: unknown;
+}
+
 export function toAppError(error: unknown): AppError {
   if (isAppError(error)) return error;
 
@@ -46,29 +55,107 @@ export function toAppError(error: unknown): AppError {
     code?: string;
   };
   const response = err?.response;
-  const data = (response?.data ?? {}) as {
-    message?: string;
-    error?: string;
-    code?: string;
-    errors?: unknown;
-  };
+  const data = (response?.data ?? {}) as BackendErrorBody;
+
+  // bplay-backend nests everything under `error`. Reading `data.error` as a
+  // string used to stringify that object into "[object Object]" and lose the
+  // ERR_* code entirely — every backend failure then looked identical.
+  const envelope = typeof data.error === 'object' && data.error !== null ? data.error : undefined;
+  const legacyError = typeof data.error === 'string' ? data.error : undefined;
 
   const message =
-    data.message || data.error || err?.message || 'Something went wrong. Please try again.';
+    envelope?.message ||
+    data.message ||
+    legacyError ||
+    err?.message ||
+    'Something went wrong. Please try again.';
 
   return new AppError(message, {
     status: response?.status,
-    code: data.code ?? err?.code,
-    fieldErrors: extractFieldErrors(data.errors),
+    code: envelope?.code ?? data.code ?? err?.code,
+    fieldErrors: extractFieldErrors(data.errors ?? envelope?.details),
   });
 }
 
+/** Ajv/Fastify validation entry — `instancePath` is the offending field, e.g. "/email". */
+interface AjvErrorEntry {
+  instancePath?: string;
+  params?: { missingProperty?: string };
+  message?: string;
+}
+
 function extractFieldErrors(errors: unknown): FieldErrors | undefined {
-  if (!errors || typeof errors !== 'object') return undefined;
+  if (!errors) return undefined;
+
+  // ERR_VALIDATION carries Fastify's ajv array, not a field->message map.
+  if (Array.isArray(errors)) {
+    const out: FieldErrors = {};
+    for (const entry of errors as AjvErrorEntry[]) {
+      const field =
+        entry?.params?.missingProperty ?? (entry?.instancePath ?? '').replace(/^\//, '');
+      if (field && entry?.message && !out[field]) out[field] = entry.message;
+    }
+    return Object.keys(out).length > 0 ? out : undefined;
+  }
+
+  if (typeof errors !== 'object') return undefined;
   const out: FieldErrors = {};
   for (const [key, value] of Object.entries(errors as Record<string, unknown>)) {
     if (typeof value === 'string') out[key] = value;
     else if (Array.isArray(value) && typeof value[0] === 'string') out[key] = value[0];
   }
   return Object.keys(out).length > 0 ? out : undefined;
+}
+
+/**
+ * Backend error code → i18n key. Only codes with a genuinely better wording than
+ * the server's English message are listed; anything else falls back to
+ * `AppError.message`, so a new backend code degrades gracefully instead of
+ * rendering a missing-translation key.
+ */
+const ERROR_CODE_KEYS: Record<string, string> = {
+  // Admin sign-in (super-admin/auth.service.js)
+  ERR_ADMIN_AUTH_FAILED: 'auth.errors.invalidCredentials',
+  ERR_ADMIN_LOCKED: 'auth.errors.accountLocked',
+  ERR_ADMIN_LOCKOUT: 'auth.errors.accountLockedNow',
+  ERR_ADMIN_DISABLED: 'auth.errors.accountDisabled',
+  ERR_ADMIN_REVOKED: 'auth.errors.accessRevoked',
+  ERR_DOMAIN_FORBIDDEN: 'auth.errors.domainForbidden',
+  ERR_IP_FORBIDDEN: 'auth.errors.ipForbidden',
+  // Session
+  ERR_SESSION_EXPIRED: 'auth.errors.sessionExpired',
+  ERR_SESSION_REVOKED: 'auth.errors.sessionRevoked',
+  ERR_MALFORMED_TOKEN: 'auth.errors.sessionInvalid',
+  // Password change / reset (modules/auth)
+  ERR_WRONG_PASSWORD: 'profile.errors.wrongCurrent',
+  ERR_PASSWORD_UNCHANGED: 'profile.errors.samePassword',
+  ERR_PASSWORD_MISMATCH: 'auth.errors.passwordMismatch',
+  ERR_INVALID_TOKEN: 'auth.errors.resetLinkInvalid',
+  ERR_TOKEN_EXPIRED: 'auth.errors.resetLinkInvalid',
+  // Owner lifecycle (super-admin/owners-management)
+  ERR_NO_DOCUMENTS: 'owner.errors.noDocuments',
+  ERR_INCOMPLETE_DOCS: 'owner.errors.incompleteDocs',
+  ERR_ILLEGAL_TRANSITION: 'owner.errors.illegalTransition',
+  ERR_REASON_REQUIRED: 'owner.errors.reasonRequired',
+  ERR_OWNER_NOT_FOUND: 'owner.errors.notFound',
+  ERR_DUPLICATE_EMAIL: 'owner.errors.duplicateEmail',
+  ERR_DUPLICATE_PHONE: 'owner.errors.duplicatePhone',
+  ERR_DUPLICATE_NATIONAL_ID: 'owner.errors.duplicateNationalId',
+  // Authorization
+  ERR_PERMISSION_DENIED: 'common.errors.permissionDenied',
+};
+
+/**
+ * The i18n key for an error, or undefined when there is no better wording than
+ * the server's own message. Status-only fallbacks cover the cases the backend
+ * cannot label (a rate limiter's 429, a dropped connection).
+ */
+export function errorMessageKey(error: unknown): string | undefined {
+  const appError = isAppError(error) ? error : undefined;
+  if (!appError) return undefined;
+  if (appError.code && ERROR_CODE_KEYS[appError.code]) return ERROR_CODE_KEYS[appError.code];
+  if (appError.status === 429) return 'common.errors.tooManyRequests';
+  if (appError.status === 403) return 'common.errors.permissionDenied';
+  if (appError.status === undefined) return 'common.errors.network';
+  return undefined;
 }

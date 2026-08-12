@@ -7,5 +7,6 @@ const impl = USE_MOCKS ? mock : real;
 
 export const login = impl.login;
 export const logout = impl.logout;
+export const getMe = impl.getMe;
 export const forgotPassword = impl.forgotPassword;
 export const resetPassword = impl.resetPassword;

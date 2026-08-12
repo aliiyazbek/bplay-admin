@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { Modal, Field, PasswordInput, Button } from '@ui';
-import { isAppError } from '@shared/lib/errors';
+import { errorMessageKey, isAppError } from '@shared/lib/errors';
 import { changePasswordSchema, type ChangePasswordValues } from '../api/profile.schema';
 import { useChangePassword } from '../hooks/useProfileMutations';
 import styles from './profileForm.module.css';
@@ -39,12 +39,21 @@ export function ChangePasswordModal({ isOpen, onClose }: Props) {
       await mutation.mutateAsync({
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
       });
       onClose();
     } catch (error) {
-      // The backend rejects a wrong current password — surface it on that field.
-      const message = isAppError(error) && error.message ? error.message : 'profile.errors.wrongCurrent';
-      setError('currentPassword', { message });
+      // The backend rejects a wrong current password (ERR_WRONG_PASSWORD) —
+      // surface it on that field. The Field renders its message through t(), so
+      // prefer the i18n KEY for a code we recognise; an unmapped failure falls
+      // back to the server's sentence, which t() passes through unchanged.
+      // Handing it the raw English sentence unconditionally showed English to an
+      // Arabic admin even for the one error this modal exists to report.
+      const key = errorMessageKey(error);
+      const serverMessage = isAppError(error) ? error.message : undefined;
+      setError('currentPassword', {
+        message: key ?? serverMessage ?? 'profile.errors.wrongCurrent',
+      });
     }
   });
 
