@@ -8,6 +8,7 @@ import { facilityDocsAllApproved, facilityDocumentKind, toRegionFacility } from 
 import type {
   BulkActionResult,
   BulkFacilityAction,
+  BulkSkip,
   CancelPolicy,
   ClubFacility,
   Court,
@@ -993,16 +994,35 @@ export async function bulkAction(
   if (action === 'reject' && (!reason || reason.trim().length === 0)) {
     throw new Error('Reason is required');
   }
-  const skipped: string[] = [];
+  // Mirrors the real backend's skip reasons so the mock and live paths render
+  // identically (see facilities-management.service.js bulkUpdateFacilityStatus).
+  const skipped: BulkSkip[] = [];
   let succeeded = 0;
   for (const id of ids) {
     const facility = db.find((item) => item.id === id);
-    if (
-      !facility ||
-      facility.status !== 'pending' ||
-      (action === 'approve' && !facilityDocsAllApproved(facility.documents))
-    ) {
-      skipped.push(id);
+    if (!facility) {
+      skipped.push({ id, reason: 'ERR_FACILITY_NOT_FOUND' });
+      continue;
+    }
+    if (facility.status !== 'pending') {
+      skipped.push({
+        id,
+        reason:
+          (action === 'approve' && facility.status === 'active') ||
+          (action === 'reject' && facility.status === 'rejected')
+            ? 'ERR_ALREADY_IN_STATUS'
+            : 'ERR_NOT_PENDING_REVIEW',
+        status: facility.status,
+      });
+      continue;
+    }
+    if (action === 'approve' && !facilityDocsAllApproved(facility.documents)) {
+      skipped.push({
+        id,
+        reason: facility.documents?.length
+          ? 'ERR_DOCUMENTS_NOT_APPROVED'
+          : 'ERR_NO_DOCUMENTS',
+      });
       continue;
     }
     if (action === 'approve') {

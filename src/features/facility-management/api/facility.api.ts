@@ -177,12 +177,23 @@ export async function bulkAction(
   if (action === 'reject' && (!reason || reason.trim().length === 0)) {
     throw new Error('Reason is required');
   }
-  await apiClient.patch(`${PENDING_PATH}/bulk`, {
+  // The route is /facilities/review/bulk, not /pending-review/bulk — the
+  // latter does not exist on the backend, so every bulk action 404'd and the
+  // fabricated return value below hid it completely.
+  const res = await apiClient.patch(`${FACILITIES_PATH}/review/bulk`, {
     ids,
     status: action === 'approve' ? 'approved' : 'rejected',
     reason: reason?.trim(),
   });
-  return { succeeded: ids.length, skipped: [] };
+  // Report what actually happened. Previously this returned
+  // `{ succeeded: ids.length, skipped: [] }` unconditionally, so an admin
+  // bulk-approving facilities with unapproved KYC documents was told every one
+  // succeeded while the backend had skipped them all.
+  const result = unwrap<BulkActionResult>(res.data);
+  return {
+    succeeded: result?.succeeded ?? 0,
+    skipped: result?.skipped ?? [],
+  };
 }
 
 /** Scope-aware KPI figures — derived client-side over the visible facility set. */

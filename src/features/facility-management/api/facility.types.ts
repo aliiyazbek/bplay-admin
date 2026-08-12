@@ -628,11 +628,30 @@ export function facilityToInput(facility: Facility): CreateFacilityInput {
 /** The two review actions applicable in bulk from the queue. */
 export type BulkFacilityAction = 'approve' | 'reject';
 
+/** Why the backend declined to act on one facility in a bulk request. */
+export type BulkSkipReason =
+  | 'ERR_FACILITY_NOT_FOUND'
+  | 'ERR_ALREADY_IN_STATUS'
+  | 'ERR_NOT_PENDING_REVIEW'
+  | 'ERR_NO_DOCUMENTS'
+  | 'ERR_DOCUMENTS_NOT_APPROVED';
+
+export interface BulkSkip {
+  id: string;
+  reason: BulkSkipReason;
+  /** The status that blocked it, when the skip was a state problem. */
+  status?: string;
+}
+
 export interface BulkActionResult {
   /** How many facilities the action actually applied to (invalid transitions skipped). */
   succeeded: number;
-  /** Ids that were skipped (not in an actionable state). */
-  skipped: string[];
+  /**
+   * Facilities the backend declined to act on, each with a reason. A bare id
+   * list could not distinguish "outside your region" from "KYC docs not
+   * approved" from "already decided", so the UI had nothing useful to report.
+   */
+  skipped: BulkSkip[];
 }
 
 // ---------------------------------------------------------------------------
