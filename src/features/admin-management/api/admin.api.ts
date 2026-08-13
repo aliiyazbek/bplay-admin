@@ -159,13 +159,3 @@ export async function deleteAdmin(id: string): Promise<void> {
   await apiClient.delete(`${PATH}/${id}`);
 }
 
-/**
- * Not supported by the backend, and cannot be: `deleteAdmin` removes the row
- * outright, so there is nothing left to restore. `/restore/:id` was a mock-era
- * route that 404s against the real API. It throws rather than resolving so a
- * caller cannot report a successful restore that did not happen — if the UI
- * still offers a restore action, that action should be removed.
- */
-export async function restoreAdmin(_id: string): Promise<void> {
-  throw new Error('Admin deletion is permanent — restore is not supported.');
-}

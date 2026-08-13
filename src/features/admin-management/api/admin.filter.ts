@@ -7,9 +7,11 @@ import type { Admin, AdminListParams, AdminListResult } from './admin.types';
  * search, scope and assignment filters can read them.
  */
 export function filterAndPaginateAdmins(all: Admin[], params: AdminListParams): AdminListResult {
-  // Soft-deleted admins are hidden unless the "show deleted" view is on, in which
-  // case ONLY deleted admins are listed (a trash/recycle view).
-  let items = all.filter((admin) => Boolean(admin.isDeleted) === Boolean(params.showDeleted));
+  // Against the real API this never removes anything: deletion is permanent, so
+  // a deleted admin has no row left to return. The guard stays because the mock
+  // source still marks records deleted rather than dropping them, and a deleted
+  // admin must not appear in the list either way.
+  let items = all.filter((admin) => !admin.isDeleted);
 
   const q = params.q?.trim().toLowerCase();
   if (q) {

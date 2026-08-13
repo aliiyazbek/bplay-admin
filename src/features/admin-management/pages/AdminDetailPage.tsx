@@ -198,11 +198,7 @@ function AdminDetailContent({ admin, editDisclosure, assignDisclosure, resetDisc
         badges={
           <>
             <Badge variant={scopeBadgeVariant(admin.scope)}>{t(`admin.scope.${admin.scope}`)}</Badge>
-            {admin.isDeleted ? (
-              <Badge variant="danger">{t('admin.deletedTag')}</Badge>
-            ) : (
-              <Badge variant={statusToBadgeVariant(admin.status)}>{t(`status.${admin.status}`)}</Badge>
-            )}
+            <Badge variant={statusToBadgeVariant(admin.status)}>{t(`status.${admin.status}`)}</Badge>
           </>
         }
         meta={

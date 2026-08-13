@@ -62,8 +62,7 @@ export default function AdminManagementPage() {
     (params.q ?? '') !== '' ||
     (params.status ?? 'all') !== 'all' ||
     (params.scope ?? 'all') !== 'all' ||
-    (params.assignment ?? 'all') !== 'all' ||
-    (params.showDeleted ?? false);
+    (params.assignment ?? 'all') !== 'all';
 
   const clearFilters = () =>
     setParams((prev) => ({
@@ -72,7 +71,6 @@ export default function AdminManagementPage() {
       status: 'all',
       scope: 'all',
       assignment: 'all',
-      showDeleted: false,
       page: 1,
     }));
 
@@ -116,12 +114,9 @@ export default function AdminManagementPage() {
     {
       key: 'status',
       header: t('admin.col.status'),
-      render: (admin) =>
-        admin.isDeleted ? (
-          <Badge variant="danger">{t('admin.deletedTag')}</Badge>
-        ) : (
-          <Badge variant={statusToBadgeVariant(admin.status)}>{t(`status.${admin.status}`)}</Badge>
-        ),
+      render: (admin) => (
+        <Badge variant={statusToBadgeVariant(admin.status)}>{t(`status.${admin.status}`)}</Badge>
+      ),
     },
   ];
 
@@ -203,18 +198,6 @@ export default function AdminManagementPage() {
             ]}
           />
         </FilterField>
-        <label className={styles.deletedToggle}>
-          <input
-            type="checkbox"
-            className={styles.deletedCheckbox}
-            checked={params.showDeleted ?? false}
-            onChange={(event) =>
-              setParams((prev) => ({ ...prev, showDeleted: event.target.checked, page: 1 }))
-            }
-            data-testid="admin-show-deleted"
-          />
-          <span>{t('admin.filter.showDeleted')}</span>
-        </label>
       </Toolbar>
 
       <DataTable<Admin>
@@ -227,8 +210,8 @@ export default function AdminManagementPage() {
         emptyState={
           <EmptyState
             icon={<InboxIcon />}
-            title={t(params.showDeleted ? 'admin.emptyDeleted.title' : 'admin.empty.title')}
-            description={t(params.showDeleted ? 'admin.emptyDeleted.desc' : 'admin.empty.desc')}
+            title={t('admin.empty.title')}
+            description={t('admin.empty.desc')}
           />
         }
         rowActions={(admin) => (

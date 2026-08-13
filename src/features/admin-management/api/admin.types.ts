@@ -145,8 +145,6 @@ export interface AdminListParams {
   scope?: 'all' | AdminScope;
   /** Filter regional admins by whether they hold any region. */
   assignment?: 'all' | 'assigned' | 'unassigned';
-  /** When true, list ONLY soft-deleted admins (the trash view); default hides them. */
-  showDeleted?: boolean;
   page?: number;
   pageSize?: number;
 }

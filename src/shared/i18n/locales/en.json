@@ -797,7 +797,6 @@
     "subtitle": "Create and manage platform admins",
     "invite": "Add admin",
     "search": "Search admins…",
-    "deletedTag": "Deleted",
     "stats": {
       "total": "Total admins",
       "active": "Active",
@@ -820,16 +819,11 @@
       "assignment": "Assignment",
       "allAssignment": "All assignment",
       "withRegion": "Has a region",
-      "noRegion": "No region yet",
-      "showDeleted": "Show deleted"
+      "noRegion": "No region yet"
     },
     "empty": {
       "title": "No admins found",
       "desc": "Add your first admin to get started."
-    },
-    "emptyDeleted": {
-      "title": "No deleted admins",
-      "desc": "Deleted admins will appear here."
     },
     "form": {
       "createTitle": "Add admin",
@@ -889,8 +883,7 @@
       "demote": "Set as region admin",
       "suspend": "Suspend",
       "activate": "Activate",
-      "delete": "Delete",
-      "restore": "Restore"
+      "delete": "Delete"
     },
     "suspend": {
       "title": "Suspend this admin?",
@@ -904,13 +897,8 @@
     },
     "delete": {
       "title": "Delete this admin?",
-      "message": "The admin is moved to the deleted list and can be restored.",
-      "confirm": "Delete"
-    },
-    "restore": {
-      "title": "Restore this admin?",
-      "message": "They return to the active list.",
-      "confirm": "Restore"
+      "message": "This permanently deletes the account and revokes its access immediately. This cannot be undone — to remove access temporarily, deactivate the admin instead.",
+      "confirm": "Delete permanently"
     },
     "promote": {
       "title": "Promote to general oversight?",
@@ -967,7 +955,6 @@
       "suspended": "Admin suspended",
       "activated": "Admin activated",
       "deleted": "Admin deleted",
-      "restored": "Admin restored",
       "promoted": "Admin promoted to general oversight",
       "demoted": "Admin set as region admin",
       "assigned": "Regions updated"

@@ -9,7 +9,7 @@ import {
   MapPinIcon,
 } from '@ui';
 import { useDisclosure } from '@shared/hooks/useDisclosure';
-import { useDeleteAdmin, useRestoreAdmin, useToggleAdmin } from '../hooks/useAdminMutations';
+import { useDeleteAdmin, useToggleAdmin } from '../hooks/useAdminMutations';
 import type { Admin } from '../api/admin.types';
 import styles from './AdminRowActions.module.css';
 
@@ -20,52 +20,19 @@ interface Props {
   onAssign: (admin: Admin) => void;
 }
 
+/**
+ * There is no deleted-admin branch here any more. Deletion is permanent — the
+ * API removes the row outright — so an admin is never in a "deleted but
+ * restorable" state and the restore action it used to offer could not work.
+ * Deactivating is the reversible alternative, and it is still on this row.
+ */
 export function AdminRowActions({ admin, onView, onEdit, onAssign }: Props) {
   const { t } = useTranslation();
   const toggle = useToggleAdmin();
   const remove = useDeleteAdmin();
-  const restore = useRestoreAdmin();
   const suspendConfirm = useDisclosure();
   const deleteConfirm = useDisclosure();
-  const restoreConfirm = useDisclosure();
   const isActive = admin.status === 'active';
-
-  // A soft-deleted admin only offers "view details" + "restore".
-  if (admin.isDeleted) {
-    return (
-      <div className={styles.actions}>
-        <IconButton
-          size="sm"
-          variant="ghost"
-          label={t('admin.actions.viewDetails')}
-          icon={<EyeIcon />}
-          onClick={() => onView(admin)}
-          data-testid={`admin-view-${admin.id}`}
-        />
-        <IconButton
-          size="sm"
-          variant="ghost"
-          label={t('admin.actions.restore')}
-          icon={<PowerIcon />}
-          onClick={restoreConfirm.open}
-          data-testid={`admin-restore-${admin.id}`}
-        />
-        <ConfirmDialog
-          isOpen={restoreConfirm.isOpen}
-          onClose={restoreConfirm.close}
-          onConfirm={async () => {
-            await restore.mutateAsync(admin.id);
-            restoreConfirm.close();
-          }}
-          title={t('admin.restore.title')}
-          message={t('admin.restore.message')}
-          confirmText={t('admin.restore.confirm')}
-          variant="primary"
-          isLoading={restore.isPending}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className={styles.actions}>

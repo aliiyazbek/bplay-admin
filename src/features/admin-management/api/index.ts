@@ -14,4 +14,3 @@ export const setAdminScope = impl.setAdminScope;
 export const assignRegions = impl.assignRegions;
 export const resetAdminPassword = impl.resetAdminPassword;
 export const deleteAdmin = impl.deleteAdmin;
-export const restoreAdmin = impl.restoreAdmin;

@@ -7,7 +7,6 @@ import {
   createAdmin,
   deleteAdmin,
   resetAdminPassword,
-  restoreAdmin,
   setAdminScope,
   toggleAdminActive,
   updateAdmin,
@@ -120,17 +119,3 @@ export function useDeleteAdmin() {
   });
 }
 
-export function useRestoreAdmin() {
-  const queryClient = useQueryClient();
-  const toast = useToast();
-  const { t } = useTranslation();
-  return useMutation({
-    mutationFn: (id: string) => restoreAdmin(id),
-    onSuccess: () => {
-      // A restored admin comes back unassigned; refresh regions defensively.
-      queryClient.invalidateQueries({ queryKey: adminKeys.all });
-      queryClient.invalidateQueries({ queryKey: REGION_KEY });
-      toast.success(t('admin.toast.restored'));
-    },
-  });
-}
