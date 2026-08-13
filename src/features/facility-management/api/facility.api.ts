@@ -145,76 +145,174 @@ export async function reviewFacilityDocument(
   });
 }
 
-/** The snake_case wire body shared by create (POST) and update (PUT). */
-function buildFacilityBody(input: CreateFacilityInput) {
+/**
+ * Sport SLUG -> UUID.
+ *
+ * The wizard speaks slugs ('tennis'); every facility route wants the sports
+ * table's uuid. `GET /sports` returns both, and `sports.slug` matches
+ * `SportType` one-for-one, so the lookup is a straight map.
+ *
+ * Cached for the session: the list is small, static, and needed by both create
+ * paths — refetching it per court would be a request per row.
+ */
+let sportIdCache: Map<string, string> | null = null;
+
+async function sportIds(): Promise<Map<string, string>> {
+  if (sportIdCache) return sportIdCache;
+  const res = await apiClient.get('/sports');
+  const rows = unwrapList<{ id: string; slug: string }>(res.data, ['sports']);
+  sportIdCache = new Map(rows.map((row) => [row.slug, row.id]));
+  return sportIdCache;
+}
+
+/** Surfaces the backend accepts; anything else is sent as null rather than rejected. */
+const SURFACES = new Set([
+  'artificial_grass',
+  'natural_grass',
+  'hard_court',
+  'clay',
+  'sand',
+  'wood',
+  'other',
+]);
+
+const toSurface = (surface?: string) =>
+  surface && SURFACES.has(surface) ? surface : null;
+
+/** The wizard's isIndoor boolean against the backend's environment enum. */
+const toEnvironment = (isIndoor?: boolean) => (isIndoor ? 'indoor' : 'outdoor');
+
+/**
+ * WorkingHours is Record<dayIndex, DayHours> in the UI and an ARRAY of
+ * { dayOfWeek, openTime, closeTime, isClosed } on the wire — note the camelCase
+ * here, which is unusual for this API but is what the schema declares.
+ */
+function toWorkingHours(hours: CreateFacilityInput['workingHours']) {
+  return Object.entries(hours ?? {}).map(([day, dayHours]) => ({
+    dayOfWeek: Number(day),
+    openTime: dayHours.isOpen ? (dayHours.openTime ?? null) : null,
+    closeTime: dayHours.isOpen ? (dayHours.closeTime ?? null) : null,
+    isClosed: !dayHours.isOpen,
+  }));
+}
+
+/**
+ * A CLUB body — `POST /facilities/clubs`.
+ *
+ * The body is `additionalProperties: false`, so every key here must be one the
+ * schema declares. `description`, `contactPhone` and the club-level amenity
+ * flags have nowhere to go and are dropped rather than sent (AJV's
+ * removeAdditional would strip them silently anyway; being explicit means the
+ * loss is visible in review rather than discovered later).
+ */
+async function buildClubBody(input: CreateFacilityInput) {
+  const ids = await sportIds();
   return {
     owner_id: input.ownerId,
-    type: input.kind,
     name: input.name,
-    description: input.description,
-    sports: input.sports,
-    contact_phone: input.contactPhone,
-    location: {
-      lat: input.location.lat,
-      lng: input.location.lng,
-      address: input.location.address,
-      city: input.location.city,
-      governorate: input.location.governorate,
-      district: input.location.district,
-    },
-    working_hours: input.workingHours
-      ? Object.fromEntries(
-          Object.entries(input.workingHours).map(([day, dayHours]) => [
-            day,
-            {
-              is_open: dayHours.isOpen,
-              open_time: dayHours.openTime,
-              close_time: dayHours.closeTime,
-            },
-          ]),
-        )
-      : undefined,
-    courts: input.courts?.map((court) => ({
-      id: court.id,
+    sports: input.sports.map((slug) => ids.get(slug)).filter((id): id is string => Boolean(id)),
+    address: input.location.address ?? null,
+    latitude: input.location.lat,
+    longitude: input.location.lng,
+    images: input.images,
+    documents: (input.documents ?? []).map((doc) => ({ name: doc.name, url: doc.url })),
+    working_hours: toWorkingHours(input.workingHours),
+    courts: (input.courts ?? []).map((court) => ({
       name: court.name,
-      sport: court.sport,
+      sport_id: ids.get(court.sport),
+      capacity: court.capacity ?? 1,
       price_per_hour: court.pricePerHour,
-      surface: court.surface,
-      is_indoor: court.isIndoor,
-      has_lighting: court.hasLighting,
-      capacity: court.capacity,
-      is_active: court.isActive,
+      surface_type: toSurface(court.surface),
+      environment: toEnvironment(court.isIndoor),
+      visibility: 'public',
     })),
-    price_per_hour: input.pricePerHour,
-    capacity: input.capacity,
-    specs: input.specs
+  };
+}
+
+/** A standalone PITCH body — `POST /facilities/pitches`. */
+async function buildPitchBody(input: CreateFacilityInput) {
+  const ids = await sportIds();
+  return {
+    owner_id: input.ownerId,
+    name: input.name,
+    // A pitch is exactly one sport — the first entry, per CreateFacilityInput.
+    sport_id: input.sports[0] ? (ids.get(input.sports[0]) ?? null) : null,
+    address: input.location.address ?? null,
+    latitude: input.location.lat,
+    longitude: input.location.lng,
+    price_per_hour: input.pricePerHour ?? 0,
+    capacity: input.capacity ?? 1,
+    specs: {
+      surface_type: toSurface(input.specs?.surface),
+      environment: toEnvironment(input.specs?.isIndoor),
+    },
+    ...(input.cancelPolicy
       ? {
-          surface: input.specs.surface,
-          is_indoor: input.specs.isIndoor,
-          has_lighting: input.specs.hasLighting,
-          has_parking: input.specs.hasParking,
-          has_locker_room: input.specs.hasLockerRoom,
-          has_cafe: input.specs.hasCafe,
+          cancel_policy: {
+            cancel_free_hours: input.cancelPolicy.freeHoursBefore,
+            cancel_penalty_percent: input.cancelPolicy.penaltyPercent,
+          },
         }
-      : undefined,
-    cancel_policy: input.cancelPolicy
-      ? {
-          free_hours_before: input.cancelPolicy.freeHoursBefore,
-          penalty_percent: input.cancelPolicy.penaltyPercent,
-        }
-      : undefined,
+      : {}),
     images: input.images,
     documents: (input.documents ?? []).map((doc) => ({ name: doc.name, url: doc.url })),
   };
 }
 
+/**
+ * Create a facility.
+ *
+ * Creation is TWO endpoints, not one: a club (with courts and working hours)
+ * and a standalone pitch (with its own price and capacity) are different
+ * shapes, and the backend validates them separately. This used to POST a
+ * single merged body to `/facilities`, a route that does not exist — so the
+ * Add Facility wizard 404'd on submit no matter what was entered.
+ */
 export async function createFacility(input: CreateFacilityInput): Promise<Facility> {
-  const res = await apiClient.post(FACILITIES_PATH, buildFacilityBody(input));
+  const res =
+    input.kind === 'club'
+      ? await apiClient.post(`${FACILITIES_PATH}/clubs`, await buildClubBody(input))
+      : await apiClient.post(`${FACILITIES_PATH}/pitches`, await buildPitchBody(input));
   return toFacility(unwrap<FacilityDto>(res.data));
 }
 
+/**
+ * Update a facility — `PUT /facilities/{id}`.
+ *
+ * One endpoint for both kinds, and every field is optional, so this sends only
+ * what the schema declares. Courts and working hours are NOT updatable here;
+ * they have their own routes.
+ */
 export async function updateFacility(id: string, input: UpdateFacilityInput): Promise<Facility> {
-  const res = await apiClient.put(`${FACILITIES_PATH}/${id}`, buildFacilityBody(input));
+  const ids = await sportIds();
+  const res = await apiClient.put(`${FACILITIES_PATH}/${id}`, {
+    name: input.name,
+    address: input.location.address ?? null,
+    latitude: input.location.lat,
+    longitude: input.location.lng,
+    contact_phone: input.contactPhone ?? null,
+    sports: input.sports.map((slug) => ids.get(slug)).filter((sid): sid is string => Boolean(sid)),
+    ...(input.kind === 'pitch'
+      ? {
+          price_per_hour: input.pricePerHour ?? null,
+          capacity: input.capacity ?? null,
+          specs: {
+            surface_type: toSurface(input.specs?.surface),
+            environment: toEnvironment(input.specs?.isIndoor),
+          },
+        }
+      : {}),
+    ...(input.cancelPolicy
+      ? {
+          cancel_policy: {
+            cancel_free_hours: input.cancelPolicy.freeHoursBefore,
+            cancel_penalty_percent: input.cancelPolicy.penaltyPercent,
+          },
+        }
+      : {}),
+    images: input.images,
+    documents: (input.documents ?? []).map((doc) => ({ name: doc.name, url: doc.url })),
+  });
   return toFacility(unwrap<FacilityDto>(res.data));
 }
 
