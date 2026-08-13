@@ -130,7 +130,15 @@ export const ACCOUNT_TYPE_VARIANT: Record<PlayerAccountType, BadgeVariant> = {
 
 /** The player's paid Bplay platform subscription (or free). */
 export type SubscriptionStatus = 'active' | 'expired';
-export type BillingPeriod = 'monthly' | 'annual';
+/**
+ * A club membership's billing cadence, matching `membership_plans.plan_type`
+ * one-for-one.
+ *
+ * `quarterly` and `class_pack` are real plan types in the database. While this
+ * was only `monthly | annual`, the backend had to collapse both into "monthly",
+ * so a 10-class pack displayed as a monthly subscription.
+ */
+export type BillingPeriod = 'monthly' | 'quarterly' | 'annual' | 'class_pack';
 export interface PlayerInvoice {
   id: string;
   date: string;

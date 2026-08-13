@@ -700,7 +700,9 @@
     },
     "billing": {
       "monthly": "Monthly",
-      "annual": "Annual"
+      "quarterly": "Quarterly",
+      "annual": "Annual",
+      "class_pack": "Class pack"
     },
     "ratings": {
       "empty": "No ratings left yet.",

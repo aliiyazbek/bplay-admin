@@ -700,7 +700,9 @@
     },
     "billing": {
       "monthly": "شهري",
-      "annual": "سنوي"
+      "quarterly": "ربع سنوي",
+      "annual": "سنوي",
+      "class_pack": "باقة حصص"
     },
     "ratings": {
       "empty": "لم يترك أي تقييمات بعد.",

@@ -46,8 +46,23 @@ const WORKING_SET = 2000;
  * is fetched instead.
  */
 export async function getPlayers(params: PlayerListParams): Promise<PlayerListResult> {
-  const { page: _p, pageSize: _ps, ...serverParams } = params;
-  const res = await apiClient.get(PLAYERS_PATH, { params: { ...serverParams, pageSize: WORKING_SET } });
+  // Blank and 'all' filters are OMITTED, not sent empty. The querystring
+  // declares `q` with minLength 1, so an empty search box sent `q=` and the
+  // whole request 400'd — the KPI row rendered while the table underneath it
+  // showed "Something went wrong", on first load, with no search typed.
+  // `city` and `sport` are matched with ILIKE against a name, so the literal
+  // string 'all' would match nothing rather than meaning "no filter".
+  const query: Record<string, string | number> = { pageSize: WORKING_SET };
+
+  const q = params.q?.trim();
+  if (q) query.q = q;
+  if (params.status && params.status !== 'all') query.status = params.status;
+  if (params.accountType && params.accountType !== 'all') query.accountType = params.accountType;
+  if (params.city && params.city !== 'all') query.city = params.city;
+  if (params.sport && params.sport !== 'all') query.sport = params.sport;
+  if (params.joined && params.joined !== 'all') query.joined = params.joined;
+
+  const res = await apiClient.get(PLAYERS_PATH, { params: query });
   const all = unwrapList<PlayerDto>(res.data, ['players']).map(toPlayer);
   return filterAndPaginatePlayers(all, params);
 }
