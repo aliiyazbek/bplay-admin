@@ -315,6 +315,15 @@ export async function getRegionFacilities(region: {
   centerLng: number;
   radiusKm: number;
 }): Promise<RegionFacility[]> {
-  const res = await apiClient.get(FACILITIES_PATH, { params: { regionId: region.id } });
+  // `regionId` filters on the facility's STORED city/neighbourhood, which is
+  // what the region actually owns. Deliberately not the browser's circle test:
+  // that answers a different question ("do the coordinates fall inside?") and
+  // disagrees with the database — a facility can sit outside the drawn circle
+  // and still belong to the city, or have no coordinates at all yet still be
+  // filed under it. For "the facilities in this region", the stored assignment
+  // is the honest answer.
+  const res = await apiClient.get(FACILITIES_PATH, {
+    params: { regionId: region.id, pageSize: WORKING_SET },
+  });
   return unwrapList<FacilityDto>(res.data, ['facilities']).map(toFacility).map(toRegionFacility);
 }

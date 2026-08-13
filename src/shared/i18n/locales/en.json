@@ -868,6 +868,14 @@
         "hint": "The admin covers each selected city in full. Tap a neighbourhood to carve it out of their scope.",
         "included": "Covered",
         "excluded": "Excluded"
+      },
+      "hoods": {
+        "title": "Neighbourhoods",
+        "hint": "Leave a city untouched to cover it entirely. Select neighbourhoods to limit the admin to just those. Several admins may share the same city or neighbourhood.",
+        "wholeCity": "whole city",
+        "limited": "{{count}} selected",
+        "on": "Assigned",
+        "off": "Not assigned"
       }
     },
     "reset": {
@@ -939,7 +947,8 @@
       "regions": {
         "manage": "Manage regions",
         "empty": "No regions assigned yet.",
-        "except": "except {{names}}"
+        "except": "except {{names}}",
+        "only": "only {{names}}"
       },
       "facilities": {
         "empty": "No facilities in the assigned regions.",
@@ -1809,7 +1818,10 @@
         "empty": "No facilities fall inside this region yet.",
         "add": "Add facility",
         "view": "View facility",
-        "viewOwner": "Open owner {{name}}"
+        "viewOwner": "Open owner {{name}}",
+        "allHoods": "All neighbourhoods",
+        "noHood": "No neighbourhood",
+        "emptyFiltered": "No facilities in this neighbourhood"
       },
       "map": {
         "legend": "Facility status",
@@ -1882,7 +1894,8 @@
         "activated": "Neighbourhood activated",
         "deactivated": "Neighbourhood deactivated",
         "deleted": "Neighbourhood deleted"
-      }
+      },
+      "column": "Neighbourhood"
     }
   },
   "community": {

@@ -87,3 +87,22 @@
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
+
+/* Row count beside the section title, so a filtered view states its own scope. */
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  margin-inline-start: var(--space-2);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full, 999px);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  letter-spacing: 0;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}

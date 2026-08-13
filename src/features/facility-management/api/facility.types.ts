@@ -436,6 +436,13 @@ export interface RegionFacility {
   thumbnailUrl?: string;
   lat: number;
   lng: number;
+  /**
+   * The neighbourhood this facility is filed under, as the SERVER resolved it
+   * (`facilities.neighbourhood_id`). Undefined when it has none — that is a real
+   * state, not a gap to paper over, and such a facility must never silently drop
+   * out of a filtered view without the filter saying so.
+   */
+  neighbourhoodName?: string;
   statistics: FacilityStatistics;
 }
 
@@ -453,6 +460,7 @@ export function toRegionFacility(facility: Facility): RegionFacility {
     thumbnailUrl: facility.images[0],
     lat: facility.location.lat,
     lng: facility.location.lng,
+    neighbourhoodName: facility.location.district || undefined,
     statistics: facility.statistics,
   };
 }

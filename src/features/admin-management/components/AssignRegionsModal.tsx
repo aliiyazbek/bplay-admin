@@ -14,64 +14,65 @@ interface Props {
 }
 
 /**
- * Region (re)assignment for a regional admin, at BOTH levels of the geography.
+ * Region assignment for a regional admin, across both levels of the geography.
  *
- * A city grant covers the whole city. Beneath it, individual neighbourhoods can
- * be EXCLUDED — the backend's scope resolver gives exclusions the highest
- * precedence, so "Riyadh except Al Malaz" is expressible. Only cities that
- * actually have neighbourhoods offer the carve-out.
+ * Pick cities, then optionally narrow to specific NEIGHBOURHOODS within them.
+ * A city with no neighbourhood selected means the whole city; selecting some
+ * means only those. Both are many-to-many — several admins may cover the same
+ * city or the same neighbourhood (`admin_neighbourhoods` is keyed on the pair),
+ * so nothing here is exclusive.
  *
- * The narrowing form (grant specific neighbourhoods INSTEAD of the city) is
- * supported by the API but not offered here: it and a city grant are two ways
- * of saying overlapping things, and presenting both invites contradictory
- * selections. Exclusion alone covers the real use case without that ambiguity.
+ * Which of the two the backend stores matters: a positive neighbourhood grant
+ * takes precedence over the city grant in its scope resolver, so selecting
+ * "Olaya" under Riyadh narrows the admin to Olaya rather than adding to Riyadh.
+ * The UI states that in the hint rather than hiding it.
  */
 export function AssignRegionsModal({ isOpen, onClose, admin }: Props) {
   const { t } = useTranslation();
   const mutation = useAssignRegions();
   const { data: neighbourhoods } = useNeighbourhoods();
-  const [selected, setSelected] = useState<string[]>([]);
-  const [excluded, setExcluded] = useState<string[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [hoods, setHoods] = useState<string[]>([]);
 
   // Pre-check from the admin's current scope; reset on (re)open.
   useEffect(() => {
     if (isOpen) {
-      setSelected(admin?.assignedRegionIds ?? []);
-      setExcluded(admin?.excludedNeighbourhoodIds ?? []);
+      setCities(admin?.assignedRegionIds ?? []);
+      setHoods(admin?.includedNeighbourhoodIds ?? []);
     }
   }, [isOpen, admin]);
 
-  /** Neighbourhoods of the currently selected cities, grouped by city. */
+  /** Neighbourhoods of the selected cities, grouped by city. */
   const groups = useMemo(() => {
     const byCity = new Map<string, { cityName: string; items: typeof neighbourhoods }>();
     for (const hood of neighbourhoods ?? []) {
-      if (!selected.includes(hood.cityId)) continue;
+      if (!cities.includes(hood.cityId)) continue;
       const entry = byCity.get(hood.cityId) ?? { cityName: hood.cityName, items: [] };
       entry.items = [...(entry.items ?? []), hood];
       byCity.set(hood.cityId, entry);
     }
     return [...byCity.entries()].map(([cityId, entry]) => ({ cityId, ...entry }));
-  }, [neighbourhoods, selected]);
+  }, [neighbourhoods, cities]);
 
-  const toggleExcluded = (id: string) => {
-    setExcluded((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const toggleHood = (id: string) => {
+    setHoods((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const submit = async () => {
     if (!admin) return;
-    // Only keep exclusions that still sit inside a selected city — dropping a
-    // city must not leave an orphaned carve-out pointing into it.
+    // Keep only selections that still sit inside a selected city — dropping a
+    // city must not leave a grant pointing into it.
     const live = new Set(
-      (neighbourhoods ?? [])
-        .filter((hood) => selected.includes(hood.cityId))
-        .map((hood) => hood.id),
+      (neighbourhoods ?? []).filter((h) => cities.includes(h.cityId)).map((h) => h.id),
     );
     await mutation.mutateAsync({
       id: admin.id,
-      regionIds: selected,
+      regionIds: cities,
       neighbourhoods: {
-        includedIds: [],
-        excludedIds: excluded.filter((id) => live.has(id)),
+        includedIds: hoods.filter((id) => live.has(id)),
+        // Exclusions are not authored here; preserve whatever is already set
+        // rather than silently clearing a carve-out made elsewhere.
+        excludedIds: admin.excludedNeighbourhoodIds ?? [],
       },
     });
     onClose();
@@ -96,38 +97,48 @@ export function AssignRegionsModal({ isOpen, onClose, admin }: Props) {
         </>
       }
     >
-      <RegionPicker value={selected} onChange={setSelected} />
+      <RegionPicker value={cities} onChange={setCities} />
 
       {groups.length > 0 && (
-        <section className={styles.exclusions} data-testid="admin-assign-exclusions">
-          <h3 className={styles.exclusionsTitle}>{t('admin.assign.exclude.title')}</h3>
-          <p className={styles.exclusionsHint}>{t('admin.assign.exclude.hint')}</p>
+        <section className={styles.exclusions} data-testid="admin-assign-hoods">
+          <h3 className={styles.exclusionsTitle}>{t('admin.assign.hoods.title')}</h3>
+          <p className={styles.exclusionsHint}>{t('admin.assign.hoods.hint')}</p>
 
-          {groups.map((group) => (
-            <div key={group.cityId} className={styles.exclusionGroup}>
-              <span className={styles.exclusionCity}>{group.cityName}</span>
-              <div className={styles.exclusionChips}>
-                {(group.items ?? []).map((hood) => {
-                  const isExcluded = excluded.includes(hood.id);
-                  return (
-                    <button
-                      key={hood.id}
-                      type="button"
-                      className={styles.exclusionChip}
-                      onClick={() => toggleExcluded(hood.id)}
-                      aria-pressed={isExcluded}
-                      data-testid={`admin-exclude-${hood.id}`}
-                    >
-                      <Badge variant={isExcluded ? 'danger' : 'neutral'}>
-                        {isExcluded ? t('admin.assign.exclude.excluded') : t('admin.assign.exclude.included')}
-                      </Badge>
-                      <span>{hood.name}</span>
-                    </button>
-                  );
-                })}
+          {groups.map((group) => {
+            const picked = (group.items ?? []).filter((hood) => hoods.includes(hood.id)).length;
+            return (
+              <div key={group.cityId} className={styles.exclusionGroup}>
+                <span className={styles.exclusionCity}>
+                  {group.cityName}
+                  <span className={styles.exclusionScope}>
+                    {picked === 0
+                      ? t('admin.assign.hoods.wholeCity')
+                      : t('admin.assign.hoods.limited', { count: picked })}
+                  </span>
+                </span>
+                <div className={styles.exclusionChips}>
+                  {(group.items ?? []).map((hood) => {
+                    const on = hoods.includes(hood.id);
+                    return (
+                      <button
+                        key={hood.id}
+                        type="button"
+                        className={styles.exclusionChip}
+                        onClick={() => toggleHood(hood.id)}
+                        aria-pressed={on}
+                        data-testid={`admin-hood-${hood.id}`}
+                      >
+                        <Badge variant={on ? 'success' : 'neutral'}>
+                          {on ? t('admin.assign.hoods.on') : t('admin.assign.hoods.off')}
+                        </Badge>
+                        <span>{hood.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </section>
       )}
     </Modal>

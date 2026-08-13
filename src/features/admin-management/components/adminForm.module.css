@@ -274,3 +274,12 @@
   outline: 2px solid var(--color-focus, var(--color-primary));
   outline-offset: 2px;
 }
+
+/* "whole city" / "N selected" beside the city name in the assign dialog. */
+.exclusionScope {
+  margin-inline-start: var(--space-2);
+  font-weight: var(--weight-regular, 400);
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--color-text-muted);
+}

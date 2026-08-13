@@ -11,6 +11,11 @@ interface Props {
   regions: Region[];
   isLoading: boolean;
   /**
+   * Neighbourhoods GRANTED within the cities above. When a city has any, the
+   * admin covers only those — not the whole city.
+   */
+  includedNeighbourhoodIds?: string[];
+  /**
    * Neighbourhoods carved OUT of the city grants above. A city row that hides
    * these would overstate the admin's reach — "Riyadh" reads as the whole city
    * when it may exclude several of its neighbourhoods.
@@ -28,6 +33,7 @@ interface Props {
 export function AdminRegionsCard({
   regions,
   isLoading,
+  includedNeighbourhoodIds = [],
   excludedNeighbourhoodIds = [],
   onManage,
 }: Props) {
@@ -35,11 +41,17 @@ export function AdminRegionsCard({
   const navigate = useNavigate();
   const { data: neighbourhoods } = useNeighbourhoods();
 
-  /** Excluded neighbourhood names, per city id. */
+  // Granted and excluded neighbourhood names, per city id. A city showing
+  // neither covers the whole city.
+  const grantsByCity = new Map<string, string[]>();
   const exclusionsByCity = new Map<string, string[]>();
   for (const hood of neighbourhoods ?? []) {
-    if (!excludedNeighbourhoodIds.includes(hood.id)) continue;
-    exclusionsByCity.set(hood.cityId, [...(exclusionsByCity.get(hood.cityId) ?? []), hood.name]);
+    if (includedNeighbourhoodIds.includes(hood.id)) {
+      grantsByCity.set(hood.cityId, [...(grantsByCity.get(hood.cityId) ?? []), hood.name]);
+    }
+    if (excludedNeighbourhoodIds.includes(hood.id)) {
+      exclusionsByCity.set(hood.cityId, [...(exclusionsByCity.get(hood.cityId) ?? []), hood.name]);
+    }
   }
 
   return (
@@ -73,13 +85,19 @@ export function AdminRegionsCard({
                 >
                   {region.name}
                 </button>
-                {exclusionsByCity.has(region.id) && (
+                {grantsByCity.has(region.id) ? (
+                  <span className={styles.exclusions}>
+                    {t('admin.detail.regions.only', {
+                      names: grantsByCity.get(region.id)?.join(', '),
+                    })}
+                  </span>
+                ) : exclusionsByCity.has(region.id) ? (
                   <span className={styles.exclusions}>
                     {t('admin.detail.regions.except', {
                       names: exclusionsByCity.get(region.id)?.join(', '),
                     })}
                   </span>
-                )}
+                ) : null}
               </div>
               <Badge variant={statusToBadgeVariant(region.status)}>
                 {t(`region.status.${region.status}`)}
