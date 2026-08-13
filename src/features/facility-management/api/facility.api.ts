@@ -34,7 +34,8 @@ const FACILITIES_PATH = `${BASE}/facilities`;
  * up to 100000, so this leaves ample headroom while still being a real limit.
  */
 const WORKING_SET = 2000;
-const PENDING_PATH = `${BASE}/pending-review`;
+/** Approve/reject live under /facilities/review, both singly and in bulk. */
+const REVIEW_PATH = `${FACILITIES_PATH}/review`;
 
 function currentScope(): AdminScope {
   const { role, user } = useAuthStore.getState();
@@ -97,22 +98,36 @@ export async function getFacilityById(id: string): Promise<Facility> {
   return facility;
 }
 
+/**
+ * Approve / reject a pending facility.
+ *
+ * The route is `/facilities/review/:id` — `/pending-review/:id` does not exist
+ * on the backend, so every approve and reject 404'd from the dashboard.
+ */
 export async function approveFacility(id: string): Promise<void> {
-  await apiClient.patch(`${PENDING_PATH}/${id}`, { status: 'approved' });
+  await apiClient.patch(`${REVIEW_PATH}/${id}`, { status: 'approved' });
 }
 
 export async function rejectFacility(id: string, reason: string): Promise<void> {
   if (reason.trim().length === 0) throw new Error('Reason is required');
-  await apiClient.patch(`${PENDING_PATH}/${id}`, { status: 'rejected', reason: reason.trim() });
+  await apiClient.patch(`${REVIEW_PATH}/${id}`, { status: 'rejected', reason: reason.trim() });
 }
 
+/**
+ * Suspend and reactivate are ONE endpoint taking a boolean, not two verbs:
+ * `PATCH /facilities/:id/suspension { isSuspended }`. The previous
+ * `/suspend` + `/reactivate` pair matched no route at all.
+ */
 export async function suspendFacility(id: string, reason: string): Promise<void> {
   if (reason.trim().length === 0) throw new Error('Reason is required');
-  await apiClient.patch(`${FACILITIES_PATH}/${id}/suspend`, { reason: reason.trim() });
+  await apiClient.patch(`${FACILITIES_PATH}/${id}/suspension`, {
+    isSuspended: true,
+    reason: reason.trim(),
+  });
 }
 
 export async function reactivateFacility(id: string): Promise<void> {
-  await apiClient.patch(`${FACILITIES_PATH}/${id}/reactivate`);
+  await apiClient.patch(`${FACILITIES_PATH}/${id}/suspension`, { isSuspended: false });
 }
 
 export async function reviewFacilityDocument(
@@ -240,16 +255,45 @@ export async function getFacilityStats(): Promise<FacilityStats> {
   return computeFacilityStats(all, regions, currentScope());
 }
 
-/** Facility count per region (keyed by region id) for the region-management screen. */
+/** One `{ id, name, count }` bucket as both counts endpoints return them. */
+interface CountBucket {
+  id: string;
+  name?: string;
+  count?: number;
+}
+
+/**
+ * Both counts endpoints return ARRAYS of `{ id, name, count }`, not the
+ * `Record<id, number>` these functions used to cast to. The cast silently
+ * succeeded and every lookup then returned `undefined`, so the facility-count
+ * column and its filter read as blank/zero for every row.
+ */
+function toCountMap(buckets: CountBucket[] | null | undefined): Record<string, number> {
+  if (!Array.isArray(buckets)) return {};
+  const map: Record<string, number> = {};
+  for (const bucket of buckets) {
+    if (bucket?.id) map[bucket.id] = bucket.count ?? 0;
+  }
+  return map;
+}
+
+/**
+ * Facility count per region, keyed by region id.
+ *
+ * The endpoint splits its answer into `{ cities, neighborhoods }`. Regions in
+ * this dashboard are backed by either level, so both are merged into one map —
+ * ids are UUIDs and cannot collide across the two sets.
+ */
 export async function getRegionFacilityCounts(): Promise<Record<string, number>> {
-  const res = await apiClient.get(`${BASE}/region-counts`);
-  return unwrap<Record<string, number>>(res.data) ?? {};
+  const res = await apiClient.get(`${FACILITIES_PATH}/region-counts`);
+  const data = unwrap<{ cities?: CountBucket[]; neighborhoods?: CountBucket[] }>(res.data);
+  return { ...toCountMap(data?.cities), ...toCountMap(data?.neighborhoods) };
 }
 
 /** Facility count per owner id (for the owners list facility-count column/filter). */
 export async function getFacilityCountsByOwner(): Promise<Record<string, number>> {
-  const res = await apiClient.get(`${BASE}/owner-counts`);
-  return unwrap<Record<string, number>>(res.data) ?? {};
+  const res = await apiClient.get(`${FACILITIES_PATH}/owner-counts`);
+  return toCountMap(unwrap<CountBucket[]>(res.data));
 }
 
 /**
