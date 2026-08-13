@@ -42,6 +42,8 @@ export interface RegionDto {
   radius_km?: number;
   radiusKm?: number;
   radius?: number;
+  /** City detail returns the radius in METRES; the list returns radius_km. */
+  radius_meters?: number;
   is_active?: boolean;
   isActive?: boolean;
   active?: boolean;
@@ -64,6 +66,11 @@ function num(...values: Array<number | undefined>): number {
   return 0;
 }
 
+/** Metres to kilometres, only when a usable metre value is present. */
+function kmFromMeters(meters: number | undefined): number | undefined {
+  return typeof meters === 'number' && Number.isFinite(meters) ? meters / 1000 : undefined;
+}
+
 export function toRegion(dto: RegionDto): Region {
   const isActive =
     typeof dto.is_active === 'boolean'
@@ -82,7 +89,7 @@ export function toRegion(dto: RegionDto): Region {
     name: dto.name ?? '',
     centerLat: num(dto.center_lat, dto.centerLat, dto.lat),
     centerLng: num(dto.center_lng, dto.centerLng, dto.lng),
-    radiusKm: num(dto.radius_km, dto.radiusKm, dto.radius),
+    radiusKm: num(dto.radius_km, dto.radiusKm, dto.radius, kmFromMeters(dto.radius_meters)),
     isActive,
     status: isActive ? 'active' : 'inactive',
     isDeleted:

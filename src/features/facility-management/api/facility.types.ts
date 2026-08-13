@@ -671,6 +671,11 @@ export interface FacilityDto {
     governorate?: string;
     district?: string;
   };
+  /** LIST endpoint: coordinates and place names arrive flat, not under `location`. */
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  city_name?: string | null;
+  neighborhood_name?: string | null;
   images?: string[];
   owner_id?: string | number;
   owner_name?: string;
@@ -727,6 +732,22 @@ export interface FacilityDto {
   cancel_policy?: { free_hours_before?: number; penalty_percent?: number };
 }
 
+/**
+ * First finite number among the candidates, else NaN.
+ *
+ * NaN is deliberate: it marks "no coordinate" in a way that fails every
+ * comparison, so an unplaced facility can never be mistaken for one sitting at
+ * 0,0. Postgres may hand back a numeric as a string, so strings are coerced.
+ */
+function numOr(...values: Array<number | string | null | undefined>): number {
+  for (const value of values) {
+    if (value === null || value === undefined || value === '') continue;
+    const n = Number(value);
+    if (Number.isFinite(n)) return n;
+  }
+  return Number.NaN;
+}
+
 function normalizeStatus(value: string | undefined): FacilityStatus {
   const s = (value ?? '').toLowerCase();
   return (FACILITY_STATUSES as string[]).includes(s) ? (s as FacilityStatus) : 'pending';
@@ -768,13 +789,22 @@ export function toFacility(dto: FacilityDto): Facility {
     name: dto.name ?? '',
     kind: normalizeKind(dto.type),
     status: normalizeStatus(dto.status),
+    // The detail endpoint nests coordinates under `location`; the LIST endpoint
+    // returns them flat as `latitude`/`longitude`. Reading only the nested form
+    // meant no facility in a list ever had coordinates.
+    //
+    // `NaN` rather than 0 when they are genuinely absent: 0,0 is a real place
+    // (the Atlantic off West Africa), so defaulting to it silently asserts a
+    // location instead of admitting there isn't one. Every distance test
+    // against NaN is false, so such a facility reads as unplaced — which is
+    // the truth — rather than as a confident orphan.
     location: {
-      lat: dto.location?.lat ?? 0,
-      lng: dto.location?.lng ?? 0,
+      lat: numOr(dto.location?.lat, dto.latitude),
+      lng: numOr(dto.location?.lng, dto.longitude),
       address: dto.location?.address ?? '',
-      city: dto.location?.city,
+      city: dto.location?.city ?? dto.city_name ?? undefined,
       governorate: normalizeGovernorate(dto.location?.governorate),
-      district: dto.location?.district,
+      district: dto.location?.district ?? dto.neighborhood_name ?? undefined,
     },
     images: Array.isArray(dto.images) ? dto.images : [],
     ownerId: String(dto.owner_id ?? ''),
