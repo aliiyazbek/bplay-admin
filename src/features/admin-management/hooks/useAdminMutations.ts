@@ -91,10 +91,16 @@ export function useAssignRegions() {
   });
 }
 
-/** Reset to the original password and return it so the caller can reveal it once. */
+/**
+ * Set an admin's password to an explicit new value.
+ *
+ * The API requires the caller to supply the password — it neither generates one
+ * nor returns it, so there is no value to reveal afterwards.
+ */
 export function useResetAdminPassword() {
   return useMutation({
-    mutationFn: (id: string) => resetAdminPassword(id),
+    mutationFn: ({ id, password }: { id: string; password: string }) =>
+      resetAdminPassword(id, password),
   });
 }
 

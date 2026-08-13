@@ -61,15 +61,38 @@ export async function getAdminById(id: string): Promise<Admin> {
   return toAdmin(unwrap<AdminDto>(res.data));
 }
 
+/**
+ * The wire contract for create and update.
+ *
+ * Two things this must get right, both of which used to be wrong:
+ *
+ * 1. `role` is REQUIRED on create. It was never sent, so every "add admin"
+ *    attempt failed validation with `must have required property 'role'` and
+ *    no admin could be created from the dashboard at all. The enum is
+ *    `['admin']` — a super_admin is not created through this endpoint.
+ * 2. Scope is expressed as `cities` / `neighborhoods`, NOT `scope` +
+ *    `region_ids`. A "region" in this dashboard IS a city (`/admin/regions`
+ *    returns rows from the `cities` table), so the selected region ids go to
+ *    `cities`. A general-scope admin simply gets an empty set.
+ *
+ * The second one was the dangerous half: the server runs AJV with
+ * `removeAdditional: 'all'`, so `scope` and `region_ids` were SILENTLY DROPPED
+ * on update rather than rejected. The request returned 200, the UI reported
+ * success, and the admin's regions were never changed.
+ */
+function toAdminScopePayload(scope: AdminScope, regionIds: string[]) {
+  return { cities: scope === 'regional' ? regionIds : [] };
+}
+
 export async function createAdmin(input: CreateAdminInput): Promise<Admin> {
   const res = await apiClient.post(PATH, {
     name: input.name,
     email: input.email,
+    role: 'admin',
     password: input.password,
     phone: `963${input.phone}`,
     national_id: input.nationalId,
-    scope: input.scope,
-    region_ids: input.scope === 'regional' ? input.regionIds : [],
+    ...toAdminScopePayload(input.scope, input.regionIds),
   });
   return toAdmin(unwrap<AdminDto>(res.data));
 }
@@ -80,8 +103,7 @@ export async function updateAdmin(id: string, input: UpdateAdminInput): Promise<
     email: input.email,
     phone: `963${input.phone}`,
     national_id: input.nationalId,
-    scope: input.scope,
-    region_ids: input.scope === 'regional' ? input.regionIds : [],
+    ...toAdminScopePayload(input.scope, input.regionIds),
   });
   return toAdmin(unwrap<AdminDto>(res.data));
 }
@@ -90,30 +112,60 @@ export async function toggleAdminActive(id: string, isActive: boolean): Promise<
   await apiClient.post(`${PATH}/is_active/${id}`, { is_active: isActive });
 }
 
-/** Promote/demote the oversight tier. */
+/**
+ * Promote/demote the oversight tier.
+ *
+ * There is no `/scope/:id` route — scope is not a stored field but a
+ * consequence of the city set: an admin with no cities is general, one with
+ * cities is regional. Demoting to general therefore clears the set. Promoting
+ * to regional cannot invent a selection, so it is a no-op here and the regions
+ * are chosen through `assignRegions`.
+ */
 export async function setAdminScope(id: string, scope: AdminScope): Promise<void> {
-  await apiClient.patch(`${PATH}/scope/${id}`, { scope });
-}
-
-/** Replace the whole region set for an admin (many-to-many). */
-export async function assignRegions(id: string, regionIds: string[]): Promise<void> {
-  await apiClient.post(`${PATH}/assign-regions/${id}`, { region_ids: regionIds });
+  if (scope === 'regional') return;
+  await apiClient.patch(`${PATH}/${id}`, { cities: [] });
 }
 
 /**
- * Reset an admin's credentials. A real backend issues a reset (e.g. emails a
- * link) and never returns a plaintext password — so this stub returns an empty
- * string; the "reveal the original value" flow is a mock-only capability.
+ * Replace the whole region set for an admin (many-to-many).
+ *
+ * `/assign-regions/:id` does not exist; the update endpoint takes the full
+ * `cities` set and replaces it, which is the same semantics.
  */
-export async function resetAdminPassword(id: string): Promise<string> {
-  await apiClient.post(`${PATH}/reset-password/${id}`);
+export async function assignRegions(id: string, regionIds: string[]): Promise<void> {
+  await apiClient.patch(`${PATH}/${id}`, { cities: regionIds });
+}
+
+/**
+ * Set an admin's password to an explicit new value.
+ *
+ * The endpoint REQUIRES a `password` in the body — it does not generate one and
+ * does not email a link. Calling it with an empty body (as this used to) fails
+ * validation with "must be object", so the reset silently never worked.
+ *
+ * The caller supplies the value and is responsible for showing it once; the
+ * server never echoes a password back, so nothing is returned.
+ */
+export async function resetAdminPassword(id: string, password: string): Promise<string> {
+  await apiClient.post(`${PATH}/reset-password/${id}`, { password });
   return '';
 }
 
+/**
+ * Deletion is PERMANENT — the backend runs `DELETE FROM users`, reassigning the
+ * audit rows first. There is no soft-delete flag and therefore no undo.
+ */
 export async function deleteAdmin(id: string): Promise<void> {
   await apiClient.delete(`${PATH}/${id}`);
 }
 
-export async function restoreAdmin(id: string): Promise<void> {
-  await apiClient.post(`${PATH}/restore/${id}`);
+/**
+ * Not supported by the backend, and cannot be: `deleteAdmin` removes the row
+ * outright, so there is nothing left to restore. `/restore/:id` was a mock-era
+ * route that 404s against the real API. It throws rather than resolving so a
+ * caller cannot report a successful restore that did not happen — if the UI
+ * still offers a restore action, that action should be removed.
+ */
+export async function restoreAdmin(_id: string): Promise<void> {
+  throw new Error('Admin deletion is permanent — restore is not supported.');
 }

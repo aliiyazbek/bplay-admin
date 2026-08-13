@@ -212,12 +212,16 @@ export async function assignRegions(id: string, regionIds: string[]): Promise<vo
   await writeThroughRegions(id, record.name, regionIds);
 }
 
-/** Reset the password back to the ORIGINAL value we issued; returns it to reveal once. */
-export async function resetAdminPassword(id: string): Promise<string> {
+/**
+ * Set the password to an explicit value, mirroring the real endpoint (which
+ * requires one and never echoes a password back).
+ */
+export async function resetAdminPassword(id: string, password: string): Promise<string> {
   await mockDelay();
   const record = db.find((item) => item.id === id);
   if (!record) throw new Error('Admin not found');
-  return record.initialPassword;
+  record.initialPassword = password;
+  return '';
 }
 
 /**

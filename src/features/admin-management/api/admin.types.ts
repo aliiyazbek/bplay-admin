@@ -73,6 +73,18 @@ export interface AdminDto {
   assignedRegionNames?: string[];
   created_at?: string;
   createdAt?: string;
+  /**
+   * The create endpoint returns the new row keyed `userId`, not `id` — without
+   * this a freshly created admin was mapped to `id: ''`.
+   */
+  userId?: string;
+  /**
+   * Region scope as the API actually expresses it: `{ id, name }` city rows.
+   * There is no `scope` field on the wire — an admin with cities is regional,
+   * one with none is general.
+   */
+  cities?: Array<{ id: string; name?: string }>;
+  neighborhoods?: Array<{ id: string; name?: string }>;
 }
 
 function firstString(...values: Array<string | undefined>): string {
@@ -91,12 +103,25 @@ export function toAdmin(dto: AdminDto): Admin {
         : dto.status
           ? dto.status.toLowerCase() === 'active'
           : true;
+  // Regions come back as `cities: [{ id, name }]`. The older flat aliases are
+  // kept ahead of it so mocks and any future shape still map.
+  const cityRows = Array.isArray(dto.cities) ? dto.cities : [];
+  const regionIds = (
+    dto.assigned_region_ids ??
+    dto.assignedRegionIds ??
+    cityRows.map((city) => city.id)
+  ).map(String);
+  const regionNames =
+    dto.assigned_region_names ??
+    dto.assignedRegionNames ??
+    cityRows.map((city) => city.name ?? '').filter(Boolean);
+  // Scope is not a stored field: an admin holding cities is regional, one
+  // holding none is general. An explicit `scope` still wins when present.
   const scopeRaw = (dto.scope ?? dto.admin_scope ?? '').toLowerCase();
-  const scope: AdminScope = scopeRaw === 'general' ? 'general' : 'regional';
-  const regionIds = (dto.assigned_region_ids ?? dto.assignedRegionIds ?? []).map(String);
-  const regionNames = dto.assigned_region_names ?? dto.assignedRegionNames ?? [];
+  const scope: AdminScope =
+    scopeRaw === 'general' || (scopeRaw === '' && regionIds.length === 0) ? 'general' : 'regional';
   return {
-    id: String(dto.id ?? dto._id ?? dto.admin_id ?? ''),
+    id: String(dto.id ?? dto._id ?? dto.admin_id ?? dto.userId ?? ''),
     name: dto.name ?? dto.full_name ?? '',
     email: dto.email ?? '',
     role: dto.role ?? 'admin',

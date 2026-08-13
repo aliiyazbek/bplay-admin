@@ -871,15 +871,14 @@
       "submit": "Save regions"
     },
     "reset": {
-      "title": "Reset password",
-      "subtitle": "Reset {{name}}'s password to the original value",
-      "copy": "Copy",
-      "copied": "Copied",
-      "copiedToast": "Password copied to clipboard",
-      "warn": "This is the original password we issued. Share it securely — the admin can change it after signing in.",
-      "confirm": "Reset password",
-      "confirmHint": "This resets the admin’s password to the original value we issued and reveals it once so you can share it securely.",
-      "error": "Couldn’t reset the password. Please try again."
+      "title": "Set a new password",
+      "subtitle": "Set a new password for {{name}}",
+      "placeholder": "New password",
+      "doneToast": "Password updated",
+      "warn": "Share it securely — the admin can change it after signing in. It cannot be viewed again.",
+      "confirm": "Set password",
+      "confirmHint": "Choose a new password for this admin. It must be at least 8 characters and include a number and a symbol.",
+      "error": "Couldn’t set the password. Please try again."
     },
     "actions": {
       "viewDetails": "View details",
