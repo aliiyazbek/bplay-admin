@@ -122,6 +122,19 @@ async function currentScope(): Promise<NotificationScope> {
  * Fetch one window of the caller's rows. No filter params are forwarded — see
  * note 2 in the contract block above.
  */
+/**
+ * PAGINATION: client-side, applied exactly once.
+ *
+ * The endpoint now supports BOTH modes — keyset (`before`, what the mobile feed
+ * uses) and offset (`page`/`pageSize`, which also returns a `meta` block). This
+ * client still cannot use offset mode, and the reason is the scope gate in
+ * `filterAndPaginateNotifications`: it runs in the browser and can drop rows, so
+ * a server page would be filtered after the fact and the totals would lie.
+ *
+ * Nothing here was double-paginating — `fetchWindow` never forwarded a page —
+ * so this is a window-size change, not a bug fix. The window is the honest
+ * limit: beyond it, older notifications are simply not in the working set.
+ */
 async function fetchWindow(): Promise<Notification[]> {
   const res = await apiClient.get(PATH, { params: { limit: WINDOW_LIMIT } });
   return unwrapList<NotificationDto>(res.data, ['notifications', 'items']).map(toNotification);

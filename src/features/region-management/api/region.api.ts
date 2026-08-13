@@ -14,6 +14,12 @@ import {
 
 const REGIONS_PATH = '/admin/regions';
 
+/**
+ * PAGINATION: client-side by design, and correct as written.
+ *
+ * Unlike the other list clients, this one never forwarded page/pageSize to the
+ * server, so it was not affected by the double-pagination bug. It must stay that way: getScopeRegions() below reads the SAME endpoint and nine other slices depend on it returning the COMPLETE set to resolve their region scope. A paginated response there would silently narrow scoping across the whole dashboard.
+ */
 export async function getRegions(params: RegionListParams): Promise<RegionListResult> {
   const res = await apiClient.get(REGIONS_PATH);
   const regions = unwrapList<RegionDto>(res.data, ['regions']).map(toRegion);

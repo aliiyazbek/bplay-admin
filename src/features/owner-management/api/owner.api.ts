@@ -1,5 +1,5 @@
 import { apiClient } from '@lib/apiClient';
-import { unwrap, unwrapList } from '@shared/types/api';
+import { unwrap, unwrapList, readPageMeta } from '@shared/types/api';
 import { DEFAULT_PAGE_SIZE } from '@shared/lib/paginate';
 import {
   toOwner,
@@ -16,14 +16,6 @@ import {
 
 const BASE = '/admin/owners-management';
 const OWNERS_PATH = `${BASE}/owners`;
-
-/** `meta` block returned by the backend's `paginated()` helper. */
-interface PageMeta {
-  page?: number;
-  pageSize?: number;
-  total?: number;
-  totalPages?: number;
-}
 
 /** Raw KPI payload from `/owners/stats` (mutually exclusive buckets). */
 interface OwnerStatsDto {
@@ -64,14 +56,13 @@ export async function getOwners(params: OwnerListParams): Promise<OwnerListResul
   const res = await apiClient.get(OWNERS_PATH, { params: query });
 
   const items = unwrapList<OwnerDto>(res.data, ['owners']).map(toOwner);
-  const meta = (res.data as { meta?: PageMeta } | undefined)?.meta;
-
-  return {
-    items,
-    total: meta?.total ?? items.length,
-    page: meta?.page ?? Number(query.page),
-    pageCount: Math.max(1, meta?.totalPages ?? 1),
-  };
+  // `readPageMeta` is the shared version of what this function used to do by
+  // hand — this slice was one of only two reading server pagination correctly,
+  // so its logic became the helper the rest of the dashboard now follows.
+  return readPageMeta(res.data, items, {
+    page: Number(query.page),
+    pageSize: Number(query.pageSize ?? DEFAULT_PAGE_SIZE),
+  });
 }
 
 export async function getOwnerById(id: string): Promise<Owner> {

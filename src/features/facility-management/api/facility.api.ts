@@ -25,6 +25,15 @@ import {
 
 const BASE = '/admin/facilities-management';
 const FACILITIES_PATH = `${BASE}/facilities`;
+
+/**
+ * How many rows to pull when the client must filter and paginate itself.
+ *
+ * Not unbounded: an explicit ceiling makes truncation a visible, chosen number
+ * rather than whatever the server's default happens to be. The endpoint allows
+ * up to 100000, so this leaves ample headroom while still being a real limit.
+ */
+const WORKING_SET = 2000;
 const PENDING_PATH = `${BASE}/pending-review`;
 
 function currentScope(): AdminScope {
@@ -32,9 +41,34 @@ function currentScope(): AdminScope {
   return { role, assignedRegionIds: user?.assignedRegionIds };
 }
 
+/**
+ * PAGINATION: deliberately CLIENT-SIDE, and paginated exactly once.
+ *
+ * This list cannot use server paging, and the reason is worth stating so nobody
+ * "fixes" it back. After the fetch, `buildFacilityListResult` still applies
+ * filters the backend cannot express — `amenities`, `minRating`, `verification`
+ * — and, more importantly, the geo REGION SCOPE, which is resolved in the
+ * browser from each region's circle. Any of those can drop rows. Paginating on
+ * the server first would therefore return "page 2 of 8" and then filter it down
+ * to 3, so the count, the page boundaries and the row set would all disagree.
+ *
+ * The bug this replaces was the opposite mistake: `page`/`pageSize` were
+ * forwarded to the server AND the returned page was sliced again locally. With
+ * `page=2` the server returned rows 6–10 and the client then sliced that
+ * 5-element array from index 5 — a blank table. Paginating twice is always
+ * wrong; the fix is to pick one place, not to remove both.
+ *
+ * So the page params are stripped from the request and a full working set is
+ * fetched instead. `pageSize` is capped high server-side (100000) precisely to
+ * allow this.
+ */
 export async function getFacilities(params: FacilityListParams): Promise<FacilityListResult> {
+  // Everything except the paging keys: those are applied locally, after the
+  // filters the server cannot run.
+  const { page: _page, pageSize: _pageSize, ...serverParams } = params;
+
   const [res, regions] = await Promise.all([
-    apiClient.get(FACILITIES_PATH, { params }),
+    apiClient.get(FACILITIES_PATH, { params: { ...serverParams, pageSize: WORKING_SET } }),
     getScopeRegions(),
   ]);
   const all = unwrapList<FacilityDto>(res.data, ['facilities']).map(toFacility);

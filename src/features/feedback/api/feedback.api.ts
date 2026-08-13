@@ -73,8 +73,29 @@ function assertVisible(feedback: Feedback, scope: FeedbackScope): Feedback {
   return feedback;
 }
 
+/** Bounded working set for client-side filtering — an explicit, visible cap. */
+const WORKING_SET = 2000;
+/**
+ * PAGINATION: client-side, and applied exactly ONCE.
+ *
+ * The local pipeline still applies the region scope after the fetch, and either can drop rows —
+ * so paginating on the server first would return "page 2 of N" and then filter
+ * it down, leaving the count, the page boundaries and the rows disagreeing.
+ *
+ * The bug this replaces was paginating TWICE: page/pageSize were forwarded to
+ * the server AND the returned page was sliced again locally, so page 2 asked
+ * the server for rows 6-10 and then sliced that 5-element array from index 5 —
+ * a blank table.
+ *
+ * Page params are therefore stripped from the request and a bounded working set
+ * is fetched instead.
+ */
 export async function getFeedbackList(params: FeedbackListParams): Promise<FeedbackListResult> {
-  const [res, scope] = await Promise.all([apiClient.get(PATH, { params }), currentScope()]);
+  const { page: _p, pageSize: _ps, ...serverParams } = params;
+  const [res, scope] = await Promise.all([
+    apiClient.get(PATH, { params: { ...serverParams, pageSize: WORKING_SET } }),
+    currentScope(),
+  ]);
   const all = unwrapList<FeedbackDto>(res.data, ['feedback', 'items']).map(toFeedback);
   return filterAndPaginateFeedback(all, params, scope);
 }
