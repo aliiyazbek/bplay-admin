@@ -40,15 +40,37 @@ function toCirclePayload(input: NeighbourhoodInput) {
 }
 
 /**
- * Every neighbourhood, newest cities first. The list is small (single digits
- * today, bounded by the number of cities) so it is fetched whole and grouped
- * client-side rather than re-queried per city.
+ * The endpoint's hard maximum. Asking for more is a 400, not a silent clamp —
+ * requesting `limit=1000` made every page that loads neighbourhoods fail
+ * validation on refresh.
+ */
+const MAX_LIMIT = 100;
+
+/**
+ * Every neighbourhood, across all cities.
+ *
+ * Pages until the reported total is reached rather than assuming one request
+ * covers it. The set is small today (single digits) but it grows with every
+ * area an operator draws, and a silent truncation at 100 would quietly drop
+ * neighbourhoods out of the filters and scope pickers that read this.
  */
 export async function getNeighbourhoods(): Promise<Neighbourhood[]> {
-  const res = await apiClient.get(PATH, { params: { limit: 1000 } });
-  return unwrapList<NeighbourhoodDto>(res.data, ['neighbourhoods', 'neighborhoods']).map(
-    toNeighbourhood,
-  );
+  const all: NeighbourhoodDto[] = [];
+  let page = 1;
+
+  for (;;) {
+    const res = await apiClient.get(PATH, { params: { page, limit: MAX_LIMIT } });
+    const rows = unwrapList<NeighbourhoodDto>(res.data, ['neighbourhoods', 'neighborhoods']);
+    all.push(...rows);
+
+    const total = Number(res.data?.meta?.total);
+    // Stop on a short page as well as on the total: if `meta` is ever absent the
+    // loop must still terminate rather than spin.
+    if (rows.length < MAX_LIMIT || !Number.isFinite(total) || all.length >= total) break;
+    page += 1;
+  }
+
+  return all.map(toNeighbourhood);
 }
 
 /** The neighbourhoods belonging to one city. */

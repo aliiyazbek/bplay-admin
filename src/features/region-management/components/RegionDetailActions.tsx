@@ -4,7 +4,6 @@ import {
   ConfirmDialog,
   EditIcon,
   MapPinIcon,
-  PlusIcon,
   PowerIcon,
   TrashIcon,
   UserPlusIcon,
@@ -21,17 +20,21 @@ interface Props {
   onEdit: () => void;
   /** Open the shared assign-admins modal (owned by the page). */
   onAssign: () => void;
-  /** Navigate to the add-facility wizard. */
-  onAddFacility: () => void;
 }
 
 /**
- * The region detail header action bar (labeled buttons). Owns ONLY the
+ * The region detail header action bar (labeled buttons).
+ *
+ * No "Add facility": it seeded the new facility's coordinates from the region
+ * CENTRE, inventing a location nobody chose. Facilities are created from the
+ * facilities screen, where the location is picked explicitly.
+ *
+ * Owns ONLY the
  * toggle / delete / restore confirm dialogs; the edit + assign modals live on
  * the page and are opened through the onEdit / onAssign callbacks. A deleted
  * region shows only Restore + View on Google Maps.
  */
-export function RegionDetailActions({ region, onEdit, onAssign, onAddFacility }: Props) {
+export function RegionDetailActions({ region, onEdit, onAssign }: Props) {
   const { t } = useTranslation();
   const toggle = useToggleRegion();
   const remove = useDeleteRegion();
@@ -86,9 +89,6 @@ export function RegionDetailActions({ region, onEdit, onAssign, onAddFacility }:
       {viewOnMapButton}
       <Button variant="secondary" leftIcon={<UserPlusIcon />} onClick={onAssign} data-testid="region-detail-assign">
         {t('region.actions.assign')}
-      </Button>
-      <Button variant="secondary" leftIcon={<PlusIcon />} onClick={onAddFacility} data-testid="region-detail-add-facility">
-        {t('region.actions.addFacility')}
       </Button>
       <Button variant="secondary" leftIcon={<EditIcon />} onClick={onEdit} data-testid="region-detail-edit">
         {t('region.actions.edit')}

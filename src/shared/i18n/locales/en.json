@@ -1775,8 +1775,7 @@
       "deactivate": "Deactivate",
       "delete": "Delete",
       "restore": "Restore",
-      "viewDetails": "View details",
-      "addFacility": "Add facility"
+      "viewDetails": "View details"
     },
     "detail": {
       "subtitle": "Everything inside this region — map, admins, facilities and stats.",
@@ -1816,7 +1815,6 @@
       },
       "facilities": {
         "empty": "No facilities fall inside this region yet.",
-        "add": "Add facility",
         "view": "View facility",
         "viewOwner": "Open owner {{name}}",
         "allHoods": "All neighbourhoods",
