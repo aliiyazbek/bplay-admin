@@ -69,6 +69,10 @@ const db: AdminRecord[] = SEEDS.map<AdminRecord>((seed, index) => ({
   isDeleted: seed.isDeleted ?? false,
   assignedRegionIds: [],
   assignedRegionNames: [],
+  includedNeighbourhoodIds: [],
+  includedNeighbourhoodNames: [],
+  excludedNeighbourhoodIds: [],
+  excludedNeighbourhoodNames: [],
   initialPassword: `Bplay@${100 + index}`,
   createdAt: new Date(2025, 0, index + 1).toISOString(),
 }));
@@ -160,6 +164,11 @@ export async function createAdmin(input: CreateAdminInput): Promise<Admin> {
     isDeleted: false,
     assignedRegionIds: [],
     assignedRegionNames: [],
+    // The mock has no neighbourhood level; scoping there is real-API only.
+    includedNeighbourhoodIds: [],
+    includedNeighbourhoodNames: [],
+    excludedNeighbourhoodIds: [],
+    excludedNeighbourhoodNames: [],
     initialPassword: input.password,
     createdAt: new Date().toISOString(),
   };

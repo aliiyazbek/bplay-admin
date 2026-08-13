@@ -38,6 +38,20 @@ export interface Admin {
    */
   assignedRegionIds: string[];
   assignedRegionNames: string[];
+  /**
+   * Neighbourhood-level scope — the finer half of the same grant.
+   *
+   * `included` NARROWS: the admin sees only these neighbourhoods.
+   * `excluded` SUBTRACTS: the admin sees the whole city EXCEPT these.
+   *
+   * The backend resolves the two with a precedence chain (exclusion wins, then
+   * a direct neighbourhood grant, then the city). Both are empty for an admin
+   * scoped at city level, which is the common case.
+   */
+  includedNeighbourhoodIds: string[];
+  includedNeighbourhoodNames: string[];
+  excludedNeighbourhoodIds: string[];
+  excludedNeighbourhoodNames: string[];
   createdAt?: string;
 }
 
@@ -84,7 +98,12 @@ export interface AdminDto {
    * one with none is general.
    */
   cities?: Array<{ id: string; name?: string }>;
-  neighborhoods?: Array<{ id: string; name?: string }>;
+  /**
+   * Neighbourhood scope. `is_excluded` splits one array into two very different
+   * meanings — a granted neighbourhood vs a carve-out from the city — so it must
+   * never be flattened away.
+   */
+  neighborhoods?: Array<{ id: string; name?: string; is_excluded?: boolean }>;
 }
 
 function firstString(...values: Array<string | undefined>): string {
@@ -120,6 +139,13 @@ export function toAdmin(dto: AdminDto): Admin {
   const scopeRaw = (dto.scope ?? dto.admin_scope ?? '').toLowerCase();
   const scope: AdminScope =
     scopeRaw === 'general' || (scopeRaw === '' && regionIds.length === 0) ? 'general' : 'regional';
+
+  // Split the single `neighborhoods` array on is_excluded: a granted
+  // neighbourhood narrows the scope, an excluded one subtracts from the city.
+  const hoodRows = Array.isArray(dto.neighborhoods) ? dto.neighborhoods : [];
+  const included = hoodRows.filter((row) => row.is_excluded !== true);
+  const excluded = hoodRows.filter((row) => row.is_excluded === true);
+
   return {
     id: String(dto.id ?? dto._id ?? dto.admin_id ?? dto.userId ?? ''),
     name: dto.name ?? dto.full_name ?? '',
@@ -134,6 +160,10 @@ export function toAdmin(dto: AdminDto): Admin {
     isDeleted: dto.is_deleted ?? dto.isDeleted ?? (dto.deleted_at != null ? true : false),
     assignedRegionIds: regionIds,
     assignedRegionNames: regionNames,
+    includedNeighbourhoodIds: included.map((row) => String(row.id)),
+    includedNeighbourhoodNames: included.map((row) => row.name ?? '').filter(Boolean),
+    excludedNeighbourhoodIds: excluded.map((row) => String(row.id)),
+    excludedNeighbourhoodNames: excluded.map((row) => row.name ?? '').filter(Boolean),
     createdAt: dto.createdAt ?? dto.created_at,
   };
 }
@@ -177,6 +207,9 @@ export interface CreateAdminInput {
   scope: AdminScope;
   /** Regions to assign — used only when scope === 'regional'. */
   regionIds: string[];
+  /** Optional neighbourhood-level refinement of the same scope. */
+  includedNeighbourhoodIds?: string[];
+  excludedNeighbourhoodIds?: string[];
 }
 
 export interface UpdateAdminInput {
@@ -186,6 +219,8 @@ export interface UpdateAdminInput {
   nationalId: string;
   scope: AdminScope;
   regionIds: string[];
+  includedNeighbourhoodIds?: string[];
+  excludedNeighbourhoodIds?: string[];
 }
 
 /** Many-to-many region assignment for an admin (replaces the whole set). */

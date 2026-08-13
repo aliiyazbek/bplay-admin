@@ -80,8 +80,22 @@ export async function getAdminById(id: string): Promise<Admin> {
  * on update rather than rejected. The request returned 200, the UI reported
  * success, and the admin's regions were never changed.
  */
-function toAdminScopePayload(scope: AdminScope, regionIds: string[]) {
-  return { cities: scope === 'regional' ? regionIds : [] };
+function toAdminScopePayload(
+  scope: AdminScope,
+  regionIds: string[],
+  includedNeighbourhoodIds: string[] = [],
+  excludedNeighbourhoodIds: string[] = [],
+) {
+  // A general admin holds nothing at either level. Sending the empty arrays
+  // rather than omitting them matters: the endpoint REPLACES each set, so
+  // omitting one would silently leave a stale neighbourhood grant in place
+  // after the admin was demoted.
+  const regional = scope === 'regional';
+  return {
+    cities: regional ? regionIds : [],
+    neighborhoods: regional ? includedNeighbourhoodIds : [],
+    excluded_neighborhoods: regional ? excludedNeighbourhoodIds : [],
+  };
 }
 
 export async function createAdmin(input: CreateAdminInput): Promise<Admin> {
@@ -92,7 +106,12 @@ export async function createAdmin(input: CreateAdminInput): Promise<Admin> {
     password: input.password,
     phone: `963${input.phone}`,
     national_id: input.nationalId,
-    ...toAdminScopePayload(input.scope, input.regionIds),
+    ...toAdminScopePayload(
+      input.scope,
+      input.regionIds,
+      input.includedNeighbourhoodIds,
+      input.excludedNeighbourhoodIds,
+    ),
   });
   return toAdmin(unwrap<AdminDto>(res.data));
 }
@@ -103,7 +122,12 @@ export async function updateAdmin(id: string, input: UpdateAdminInput): Promise<
     email: input.email,
     phone: `963${input.phone}`,
     national_id: input.nationalId,
-    ...toAdminScopePayload(input.scope, input.regionIds),
+    ...toAdminScopePayload(
+      input.scope,
+      input.regionIds,
+      input.includedNeighbourhoodIds,
+      input.excludedNeighbourhoodIds,
+    ),
   });
   return toAdmin(unwrap<AdminDto>(res.data));
 }
@@ -132,8 +156,23 @@ export async function setAdminScope(id: string, scope: AdminScope): Promise<void
  * `/assign-regions/:id` does not exist; the update endpoint takes the full
  * `cities` set and replaces it, which is the same semantics.
  */
-export async function assignRegions(id: string, regionIds: string[]): Promise<void> {
-  await apiClient.patch(`${PATH}/${id}`, { cities: regionIds });
+export async function assignRegions(
+  id: string,
+  regionIds: string[],
+  neighbourhoods?: { includedIds: string[]; excludedIds: string[] },
+): Promise<void> {
+  // Only the keys being changed are sent. The endpoint replaces each set it
+  // receives, so sending `neighborhoods: []` here by default would silently
+  // erase a neighbourhood-level grant every time someone edited the cities.
+  await apiClient.patch(`${PATH}/${id}`, {
+    cities: regionIds,
+    ...(neighbourhoods
+      ? {
+          neighborhoods: neighbourhoods.includedIds,
+          excluded_neighborhoods: neighbourhoods.excludedIds,
+        }
+      : {}),
+  });
 }
 
 /**

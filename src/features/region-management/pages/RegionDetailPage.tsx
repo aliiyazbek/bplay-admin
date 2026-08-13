@@ -27,6 +27,7 @@ import { RegionStatCards } from '../components/RegionStatCards';
 import { RegionStatusBreakdown } from '../components/RegionStatusBreakdown';
 import { RegionAdminsCard } from '../components/RegionAdminsCard';
 import { RegionFacilitiesCard } from '../components/RegionFacilitiesCard';
+import { RegionNeighbourhoodsCard } from '../components/RegionNeighbourhoodsCard';
 import { RegionFormModal } from '../components/RegionFormModal';
 import { AssignAdminModal } from '../components/AssignAdminModal';
 import type { Region } from '../api/region.types';
@@ -208,6 +209,7 @@ function RegionDetailContent({ region, editDisclosure, assignDisclosure }: Conte
       <RegionStatusBreakdown facilities={list} />
 
       <RegionAdminsCard region={region} onManage={assignDisclosure.open} />
+      <RegionNeighbourhoodsCard city={region} />
       <RegionFacilitiesCard region={region} facilities={list} isLoading={facilitiesLoading} />
 
       <RegionFormModal isOpen={editDisclosure.isOpen} onClose={editDisclosure.close} region={region} />

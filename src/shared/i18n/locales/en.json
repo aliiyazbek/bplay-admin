@@ -862,7 +862,13 @@
       "remove": "Remove {{name}}",
       "empty": "No regions available.",
       "noMatch": "No regions match your filters.",
-      "submit": "Save regions"
+      "submit": "Save regions",
+      "exclude": {
+        "title": "Neighbourhood exclusions",
+        "hint": "The admin covers each selected city in full. Tap a neighbourhood to carve it out of their scope.",
+        "included": "Covered",
+        "excluded": "Excluded"
+      }
     },
     "reset": {
       "title": "Set a new password",
@@ -932,7 +938,8 @@
       },
       "regions": {
         "manage": "Manage regions",
-        "empty": "No regions assigned yet."
+        "empty": "No regions assigned yet.",
+        "except": "except {{names}}"
       },
       "facilities": {
         "empty": "No facilities in the assigned regions.",
@@ -1848,6 +1855,34 @@
       "title": "Outside regions",
       "desc": "Facilities that fall outside every active region.",
       "count": "{{count}} outside regions"
+    },
+    "hood": {
+      "title": "Neighbourhoods",
+      "add": "Add neighbourhood",
+      "empty": "No neighbourhoods yet. Facilities placed in this city can only be matched to it once it has at least one.",
+      "radius": "{{km}} km radius",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "form": {
+        "createTitle": "Add a neighbourhood to {{city}}",
+        "editTitle": "Edit neighbourhood",
+        "name": "Neighbourhood name",
+        "namePlaceholder": "e.g. Olaya",
+        "centerHint": "The circle must sit entirely inside {{city}} — the city is worked out from where you place it.",
+        "outsideWarning": "This circle reaches outside {{city}}. Move the centre or reduce the radius, or the server will reject it."
+      },
+      "delete": {
+        "title": "Delete this neighbourhood?",
+        "message": "“{{name}}” will be permanently deleted. This cannot be undone — deactivate it instead to keep it on record.",
+        "confirm": "Delete permanently"
+      },
+      "toast": {
+        "created": "Neighbourhood added",
+        "updated": "Neighbourhood updated",
+        "activated": "Neighbourhood activated",
+        "deactivated": "Neighbourhood deactivated",
+        "deleted": "Neighbourhood deleted"
+      }
     }
   },
   "community": {

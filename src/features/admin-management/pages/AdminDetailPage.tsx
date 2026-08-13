@@ -241,6 +241,7 @@ function AdminDetailContent({ admin, editDisclosure, assignDisclosure, resetDisc
             <AdminRegionsCard
               regions={regionList}
               isLoading={regionsLoading}
+              excludedNeighbourhoodIds={admin.excludedNeighbourhoodIds}
               onManage={assignDisclosure.open}
             />
             <AdminFacilitiesCard facilities={facilityList} isLoading={facilitiesLoading} />

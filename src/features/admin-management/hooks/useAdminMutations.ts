@@ -80,8 +80,16 @@ export function useAssignRegions() {
   const toast = useToast();
   const { t } = useTranslation();
   return useMutation({
-    mutationFn: ({ id, regionIds }: { id: string; regionIds: string[] }) =>
-      assignRegions(id, regionIds),
+    mutationFn: ({
+      id,
+      regionIds,
+      neighbourhoods,
+    }: {
+      id: string;
+      regionIds: string[];
+      /** Omit to leave the neighbourhood-level scope untouched. */
+      neighbourhoods?: { includedIds: string[]; excludedIds: string[] };
+    }) => assignRegions(id, regionIds, neighbourhoods),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.all });
       queryClient.invalidateQueries({ queryKey: REGION_KEY });
