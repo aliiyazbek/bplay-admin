@@ -40,6 +40,11 @@ interface NavItem {
   roles?: UserRole[];
   /** Optional trailing indicator (an unread count, a pending badge). */
   Badge?: ComponentType;
+  /**
+   * Built, but not offered yet. The entry stays here so it is obvious what is
+   * parked and why, rather than the feature quietly vanishing from the file.
+   */
+  hidden?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -60,6 +65,13 @@ const NAV_ITEMS: NavItem[] = [
     Icon: SendIcon,
     superAdminOnly: false,
     Badge: ChatNavBadge,
+    // HIDDEN — there is no chat backend. The whole slice is built and left in
+    // place, but its only endpoint (GET /admin/chat/conversations/stats) 404s,
+    // and because ChatNavBadge polls it from the sidebar that 404 fired on
+    // EVERY page, once per navigation. Hiding the entry unmounts the badge and
+    // stops the noise; the route still resolves for anyone with the URL.
+    // Flip this to false when the backend lands.
+    hidden: true,
   },
   { to: PATHS.notifications, key: 'nav.notifications', Icon: BellIcon, superAdminOnly: false },
   // AUD2 — the audit trail is a supervision tool aimed at admins, so it is
@@ -89,10 +101,12 @@ export function AppSidebar() {
     navigate(PATHS.login, { replace: true });
   };
 
-  const items = NAV_ITEMS.filter((item) =>
-    item.roles
-      ? role !== null && item.roles.includes(role)
-      : !item.superAdminOnly || role === 'super_admin',
+  const items = NAV_ITEMS.filter(
+    (item) =>
+      !item.hidden &&
+      (item.roles
+        ? role !== null && item.roles.includes(role)
+        : !item.superAdminOnly || role === 'super_admin'),
   );
   const displayName = user?.name ?? user?.email?.split('@')[0] ?? 'Admin';
 
