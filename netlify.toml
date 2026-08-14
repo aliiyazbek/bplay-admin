@@ -1,13 +1,11 @@
-# Netlify config for the LIVE super-admin, wired to the deployed backend.
+# Netlify config for the super-admin dashboard, wired to the deployed backend.
 #
-# This branch exists only because netlify.toml takes precedence over a site's
-# UI settings: `main` carries the standalone mock demo, and a second Netlify
-# site pointed at `main` would silently inherit that demo build no matter what
-# was configured in the dashboard. Keeping the two builds on two branches is
-# what keeps them independent.
+# This replaced a mock-data demo build. Note that netlify.toml overrides a
+# site's dashboard settings, so the values below win over anything configured
+# in the Netlify UI — change them here, not there.
 #
-# main        -> mock demo, no backend  (bplay-superadmin-yazbek2003)
-# deploy/live -> this file, real API    (the live site)
+# `npm run build:demo` still exists for a backend-free build; it just isn't what
+# this site deploys any more.
 
 [build]
   command = "npm run build"
