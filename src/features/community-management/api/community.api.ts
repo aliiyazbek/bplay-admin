@@ -49,14 +49,27 @@ export async function getPostById(id: string): Promise<Post> {
   return toPost(unwrap<PostDto>(res.data));
 }
 
+/**
+ * Moderation KPIs, counted server-side.
+ *
+ * Previously derived by fetching `pageSize=1000` and reducing over it, which
+ * silently under-reports past 1000 posts — the totals would simply stop
+ * growing, with nothing to indicate the numbers had become wrong. The server
+ * counts over the whole scoped set in one query.
+ */
 export async function getPostStats(): Promise<PostStats> {
-  const res = await apiClient.get(POSTS_PATH, { params: { pageSize: 1000 } });
-  const all = unwrapList<PostDto>(res.data, ['posts']).map(toPost);
+  const res = await apiClient.get(`${POSTS_PATH}/stats`);
+  const dto = unwrap<{
+    total?: number;
+    total_comments?: number;
+    total_reactions?: number;
+    removed?: number;
+  }>(res.data);
   return {
-    totalPosts: all.length,
-    totalComments: all.reduce((sum, post) => sum + post.totalComments, 0),
-    totalReactions: all.reduce((sum, post) => sum + post.totalReactions, 0),
-    removed: all.filter((post) => post.moderationStatus === 'removed').length,
+    totalPosts: dto.total ?? 0,
+    totalComments: dto.total_comments ?? 0,
+    totalReactions: dto.total_reactions ?? 0,
+    removed: dto.removed ?? 0,
   };
 }
 
