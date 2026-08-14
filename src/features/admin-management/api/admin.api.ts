@@ -33,8 +33,19 @@ const WORKING_SET = 2000;
  * is fetched instead.
  */
 export async function getAdmins(params: AdminListParams): Promise<AdminListResult> {
-  const { page: _p, pageSize: _ps, ...serverParams } = params;
-  const res = await apiClient.get(PATH, { params: { ...serverParams, pageSize: WORKING_SET } });
+  // FILTERS ARE NOT SENT. The UI's filter state (`q`, `status`, `scope`,
+  // `assignment`) uses names the endpoint does not declare — its querystring
+  // takes `search` and `is_active` — and it runs AJV with
+  // `additionalProperties: false` + `removeAdditional: 'all'`, so those keys
+  // were stripped server-side and silently ignored. Spreading them produced a
+  // request that looked filtered and was not: `?q=nomatch` still returned every
+  // admin.
+  //
+  // They are omitted rather than translated because `filterAndPaginateAdmins`
+  // below already applies all four locally over the full working set — the same
+  // reason pagination is client-side. Sending them too would filter twice, and
+  // the server's narrowed page would disagree with the local count.
+  const res = await apiClient.get(PATH, { params: { pageSize: WORKING_SET } });
   const all = unwrapList<AdminDto>(res.data, ['admins']).map(toAdmin);
   return filterAndPaginateAdmins(all, params);
 }
@@ -191,10 +202,23 @@ export async function resetAdminPassword(id: string, password: string): Promise<
 }
 
 /**
- * Deletion is PERMANENT — the backend runs `DELETE FROM users`, reassigning the
- * audit rows first. There is no soft-delete flag and therefore no undo.
+ * Deletion is a SOFT delete: the backend stamps `users.deleted_at` and revokes
+ * the account's sessions. The row, its profile, its region grants and its audit
+ * history all survive, and `restoreAdmin` puts it back.
+ *
+ * A deleted admin drops out of the default listing but its detail page still
+ * resolves (with `isDeleted` true), which is how it gets reviewed and restored.
+ *
+ * One consequence worth surfacing in the UI: the account keeps its email and
+ * phone, so creating a NEW admin at the same address fails with
+ * ERR_EMAIL_EXISTS until this one is restored.
  */
 export async function deleteAdmin(id: string): Promise<void> {
   await apiClient.delete(`${PATH}/${id}`);
+}
+
+/** Undo a soft delete. Gated on the same permission as the delete itself. */
+export async function restoreAdmin(id: string): Promise<void> {
+  await apiClient.post(`${PATH}/restore/${id}`);
 }
 

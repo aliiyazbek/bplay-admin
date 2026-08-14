@@ -39,13 +39,20 @@ export type BlockReason = 'maintenance' | 'holiday' | 'event';
 /** A club is a venue with named courts; a pitch IS its own single court. */
 export type BookingFacilityKind = 'club' | 'pitch';
 
+/** Slugs for every seeded sport — kept in step with the `sports` table. */
 export type BookingSport =
   | 'tennis'
   | 'padel'
   | 'football'
   | 'basketball'
   | 'swimming'
-  | 'volleyball';
+  | 'volleyball'
+  | 'badminton'
+  | 'squash'
+  | 'table_tennis'
+  | 'cycling'
+  | 'running'
+  | 'gym_fitness';
 
 export const BOOKING_STATUSES: BookingStatus[] = [
   'under_review',
@@ -67,7 +74,37 @@ export const BOOKING_SPORTS: BookingSport[] = [
   'basketball',
   'swimming',
   'volleyball',
+  'badminton',
+  'squash',
+  'table_tennis',
+  'cycling',
+  'running',
+  'gym_fitness',
 ];
+
+/**
+ * The display name each slug corresponds to in the `sports` table.
+ *
+ * The bookings endpoint filters with `s.name = $1` — an exact, case-sensitive
+ * comparison against the stored name. The dashboard's slug ('football') never
+ * equalled the stored 'Football', so the sport filter returned zero rows for
+ * EVERY sport. The filter value is translated back through this map before it
+ * goes out; see `toQuery` in booking.api.ts.
+ */
+export const BOOKING_SPORT_WIRE_NAME: Record<BookingSport, string> = {
+  tennis: 'Tennis',
+  padel: 'Padel',
+  football: 'Football',
+  basketball: 'Basketball',
+  swimming: 'Swimming',
+  volleyball: 'Volleyball',
+  badminton: 'Badminton',
+  squash: 'Squash',
+  table_tennis: 'Table Tennis',
+  cycling: 'Cycling',
+  running: 'Running',
+  gym_fitness: 'Gym / Fitness',
+};
 
 const BLOCK_REASONS: BlockReason[] = ['maintenance', 'holiday', 'event'];
 
@@ -368,8 +405,17 @@ function normalizeSource(value: string | undefined): BookingSource {
   return (BOOKING_SOURCES as string[]).includes(s) ? (s as BookingSource) : 'electronic';
 }
 
+/**
+ * Rows carry the sport's DISPLAY name ('Table Tennis'), so slugify rather than
+ * merely lowercase — otherwise every multi-word sport fell through to the
+ * 'football' fallback and rendered as the wrong sport.
+ */
 function normalizeSport(value: string | undefined): BookingSport {
-  const s = (value ?? '').toLowerCase();
+  const s = (value ?? '')
+    .toLowerCase()
+    .replace(/[\s/]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '');
   return (BOOKING_SPORTS as string[]).includes(s) ? (s as BookingSport) : 'football';
 }
 

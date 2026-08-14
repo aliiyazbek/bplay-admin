@@ -557,7 +557,8 @@
       "ratingShown": "Review restored",
       "reportResolved": "Report resolved",
       "reportDismissed": "Report dismissed",
-      "suspensionLifted": "Booking suspension lifted"
+      "suspensionLifted": "Booking suspension lifted",
+      "created": "Player created"
     },
     "empty": {
       "title": "No players found",
@@ -612,7 +613,8 @@
     },
     "gender": {
       "male": "Male",
-      "female": "Female"
+      "female": "Female",
+      "other": "Other"
     },
     "sport": {
       "football": "Football",
@@ -620,7 +622,13 @@
       "tennis": "Tennis",
       "basketball": "Basketball",
       "volleyball": "Volleyball",
-      "swimming": "Swimming"
+      "swimming": "Swimming",
+      "badminton": "Badminton",
+      "squash": "Squash",
+      "table_tennis": "Table Tennis",
+      "cycling": "Cycling",
+      "running": "Running",
+      "gym_fitness": "Gym / Fitness"
     },
     "skill": {
       "beginner": "Beginner",
@@ -736,6 +744,33 @@
       "reviewing": "Reviewing",
       "resolved": "Resolved",
       "dismissed": "Dismissed"
+    },
+    "create": {
+      "title": "Add player",
+      "submit": "Create player",
+      "name": "Full name",
+      "username": "Username",
+      "email": "Email",
+      "phone": "Phone",
+      "gender": "Gender",
+      "dateOfBirth": "Date of birth",
+      "hint": "A one-time temporary password is generated. The player must change it on first sign-in.",
+      "done": "{{name}} was created. Share the temporary password below — it is shown once.",
+      "tempPassword": "Temporary password",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copiedToast": "Temporary password copied",
+      "warn": "This password is shown once. The player is forced to change it on first sign-in."
+    },
+    "errors": {
+      "nameRequired": "Full name must be at least 3 characters",
+      "usernameRequired": "Username must be at least 3 characters",
+      "usernameInvalid": "Use letters, numbers, dots, dashes or underscores only",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email address",
+      "phoneInvalid": "Enter a valid 9-digit phone number",
+      "genderRequired": "Select a gender",
+      "dobInvalid": "Enter a valid date"
     }
   },
   "status": {
@@ -1187,8 +1222,16 @@
       },
       "toast": {
         "accepted": "Document accepted",
-        "rejected": "Document rejected"
-      }
+        "rejected": "Document rejected",
+        "uploaded": "Document uploaded"
+      },
+      "add": "Add document",
+      "addTitle": "Add a verification document",
+      "upload": "Upload",
+      "typeLabel": "Document type",
+      "fileLabel": "File",
+      "uploadHint": "JPG, PNG, WebP or PDF, up to 10 MB. The document is added as under review — you still accept or reject it separately.",
+      "fileTooLarge": "File is larger than 10 MB"
     },
     "about": {
       "title": "Details",
@@ -1256,7 +1299,8 @@
       "notFound": "Owner not found",
       "viewPhoto": "View photo",
       "documents": "Verification documents",
-      "noDocuments": "No verification documents uploaded."
+      "noDocuments": "No verification documents uploaded.",
+      "noDocumentsHint": "Add the owner’s paperwork here so the account can be reviewed."
     },
     "detail": {
       "sections": {
@@ -1364,7 +1408,13 @@
       "football": "Football",
       "basketball": "Basketball",
       "swimming": "Swimming",
-      "volleyball": "Volleyball"
+      "volleyball": "Volleyball",
+      "badminton": "Badminton",
+      "squash": "Squash",
+      "table_tennis": "Table Tennis",
+      "cycling": "Cycling",
+      "running": "Running",
+      "gym_fitness": "Gym / Fitness"
     },
     "surface": {
       "grass": "Grass",
@@ -2186,7 +2236,13 @@
       "football": "Football",
       "basketball": "Basketball",
       "swimming": "Swimming",
-      "volleyball": "Volleyball"
+      "volleyball": "Volleyball",
+      "badminton": "Badminton",
+      "squash": "Squash",
+      "table_tennis": "Table Tennis",
+      "cycling": "Cycling",
+      "running": "Running",
+      "gym_fitness": "Gym / Fitness"
     },
     "blockReason": {
       "maintenance": "Maintenance",

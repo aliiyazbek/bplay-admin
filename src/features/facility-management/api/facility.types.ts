@@ -33,7 +33,30 @@ export type SyrianGovernorate =
   | 'al_hasakah'
   | 'raqqa';
 
-export type SportType = 'tennis' | 'padel' | 'football' | 'basketball' | 'swimming' | 'volleyball';
+/**
+ * Every sport the platform seeds, as a lowercase slug.
+ *
+ * This list must cover the `sports` table. It previously held only six of the
+ * twelve seeded rows, and `normalizeSport` falls back to 'football' for
+ * anything unrecognised — so a Badminton court rendered as Football rather than
+ * as "unknown". Silent, confident, and wrong.
+ *
+ * The DB stores DISPLAY names ('Table Tennis', 'Gym / Fitness'); these slugs are
+ * derived from them by `sportSlug`, and the labels come back from i18n.
+ */
+export type SportType =
+  | 'tennis'
+  | 'padel'
+  | 'football'
+  | 'basketball'
+  | 'swimming'
+  | 'volleyball'
+  | 'badminton'
+  | 'squash'
+  | 'table_tennis'
+  | 'cycling'
+  | 'running'
+  | 'gym_fitness';
 
 export type PitchSurface = 'grass' | 'artificial' | 'hardcourt' | 'clay' | 'sand';
 
@@ -153,7 +176,28 @@ export const SPORT_TYPES: SportType[] = [
   'basketball',
   'swimming',
   'volleyball',
+  'badminton',
+  'squash',
+  'table_tennis',
+  'cycling',
+  'running',
+  'gym_fitness',
 ];
+
+/**
+ * Turn whatever the API sends for a sport into a slug.
+ *
+ * The `sports` table stores display names — 'Table Tennis', 'Gym / Fitness' —
+ * so a plain lowercase is not enough: the separator has to collapse too. Detail
+ * endpoints also send `{ id, name }` objects rather than strings, which is
+ * handled by `enumText` before this runs.
+ */
+export function sportSlug(value: unknown): string {
+  return enumText(value)
+    .replace(/[\s/]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '');
+}
 
 export const PITCH_SURFACES: PitchSurface[] = ['grass', 'artificial', 'hardcourt', 'clay', 'sand'];
 
@@ -686,23 +730,37 @@ export interface FacilityDto {
   location?: {
     lat?: number;
     lng?: number;
+    /** The admin DETAIL endpoint spells them out inside `location`. */
+    latitude?: number | string | null;
+    longitude?: number | string | null;
     address?: string;
     city?: string;
     governorate?: string;
     district?: string;
+    neighbourhood?: string;
   };
   /** LIST endpoint: coordinates and place names arrive flat, not under `location`. */
   latitude?: number | string | null;
   longitude?: number | string | null;
   city_name?: string | null;
+  cityName?: string | null;
   neighborhood_name?: string | null;
+  neighbourhoodName?: string | null;
   images?: string[];
+  /** The admin detail endpoint's name for the gallery. */
+  photos?: Array<string | { url?: string } | null>;
   owner_id?: string | number;
+  ownerId?: string | number;
   owner_name?: string;
+  ownerName?: string;
   source?: string;
   created_at?: string;
+  createdAt?: string;
   admin_notes?: string;
+  adminNotes?: string;
   suspension_reason?: string;
+  suspensionReason?: string;
+  isSuspended?: boolean;
   rating?: number;
   documents?: Array<{
     id?: string | number;
@@ -720,22 +778,47 @@ export interface FacilityDto {
   // Club
   description?: string;
   logo_url?: string;
-  sports?: string[];
+  logoUrl?: string;
+  /**
+   * The LIST endpoint sends plain slugs; the admin DETAIL endpoint sends
+   * `{ id, name }` objects. `normalizeSport` accepts both — see `enumText`.
+   */
+  sports?: Array<string | { id?: string; name?: string; slug?: string }>;
   working_hours?: Record<
     string,
     { is_open?: boolean; open_time?: string; close_time?: string }
   >;
+  /** The admin detail endpoint sends an ARRAY keyed by `dayOfWeek` instead. */
+  workingHours?: Array<{
+    dayOfWeek?: number;
+    day_of_week?: number;
+    openTime?: string | null;
+    open_time?: string | null;
+    closeTime?: string | null;
+    close_time?: string | null;
+    isClosed?: boolean;
+    is_closed?: boolean;
+  }>;
   contact_phone?: string;
+  contactPhone?: string;
   courts?: Array<{
     id?: string | number;
     name?: string;
-    sport?: string;
+    sport?: string | { id?: string; name?: string; slug?: string };
+    /** Detail endpoint's spelling of the sport. */
+    sportName?: string;
     price_per_hour?: number;
+    pricePerHour?: number | string;
     surface?: string;
+    surfaceType?: string | null;
     is_indoor?: boolean;
+    /** Detail endpoint expresses indoor/outdoor as an enum instead of a flag. */
+    environment?: string | null;
     has_lighting?: boolean;
+    hasLighting?: boolean;
     capacity?: number;
     is_active?: boolean;
+    isActive?: boolean;
   }>;
   // Pitch
   sport?: string;
@@ -790,8 +873,8 @@ const STATUS_FROM_WIRE: Record<string, FacilityStatus> = {
   owner_suspended: 'owner_suspended',
 };
 
-function normalizeStatus(value: string | undefined): FacilityStatus {
-  const s = (value ?? '').toLowerCase();
+function normalizeStatus(value: unknown): FacilityStatus {
+  const s = enumText(value);
   return STATUS_FROM_WIRE[s] ?? 'pending';
 }
 
@@ -803,23 +886,54 @@ function normalizeSource(value: string | undefined): FacilitySource {
   return value === 'admin' ? 'admin' : 'owner';
 }
 
-function normalizeGovernorate(value: string | undefined): SyrianGovernorate | undefined {
-  const s = (value ?? '').toLowerCase();
+function normalizeGovernorate(value: unknown): SyrianGovernorate | undefined {
+  const s = enumText(value);
   return (SYRIAN_GOVERNORATES as string[]).includes(s) ? (s as SyrianGovernorate) : undefined;
 }
 
-function normalizeSport(value: string | undefined): SportType {
-  const s = (value ?? '').toLowerCase();
+/**
+ * Coerce a DTO enum-ish field to a lowercase string.
+ *
+ * The detail endpoint returns `sports` as `{ id, name }` OBJECTS while the list
+ * endpoint returns plain strings. Calling `.toLowerCase()` on the object form
+ * threw `TypeError: (value ?? "").toLowerCase is not a function` — a render-time
+ * crash that the app error boundary caught and displayed as "Something went
+ * wrong. Please refresh the page." on every club facility profile.
+ *
+ * Accepting both shapes here fixes it once for every normalizer below, rather
+ * than at each of the five call sites.
+ */
+function enumText(value: unknown): string {
+  if (typeof value === 'string') return value.toLowerCase();
+  if (value && typeof value === 'object') {
+    const named = value as { name?: unknown; slug?: unknown };
+    const text = named.slug ?? named.name;
+    if (typeof text === 'string') return text.toLowerCase();
+  }
+  return '';
+}
+
+/**
+ * Map an API sport onto a known slug.
+ *
+ * Slugified first, so the display names the `sports` table stores ('Table
+ * Tennis') resolve rather than falling through. The fallback stays 'football'
+ * only because `SportType` has no "unknown" member and every caller expects a
+ * concrete value — but with all twelve seeded sports now listed, real data no
+ * longer reaches it. See `sportSlug`.
+ */
+function normalizeSport(value: unknown): SportType {
+  const s = sportSlug(value);
   return (SPORT_TYPES as string[]).includes(s) ? (s as SportType) : 'football';
 }
 
-function normalizeSurface(value: string | undefined): PitchSurface {
-  const s = (value ?? '').toLowerCase();
+function normalizeSurface(value: unknown): PitchSurface {
+  const s = enumText(value);
   return (PITCH_SURFACES as string[]).includes(s) ? (s as PitchSurface) : 'artificial';
 }
 
 function normalizeDocStatus(value: string | undefined): FacilityDocStatus {
-  const s = (value ?? '').toLowerCase();
+  const s = enumText(value);
   if (s === 'approved' || s === 'accepted' || s === 'verified') return 'approved';
   if (s === 'rejected' || s === 'denied') return 'rejected';
   return 'pending';
@@ -833,7 +947,7 @@ export function toFacility(dto: FacilityDto): Facility {
     // Suspension overrides the review outcome: a suspended facility is still
     // 'approved' on the wire, but the dashboard shows one state per row and
     // "suspended" is the one that matters operationally.
-    status: dto.is_suspended
+    status: (dto.is_suspended ?? dto.isSuspended)
       ? 'suspended'
       : normalizeStatus(dto.status ?? dto.approval_status),
     // The detail endpoint nests coordinates under `location`; the LIST endpoint
@@ -846,20 +960,37 @@ export function toFacility(dto: FacilityDto): Facility {
     // against NaN is false, so such a facility reads as unplaced — which is
     // the truth — rather than as a confident orphan.
     location: {
-      lat: numOr(dto.location?.lat, dto.latitude),
-      lng: numOr(dto.location?.lng, dto.longitude),
+      // The detail endpoint spells these `latitude`/`longitude` INSIDE
+      // `location`, not `lat`/`lng`, so both are read at each level.
+      lat: numOr(dto.location?.lat, dto.location?.latitude, dto.latitude),
+      lng: numOr(dto.location?.lng, dto.location?.longitude, dto.longitude),
       address: dto.location?.address ?? '',
-      city: dto.location?.city ?? dto.city_name ?? undefined,
+      city: dto.location?.city ?? dto.city_name ?? dto.cityName ?? undefined,
       governorate: normalizeGovernorate(dto.location?.governorate),
-      district: dto.location?.district ?? dto.neighborhood_name ?? undefined,
+      district:
+        dto.location?.district ??
+        dto.location?.neighbourhood ??
+        dto.neighborhood_name ??
+        dto.neighbourhoodName ??
+        undefined,
     },
-    images: Array.isArray(dto.images) ? dto.images : [],
-    ownerId: String(dto.owner_id ?? ''),
-    ownerName: dto.owner_name ?? '',
+    // The admin detail endpoint calls the gallery `photos`; the list endpoint
+    // and the owner-facing one call it `images`.
+    images: Array.isArray(dto.images)
+      ? dto.images
+      : Array.isArray(dto.photos)
+        ? dto.photos.map((photo) => (typeof photo === 'string' ? photo : (photo?.url ?? '')))
+            .filter(Boolean)
+        : [],
+    // Every field below arrives camelCased from the admin endpoints. Reading
+    // only snake_case left the owner link dead and stamped `createdAt` with
+    // "now" on each render.
+    ownerId: String(dto.owner_id ?? dto.ownerId ?? ''),
+    ownerName: dto.owner_name ?? dto.ownerName ?? '',
     source: normalizeSource(dto.source),
-    createdAt: dto.created_at ?? new Date().toISOString(),
-    adminNotes: dto.admin_notes,
-    suspensionReason: dto.suspension_reason,
+    createdAt: dto.created_at ?? dto.createdAt ?? new Date().toISOString(),
+    adminNotes: dto.admin_notes ?? dto.adminNotes,
+    suspensionReason: dto.suspension_reason ?? dto.suspensionReason,
     rating: dto.rating,
     documents: Array.isArray(dto.documents)
       ? dto.documents.map((doc, index) => {
@@ -883,35 +1014,61 @@ export function toFacility(dto: FacilityDto): Facility {
   };
 
   if (base.kind === 'club') {
+    // Working hours arrive in TWO shapes. The admin detail endpoint sends an
+    // ARRAY of `{ dayOfWeek, openTime, closeTime, isClosed }`; older/mock
+    // payloads send an OBJECT keyed by weekday. Reading only the object form
+    // left every club showing no opening hours at all.
+    //
+    // Note the polarity flip: the array form carries `isClosed`, the internal
+    // model carries `isOpen`.
     const workingHours: WorkingHours = {};
-    for (const [day, hours] of Object.entries(dto.working_hours ?? {})) {
-      const weekday = Number(day);
-      if (Number.isInteger(weekday)) {
+    const rawHours = dto.working_hours ?? dto.workingHours;
+    if (Array.isArray(rawHours)) {
+      for (const entry of rawHours) {
+        const weekday = Number(entry?.dayOfWeek ?? entry?.day_of_week);
+        if (!Number.isInteger(weekday)) continue;
+        const closed = entry?.isClosed ?? entry?.is_closed ?? false;
+        // A closed day carries null times; the model wants them absent.
         workingHours[weekday] = {
-          isOpen: hours.is_open ?? false,
-          openTime: hours.open_time,
-          closeTime: hours.close_time,
+          isOpen: !closed,
+          openTime: entry?.openTime ?? entry?.open_time ?? undefined,
+          closeTime: entry?.closeTime ?? entry?.close_time ?? undefined,
         };
+      }
+    } else {
+      for (const [day, hours] of Object.entries(rawHours ?? {})) {
+        const weekday = Number(day);
+        if (Number.isInteger(weekday)) {
+          workingHours[weekday] = {
+            isOpen: hours.is_open ?? false,
+            openTime: hours.open_time,
+            closeTime: hours.close_time,
+          };
+        }
       }
     }
     const club: ClubFacility = {
       ...base,
       kind: 'club',
       description: dto.description,
-      logoUrl: dto.logo_url,
+      logoUrl: dto.logo_url ?? dto.logoUrl,
       sports: (dto.sports ?? []).map(normalizeSport),
       workingHours,
-      contactPhone: dto.contact_phone,
+      contactPhone: dto.contact_phone ?? dto.contactPhone,
+      // Courts come back camelCased from the admin endpoint. Each snake_case
+      // read is kept first so any older payload still maps.
       courts: (dto.courts ?? []).map((court, index) => ({
         id: String(court.id ?? index),
         name: court.name ?? '',
-        sport: normalizeSport(court.sport),
-        pricePerHour: court.price_per_hour ?? 0,
-        surface: normalizeSurface(court.surface),
-        isIndoor: court.is_indoor ?? false,
-        hasLighting: court.has_lighting ?? false,
+        // `sport` is absent here — the endpoint names it `sportName`, and as an
+        // object under the facility's own `sports`.
+        sport: normalizeSport(court.sport ?? court.sportName),
+        pricePerHour: Number(court.price_per_hour ?? court.pricePerHour ?? 0),
+        surface: normalizeSurface(court.surface ?? court.surfaceType),
+        isIndoor: court.is_indoor ?? court.environment === 'indoor',
+        hasLighting: court.has_lighting ?? court.hasLighting ?? false,
         capacity: court.capacity,
-        isActive: court.is_active ?? true,
+        isActive: court.is_active ?? court.isActive ?? true,
       })),
     };
     return club;

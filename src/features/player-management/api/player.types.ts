@@ -29,13 +29,27 @@ export type PlayerAccountType = 'free' | 'paid';
 export type Gender = 'male' | 'female';
 
 /** Sports a player can play, each with a per-sport skill level. */
+/**
+ * Every sport the platform seeds, as a lowercase slug — kept in step with
+ * `SportType` in the facility feature and with the `sports` table.
+ *
+ * This held only six of the twelve seeded sports. `normalizeSport` returns null
+ * for anything unlisted and the caller filters those out, so a player's
+ * Badminton, Squash or Cycling simply vanished from their profile.
+ */
 export type SportKind =
   | 'football'
   | 'padel'
   | 'tennis'
   | 'basketball'
   | 'volleyball'
-  | 'swimming';
+  | 'swimming'
+  | 'badminton'
+  | 'squash'
+  | 'table_tennis'
+  | 'cycling'
+  | 'running'
+  | 'gym_fitness';
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'pro';
 export interface PlayerSport {
   sport: SportKind;
@@ -337,6 +351,12 @@ const SPORTS: SportKind[] = [
   'basketball',
   'volleyball',
   'swimming',
+  'badminton',
+  'squash',
+  'table_tennis',
+  'cycling',
+  'running',
+  'gym_fitness',
 ];
 const SKILL_LEVELS: SkillLevel[] = ['beginner', 'intermediate', 'advanced', 'pro'];
 
@@ -345,8 +365,33 @@ function normalizeAccountStatus(value: string | undefined): PlayerAccountStatus 
   return (ACCOUNT_STATUSES as string[]).includes(s) ? (s as PlayerAccountStatus) : 'active';
 }
 
-function normalizeSport(value: string | undefined): SportKind | null {
-  const s = (value ?? '').toLowerCase();
+/**
+ * Map an API sport onto a known slug, or null when it is genuinely unknown.
+ *
+ * Slugified rather than merely lowercased: the `sports` table stores display
+ * names, so 'Table Tennis' and 'Gym / Fitness' only match after the separators
+ * collapse. Objects are tolerated because detail endpoints send `{ id, name }`
+ * for sports in some payloads.
+ *
+ * Returning null (and being filtered out by the caller) is right for a sport
+ * this build has no label for — better an omission than a wrong label.
+ */
+function normalizeSport(value: unknown): SportKind | null {
+  const raw =
+    typeof value === 'string'
+      ? value
+      : value && typeof value === 'object'
+        ? ((value as { slug?: unknown; name?: unknown }).slug ??
+            (value as { name?: unknown }).name)
+        : undefined;
+  const s =
+    typeof raw === 'string'
+      ? raw
+          .toLowerCase()
+          .replace(/[\s/]+/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '')
+      : '';
   return (SPORTS as string[]).includes(s) ? (s as SportKind) : null;
 }
 
@@ -405,4 +450,46 @@ export function toPlayer(dto: PlayerDto): Player {
     location,
     createdAt: dto.join_date ?? dto.createdAt ?? dto.created_at ?? new Date().toISOString(),
   };
+}
+
+/**
+ * Gender as the CREATE endpoint accepts it.
+ *
+ * Deliberately wider than the display-side `Gender`: the backend's
+ * `createPlayerSchema` enumerates male/female/other, and sending anything else
+ * is rejected. `Gender` stays narrow because the rest of the UI only ever
+ * renders the two it knows how to label.
+ */
+export type CreatePlayerGender = 'male' | 'female' | 'other';
+
+export interface CreatePlayerInput {
+  fullName: string;
+  username: string;
+  email: string;
+  /** 9-digit local part; the api prepends 963. */
+  phone: string;
+  gender: CreatePlayerGender;
+  /** ISO date (YYYY-MM-DD). Omitted from the request when blank. */
+  dateOfBirth?: string;
+}
+
+/** Raw create response. `id` and `userId` are DIFFERENT rows — see createPlayer. */
+export interface CreatedPlayerDto {
+  id?: string;
+  userId?: string;
+  username?: string;
+  email?: string;
+  temporaryPassword?: string;
+  requiresPasswordChange?: boolean;
+}
+
+/** The result of creating a player — carries the one-time temporary password. */
+export interface CreatedPlayer {
+  /** players.id — the id every other player route takes. Use this to navigate. */
+  id: string;
+  /** users.id — kept for completeness; NOT a valid path param for player routes. */
+  userId: string;
+  username: string;
+  email: string;
+  tempPassword: string;
 }
