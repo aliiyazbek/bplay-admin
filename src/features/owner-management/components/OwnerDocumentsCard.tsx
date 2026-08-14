@@ -8,6 +8,10 @@ import {
   EmptyState,
   ReasonDialog,
   DocumentViewerModal,
+  Modal,
+  Field,
+  Select,
+  PlusIcon,
   InboxIcon,
   ImageIcon,
   DocumentIcon,
@@ -16,14 +20,33 @@ import {
   XIcon,
   RotateCcwIcon,
 } from '@ui';
-import { ownerDocBadgeVariant, type OwnerDocument } from '../api/owner.types';
+import { ownerDocBadgeVariant, type OwnerDocument, type OwnerDocType } from '../api/owner.types';
 import { useOwnerDocumentReview } from '../hooks/useOwnerDocumentReview';
+import { useUploadOwnerDocument } from '../hooks/useUploadOwnerDocument';
 import styles from './OwnerDocumentsCard.module.css';
 
 interface Props {
   ownerId: string;
   documents: OwnerDocument[];
 }
+
+/** Mirrors the `document_type` enum the upload endpoint accepts. */
+const DOC_TYPE_OPTIONS: OwnerDocType[] = [
+  'national_id',
+  'business_license',
+  'tax_certificate',
+  'ownership_proof',
+  'other',
+];
+
+/**
+ * Matches the server's ALLOWED_DOC_MIME. Kept in sync deliberately: the picker
+ * filtering to types the server would reject just moves the failure later.
+ */
+const ACCEPTED_TYPES = 'image/jpeg,image/png,image/webp,application/pdf';
+
+/** The server's multipart limit. Checked here so a too-large file fails fast. */
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
 /** The owner's KYC documents — view each (image/PDF) and accept/reject with a reason. */
 export function OwnerDocumentsCard({ ownerId, documents }: Props) {
@@ -32,6 +55,30 @@ export function OwnerDocumentsCard({ ownerId, documents }: Props) {
   const [viewing, setViewing] = useState<OwnerDocument | null>(null);
   const [rejecting, setRejecting] = useState<OwnerDocument | null>(null);
   const [accepting, setAccepting] = useState<OwnerDocument | null>(null);
+
+  const upload = useUploadOwnerDocument();
+  const [uploading, setUploading] = useState(false);
+  const [docType, setDocType] = useState<OwnerDocType>('national_id');
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | undefined>();
+
+  const closeUpload = () => {
+    setUploading(false);
+    setFile(null);
+    setFileError(undefined);
+    setDocType('national_id');
+  };
+
+  const submitUpload = () => {
+    if (!file) return;
+    // Checked before the request so an oversized file reports a clear message
+    // rather than the server's generic multipart failure.
+    if (file.size > MAX_FILE_BYTES) {
+      setFileError(t('owner.doc.fileTooLarge'));
+      return;
+    }
+    upload.mutate({ id: ownerId, docType, file }, { onSuccess: closeUpload });
+  };
 
   const accept = (document: OwnerDocument) =>
     review.mutate({ id: ownerId, documentId: document.id, action: 'accept' });
@@ -60,10 +107,25 @@ export function OwnerDocumentsCard({ ownerId, documents }: Props) {
 
   return (
     <Card className={styles.card} data-testid="owner-detail-documents">
-      <h2 className={styles.title}>{t('owner.profile.documents')}</h2>
+      <div className={styles.head}>
+        <h2 className={styles.title}>{t('owner.profile.documents')}</h2>
+        <Button
+          size="sm"
+          variant="secondary"
+          leftIcon={<PlusIcon />}
+          onClick={() => setUploading(true)}
+          data-testid="owner-doc-add"
+        >
+          {t('owner.doc.add')}
+        </Button>
+      </div>
 
       {documents.length === 0 ? (
-        <EmptyState icon={<InboxIcon />} title={t('owner.profile.noDocuments')} />
+        <EmptyState
+          icon={<InboxIcon />}
+          title={t('owner.profile.noDocuments')}
+          description={t('owner.profile.noDocumentsHint')}
+        />
       ) : (
         <ul className={styles.docs}>
           {documents.map((document) => (
@@ -179,6 +241,60 @@ export function OwnerDocumentsCard({ ownerId, documents }: Props) {
         variant="primary"
         isLoading={review.isPending}
       />
+
+      <Modal
+        isOpen={uploading}
+        onClose={closeUpload}
+        title={t('owner.doc.addTitle')}
+        size="sm"
+        closeLabel={t('common.close')}
+        footer={
+          <>
+            <Button variant="secondary" onClick={closeUpload}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={submitUpload}
+              isLoading={upload.isPending}
+              disabled={!file}
+              data-testid="owner-doc-upload-submit"
+            >
+              {t('owner.doc.upload')}
+            </Button>
+          </>
+        }
+      >
+        <div className={styles.uploadForm}>
+          <Field label={t('owner.doc.typeLabel')} htmlFor="doc-type">
+            <Select
+              id="doc-type"
+              value={docType}
+              onChange={(value) => setDocType(value as OwnerDocType)}
+              options={DOC_TYPE_OPTIONS.map((value) => ({
+                value,
+                label: t(`owner.doc.type.${value}`),
+              }))}
+              aria-label={t('owner.doc.typeLabel')}
+            />
+          </Field>
+
+          <Field label={t('owner.doc.fileLabel')} htmlFor="doc-file" error={fileError}>
+            <input
+              id="doc-file"
+              type="file"
+              className={styles.fileInput}
+              accept={ACCEPTED_TYPES}
+              onChange={(event) => {
+                setFileError(undefined);
+                setFile(event.target.files?.[0] ?? null);
+              }}
+              data-testid="owner-doc-file"
+            />
+          </Field>
+
+          <p className={styles.uploadHint}>{t('owner.doc.uploadHint')}</p>
+        </div>
+      </Modal>
     </Card>
   );
 }

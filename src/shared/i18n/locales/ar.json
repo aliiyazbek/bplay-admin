@@ -557,7 +557,8 @@
       "ratingShown": "تمت استعادة التقييم",
       "reportResolved": "تمت معالجة البلاغ",
       "reportDismissed": "تم رفض البلاغ",
-      "suspensionLifted": "تم رفع إيقاف الحجز"
+      "suspensionLifted": "تم رفع إيقاف الحجز",
+      "created": "تم إنشاء اللاعب"
     },
     "empty": {
       "title": "لا يوجد لاعبون",
@@ -612,7 +613,8 @@
     },
     "gender": {
       "male": "ذكر",
-      "female": "أنثى"
+      "female": "أنثى",
+      "other": "آخر"
     },
     "sport": {
       "football": "كرة القدم",
@@ -620,7 +622,13 @@
       "tennis": "تنس",
       "basketball": "كرة السلة",
       "volleyball": "كرة الطائرة",
-      "swimming": "سباحة"
+      "swimming": "سباحة",
+      "badminton": "ريشة طائرة",
+      "squash": "إسكواش",
+      "table_tennis": "تنس طاولة",
+      "cycling": "دراجات",
+      "running": "جري",
+      "gym_fitness": "صالة رياضية / لياقة"
     },
     "skill": {
       "beginner": "مبتدئ",
@@ -736,6 +744,33 @@
       "reviewing": "قيد المراجعة",
       "resolved": "تمت المعالجة",
       "dismissed": "مرفوض"
+    },
+    "create": {
+      "title": "إضافة لاعب",
+      "submit": "إنشاء اللاعب",
+      "name": "الاسم الكامل",
+      "username": "اسم المستخدم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "gender": "الجنس",
+      "dateOfBirth": "تاريخ الميلاد",
+      "hint": "تُولَّد كلمة مرور مؤقتة لمرة واحدة، ويجب على اللاعب تغييرها عند أول دخول.",
+      "done": "تم إنشاء {{name}}. شارك كلمة المرور المؤقتة أدناه — تظهر مرة واحدة فقط.",
+      "tempPassword": "كلمة المرور المؤقتة",
+      "copy": "نسخ",
+      "copied": "تم النسخ",
+      "copiedToast": "تم نسخ كلمة المرور المؤقتة",
+      "warn": "تظهر هذه الكلمة مرة واحدة. يُفرَض على اللاعب تغييرها عند أول دخول."
+    },
+    "errors": {
+      "nameRequired": "يجب ألا يقل الاسم الكامل عن 3 أحرف",
+      "usernameRequired": "يجب ألا يقل اسم المستخدم عن 3 أحرف",
+      "usernameInvalid": "استخدم الحروف والأرقام والنقطة والشرطة فقط",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "أدخل بريدًا إلكترونيًا صحيحًا",
+      "phoneInvalid": "أدخل رقم هاتف صحيحًا من 9 أرقام",
+      "genderRequired": "اختر الجنس",
+      "dobInvalid": "أدخل تاريخًا صحيحًا"
     }
   },
   "status": {
@@ -1187,8 +1222,16 @@
       },
       "toast": {
         "accepted": "تم قبول الوثيقة",
-        "rejected": "تم رفض الوثيقة"
-      }
+        "rejected": "تم رفض الوثيقة",
+        "uploaded": "تم رفع المستند"
+      },
+      "add": "إضافة مستند",
+      "addTitle": "إضافة مستند تحقق",
+      "upload": "رفع",
+      "typeLabel": "نوع المستند",
+      "fileLabel": "الملف",
+      "uploadHint": "JPG أو PNG أو WebP أو PDF، حتى 10 ميغابايت. يُضاف المستند قيد المراجعة — وتبقى الموافقة أو الرفض قرارًا منفصلًا.",
+      "fileTooLarge": "حجم الملف أكبر من 10 ميغابايت"
     },
     "about": {
       "title": "التفاصيل",
@@ -1256,7 +1299,8 @@
       "notFound": "المالك غير موجود",
       "viewPhoto": "عرض الصورة",
       "documents": "مستندات التحقق",
-      "noDocuments": "لم يتم رفع أي مستندات تحقق."
+      "noDocuments": "لم يتم رفع أي مستندات تحقق.",
+      "noDocumentsHint": "أضف أوراق المالك هنا ليتسنى مراجعة الحساب."
     },
     "detail": {
       "sections": {
@@ -1364,7 +1408,13 @@
       "football": "كرة قدم",
       "basketball": "كرة سلة",
       "swimming": "سباحة",
-      "volleyball": "كرة طائرة"
+      "volleyball": "كرة طائرة",
+      "badminton": "ريشة طائرة",
+      "squash": "إسكواش",
+      "table_tennis": "تنس طاولة",
+      "cycling": "دراجات",
+      "running": "جري",
+      "gym_fitness": "صالة رياضية / لياقة"
     },
     "surface": {
       "grass": "عشب طبيعي",
@@ -2186,7 +2236,13 @@
       "football": "كرة قدم",
       "basketball": "كرة سلة",
       "swimming": "سباحة",
-      "volleyball": "كرة طائرة"
+      "volleyball": "كرة طائرة",
+      "badminton": "ريشة طائرة",
+      "squash": "إسكواش",
+      "table_tennis": "تنس طاولة",
+      "cycling": "دراجات",
+      "running": "جري",
+      "gym_fitness": "صالة رياضية / لياقة"
     },
     "blockReason": {
       "maintenance": "صيانة",

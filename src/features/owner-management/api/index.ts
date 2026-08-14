@@ -12,6 +12,7 @@ export const getOwnerById = impl.getOwnerById;
 export const getOwnerStats = impl.getOwnerStats;
 export const updateOwnerStatus = impl.updateOwnerStatus;
 export const reviewOwnerDocument = impl.reviewOwnerDocument;
+export const uploadOwnerDocument = impl.uploadOwnerDocument;
 export const createOwner = impl.createOwner;
 
 export const getPlatformPlans = subImpl.getPlatformPlans;

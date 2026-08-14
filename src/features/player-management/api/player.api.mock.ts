@@ -3,6 +3,8 @@ import type { GeoPoint } from '@shared/lib/geo';
 import { filterAndPaginatePlayers } from './player.filter';
 import type {
   BillingPeriod,
+  CreatedPlayer,
+  CreatePlayerInput,
   Gender,
   MatchStyle,
   Player,
@@ -462,4 +464,60 @@ export async function liftBookingSuspension(playerId: string): Promise<void> {
   if (!player) return;
   player.bookingSuspendedUntil = undefined;
   player.noShowViolations = 0;
+}
+
+/**
+ * Create a player. Mirrors the real endpoint's contract: the account starts
+ * active, unverified, on the free tier, with no history — and the caller gets a
+ * one-time temporary password back.
+ *
+ * `id` and `userId` are distinct here for the same reason they are on the
+ * server, so code that navigates with the wrong one fails the same way in mocks
+ * as it would live.
+ */
+export async function createPlayer(input: CreatePlayerInput): Promise<CreatedPlayer> {
+  await mockDelay();
+
+  const id = String(500 + db.length);
+  const seq = db.length;
+
+  const player: Player = {
+    id,
+    name: input.fullName.trim(),
+    email: input.email.trim(),
+    phone: `963${input.phone}`,
+    // The mock's display model only knows male/female; 'other' has no label in
+    // the UI, so it is stored as undefined rather than forced into one of them.
+    gender: input.gender === 'other' ? undefined : (input.gender as Gender),
+    dateOfBirth: input.dateOfBirth || undefined,
+    city: '',
+    sports: [],
+    accountStatus: 'active',
+    isBlocked: false,
+    emailVerified: false,
+    twoFactorEnabled: false,
+    accountType: 'free',
+    noShowViolations: 0,
+    overallRating: 0,
+    bookingsCount: 0,
+    roomsCount: 0,
+    ratingsGivenCount: 0,
+    totalSpentSyp: 0,
+    openReportsCount: 0,
+    createdAt: new Date().toISOString(),
+  };
+
+  db.unshift(player);
+  subscriptionBy[id] = genSubscription(id, { accountType: 'free' } as Seed, seq);
+  roomsBy[id] = [];
+  ratingsBy[id] = [];
+  reportsBy[id] = [];
+
+  return {
+    id,
+    userId: `u-${id}`,
+    username: input.username.trim(),
+    email: player.email,
+    tempPassword: `Bplay@${1000 + seq}`,
+  };
 }
