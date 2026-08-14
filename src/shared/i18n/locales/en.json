@@ -2356,6 +2356,7 @@
       "paymentStatus": "Status",
       "usage": "Usage",
       "entriesUsed": "Entries used",
+      "entriesNotTracked": "Not tracked",
       "checkIns": "Check-ins",
       "checkInDate": "Date",
       "checkInMethod": "Method",

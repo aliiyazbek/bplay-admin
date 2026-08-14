@@ -2356,6 +2356,7 @@
       "paymentStatus": "الحالة",
       "usage": "الاستخدام",
       "entriesUsed": "مرات الدخول المستخدمة",
+      "entriesNotTracked": "غير متتبَّع",
       "checkIns": "تسجيلات الدخول",
       "checkInDate": "التاريخ",
       "checkInMethod": "الطريقة",
