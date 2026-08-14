@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   PageContainer,
@@ -14,8 +14,7 @@ import {
 import { useDisclosure, type Disclosure } from '@shared/hooks/useDisclosure';
 import { statusToBadgeVariant } from '@shared/utils/status';
 import { googleMapsLink, formatLatLng } from '@shared/lib/geo';
-import { PATHS } from '@app/router/paths';
-import { FACILITY_STATUSES, facilityRegionSeed } from '@features/facility-management/api';
+import { FACILITY_STATUSES } from '@features/facility-management/api';
 import type { FacilityStatus, RegionFacility } from '@features/facility-management/api';
 import { useRegionQuery } from '../hooks/useRegionQuery';
 import { useRegionFacilities } from '../hooks/useRegionFacilities';
@@ -27,6 +26,7 @@ import { RegionStatCards } from '../components/RegionStatCards';
 import { RegionStatusBreakdown } from '../components/RegionStatusBreakdown';
 import { RegionAdminsCard } from '../components/RegionAdminsCard';
 import { RegionFacilitiesCard } from '../components/RegionFacilitiesCard';
+import { RegionNeighbourhoodsCard } from '../components/RegionNeighbourhoodsCard';
 import { RegionFormModal } from '../components/RegionFormModal';
 import { AssignAdminModal } from '../components/AssignAdminModal';
 import type { Region } from '../api/region.types';
@@ -44,7 +44,6 @@ const NOT_FOUND_MESSAGE = 'Region not found';
 export default function RegionDetailPage() {
   const { regionId } = useParams<{ regionId: string }>();
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { data: region, isLoading, isError, error, refetch } = useRegionQuery(regionId);
 
   // Disclosures for the two shared modals live at page level so both the header
@@ -69,11 +68,6 @@ export default function RegionDetailPage() {
               region={region}
               onEdit={editDisclosure.open}
               onAssign={assignDisclosure.open}
-              onAddFacility={() =>
-                navigate(PATHS.facilityManagementNew, {
-                  state: { region: facilityRegionSeed(region) },
-                })
-              }
             />
           ) : undefined
         }
@@ -208,6 +202,7 @@ function RegionDetailContent({ region, editDisclosure, assignDisclosure }: Conte
       <RegionStatusBreakdown facilities={list} />
 
       <RegionAdminsCard region={region} onManage={assignDisclosure.open} />
+      <RegionNeighbourhoodsCard city={region} />
       <RegionFacilitiesCard region={region} facilities={list} isLoading={facilitiesLoading} />
 
       <RegionFormModal isOpen={editDisclosure.isOpen} onClose={editDisclosure.close} region={region} />

@@ -69,6 +69,10 @@ const db: AdminRecord[] = SEEDS.map<AdminRecord>((seed, index) => ({
   isDeleted: seed.isDeleted ?? false,
   assignedRegionIds: [],
   assignedRegionNames: [],
+  includedNeighbourhoodIds: [],
+  includedNeighbourhoodNames: [],
+  excludedNeighbourhoodIds: [],
+  excludedNeighbourhoodNames: [],
   initialPassword: `Bplay@${100 + index}`,
   createdAt: new Date(2025, 0, index + 1).toISOString(),
 }));
@@ -160,6 +164,11 @@ export async function createAdmin(input: CreateAdminInput): Promise<Admin> {
     isDeleted: false,
     assignedRegionIds: [],
     assignedRegionNames: [],
+    // The mock has no neighbourhood level; scoping there is real-API only.
+    includedNeighbourhoodIds: [],
+    includedNeighbourhoodNames: [],
+    excludedNeighbourhoodIds: [],
+    excludedNeighbourhoodNames: [],
     initialPassword: input.password,
     createdAt: new Date().toISOString(),
   };
@@ -212,12 +221,16 @@ export async function assignRegions(id: string, regionIds: string[]): Promise<vo
   await writeThroughRegions(id, record.name, regionIds);
 }
 
-/** Reset the password back to the ORIGINAL value we issued; returns it to reveal once. */
-export async function resetAdminPassword(id: string): Promise<string> {
+/**
+ * Set the password to an explicit value, mirroring the real endpoint (which
+ * requires one and never echoes a password back).
+ */
+export async function resetAdminPassword(id: string, password: string): Promise<string> {
   await mockDelay();
   const record = db.find((item) => item.id === id);
   if (!record) throw new Error('Admin not found');
-  return record.initialPassword;
+  record.initialPassword = password;
+  return '';
 }
 
 /**

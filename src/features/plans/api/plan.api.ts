@@ -43,6 +43,12 @@ import {
  */
 const PATH = '/admin/plans';
 
+/**
+ * PAGINATION: client-side by design, and correct as written.
+ *
+ * Unlike the other list clients, this one never forwarded page/pageSize to the
+ * server, so it was not affected by the double-pagination bug. The catalog is a handful of rows and every consumer needs all of them to render an upgrade ladder, so truncating it server-side would be worse than the query cost. The endpoint now returns a meta block anyway, for any client that wants a total.
+ */
 export async function getPlans(params: PlanListParams): Promise<PlanListResult> {
   const res = await apiClient.get(PATH);
   const all = unwrapList<PlanDto>(res.data, ['plans']).map(toPlan);

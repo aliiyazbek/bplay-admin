@@ -189,3 +189,14 @@
   justify-content: center;
   padding-block: var(--space-6);
 }
+
+/* ---- Out-of-bounds warning: the circle escapes its parent city ------------ */
+.warn {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft, var(--color-surface-2));
+  color: var(--color-warning-strong, var(--color-text));
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}

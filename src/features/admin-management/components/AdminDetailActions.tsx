@@ -10,12 +10,7 @@ import {
   TrashIcon,
 } from '@ui';
 import { useDisclosure } from '@shared/hooks/useDisclosure';
-import {
-  useDeleteAdmin,
-  useRestoreAdmin,
-  useSetAdminScope,
-  useToggleAdmin,
-} from '../hooks/useAdminMutations';
+import { useDeleteAdmin, useSetAdminScope, useToggleAdmin } from '../hooks/useAdminMutations';
 import type { Admin } from '../api/admin.types';
 import styles from './AdminDetailActions.module.css';
 
@@ -25,50 +20,28 @@ interface Props {
   onEdit: () => void;
   /** Open the page-owned assign-regions modal. */
   onAssign: () => void;
-  /** Open the page-owned reset-password reveal modal. */
+  /** Open the page-owned set-password modal. */
   onResetPassword: () => void;
 }
 
 /**
- * The admin detail header action bar. Owns the promote/demote, toggle, delete and
- * restore confirm dialogs; edit / assign / reset are page-owned modals opened via
- * callbacks. A soft-deleted admin shows only Restore.
+ * The admin detail header action bar. Owns the promote/demote, toggle and delete
+ * confirm dialogs; edit / assign / reset are page-owned modals opened via
+ * callbacks.
+ *
+ * There is no deleted-admin branch: deletion is permanent, so an admin is never
+ * in a "deleted but restorable" state.
  */
 export function AdminDetailActions({ admin, onEdit, onAssign, onResetPassword }: Props) {
   const { t } = useTranslation();
   const toggle = useToggleAdmin();
   const remove = useDeleteAdmin();
-  const restore = useRestoreAdmin();
   const setScope = useSetAdminScope();
   const scopeConfirm = useDisclosure();
   const toggleConfirm = useDisclosure();
   const deleteConfirm = useDisclosure();
-  const restoreConfirm = useDisclosure();
   const isActive = admin.status === 'active';
   const nextScope = admin.scope === 'regional' ? 'general' : 'regional';
-
-  if (admin.isDeleted) {
-    return (
-      <div className={styles.actions}>
-        <Button leftIcon={<PowerIcon />} onClick={restoreConfirm.open} data-testid="admin-detail-restore">
-          {t('admin.actions.restore')}
-        </Button>
-        <ConfirmDialog
-          isOpen={restoreConfirm.isOpen}
-          onClose={restoreConfirm.close}
-          onConfirm={async () => {
-            await restore.mutateAsync(admin.id);
-            restoreConfirm.close();
-          }}
-          title={t('admin.restore.title')}
-          message={t('admin.restore.message')}
-          confirmText={t('admin.restore.confirm')}
-          variant="primary"
-          isLoading={restore.isPending}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className={styles.actions}>

@@ -436,6 +436,13 @@ export interface RegionFacility {
   thumbnailUrl?: string;
   lat: number;
   lng: number;
+  /**
+   * The neighbourhood this facility is filed under, as the SERVER resolved it
+   * (`facilities.neighbourhood_id`). Undefined when it has none — that is a real
+   * state, not a gap to paper over, and such a facility must never silently drop
+   * out of a filtered view without the filter saying so.
+   */
+  neighbourhoodName?: string;
   statistics: FacilityStatistics;
 }
 
@@ -453,6 +460,7 @@ export function toRegionFacility(facility: Facility): RegionFacility {
     thumbnailUrl: facility.images[0],
     lat: facility.location.lat,
     lng: facility.location.lng,
+    neighbourhoodName: facility.location.district || undefined,
     statistics: facility.statistics,
   };
 }
@@ -628,11 +636,30 @@ export function facilityToInput(facility: Facility): CreateFacilityInput {
 /** The two review actions applicable in bulk from the queue. */
 export type BulkFacilityAction = 'approve' | 'reject';
 
+/** Why the backend declined to act on one facility in a bulk request. */
+export type BulkSkipReason =
+  | 'ERR_FACILITY_NOT_FOUND'
+  | 'ERR_ALREADY_IN_STATUS'
+  | 'ERR_NOT_PENDING_REVIEW'
+  | 'ERR_NO_DOCUMENTS'
+  | 'ERR_DOCUMENTS_NOT_APPROVED';
+
+export interface BulkSkip {
+  id: string;
+  reason: BulkSkipReason;
+  /** The status that blocked it, when the skip was a state problem. */
+  status?: string;
+}
+
 export interface BulkActionResult {
   /** How many facilities the action actually applied to (invalid transitions skipped). */
   succeeded: number;
-  /** Ids that were skipped (not in an actionable state). */
-  skipped: string[];
+  /**
+   * Facilities the backend declined to act on, each with a reason. A bare id
+   * list could not distinguish "outside your region" from "KYC docs not
+   * approved" from "already decided", so the UI had nothing useful to report.
+   */
+  skipped: BulkSkip[];
 }
 
 // ---------------------------------------------------------------------------
@@ -643,7 +670,19 @@ export interface FacilityDto {
   id?: string | number;
   name?: string;
   type?: string;
+  /** DETAIL endpoint. The LIST endpoint sends `approval_status` instead. */
   status?: string;
+  /**
+   * LIST endpoint's name for the same field.
+   *
+   * Reading only `status` meant every row in a list arrived undefined and
+   * `normalizeStatus` fell through to its 'pending' default — so the KPI row
+   * reported 8 pending / 0 active over a set that is really 1 pending and 7
+   * approved, and the directory could not filter by status at all.
+   */
+  approval_status?: string;
+  /** Suspension is orthogonal to the review outcome and overrides it. */
+  is_suspended?: boolean;
   location?: {
     lat?: number;
     lng?: number;
@@ -652,6 +691,11 @@ export interface FacilityDto {
     governorate?: string;
     district?: string;
   };
+  /** LIST endpoint: coordinates and place names arrive flat, not under `location`. */
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  city_name?: string | null;
+  neighborhood_name?: string | null;
   images?: string[];
   owner_id?: string | number;
   owner_name?: string;
@@ -708,9 +752,47 @@ export interface FacilityDto {
   cancel_policy?: { free_hours_before?: number; penalty_percent?: number };
 }
 
+/**
+ * First finite number among the candidates, else NaN.
+ *
+ * NaN is deliberate: it marks "no coordinate" in a way that fails every
+ * comparison, so an unplaced facility can never be mistaken for one sitting at
+ * 0,0. Postgres may hand back a numeric as a string, so strings are coerced.
+ */
+function numOr(...values: Array<number | string | null | undefined>): number {
+  for (const value of values) {
+    if (value === null || value === undefined || value === '') continue;
+    const n = Number(value);
+    if (Number.isFinite(n)) return n;
+  }
+  return Number.NaN;
+}
+
+/**
+ * The backend's review outcome vs the dashboard's status vocabulary.
+ *
+ * `approval_status` is approved | pending | rejected, and the dashboard calls
+ * an approved facility 'active'. Without this mapping 'approved' was not in
+ * FACILITY_STATUSES, so it fell through to the 'pending' default and every
+ * approved facility read as pending — the KPI row showed 8 pending / 0 active
+ * over a set that is really 1 pending and 7 approved.
+ *
+ * Suspension is NOT part of this enum on the wire: it is a separate boolean
+ * (`is_suspended` on the facility, plus the owner's own suspension), which is
+ * why the caller layers it on top rather than expecting it here.
+ */
+const STATUS_FROM_WIRE: Record<string, FacilityStatus> = {
+  approved: 'active',
+  active: 'active',
+  pending: 'pending',
+  rejected: 'rejected',
+  suspended: 'suspended',
+  owner_suspended: 'owner_suspended',
+};
+
 function normalizeStatus(value: string | undefined): FacilityStatus {
   const s = (value ?? '').toLowerCase();
-  return (FACILITY_STATUSES as string[]).includes(s) ? (s as FacilityStatus) : 'pending';
+  return STATUS_FROM_WIRE[s] ?? 'pending';
 }
 
 function normalizeKind(value: string | undefined): FacilityKind {
@@ -748,14 +830,28 @@ export function toFacility(dto: FacilityDto): Facility {
     id: String(dto.id ?? ''),
     name: dto.name ?? '',
     kind: normalizeKind(dto.type),
-    status: normalizeStatus(dto.status),
+    // Suspension overrides the review outcome: a suspended facility is still
+    // 'approved' on the wire, but the dashboard shows one state per row and
+    // "suspended" is the one that matters operationally.
+    status: dto.is_suspended
+      ? 'suspended'
+      : normalizeStatus(dto.status ?? dto.approval_status),
+    // The detail endpoint nests coordinates under `location`; the LIST endpoint
+    // returns them flat as `latitude`/`longitude`. Reading only the nested form
+    // meant no facility in a list ever had coordinates.
+    //
+    // `NaN` rather than 0 when they are genuinely absent: 0,0 is a real place
+    // (the Atlantic off West Africa), so defaulting to it silently asserts a
+    // location instead of admitting there isn't one. Every distance test
+    // against NaN is false, so such a facility reads as unplaced — which is
+    // the truth — rather than as a confident orphan.
     location: {
-      lat: dto.location?.lat ?? 0,
-      lng: dto.location?.lng ?? 0,
+      lat: numOr(dto.location?.lat, dto.latitude),
+      lng: numOr(dto.location?.lng, dto.longitude),
       address: dto.location?.address ?? '',
-      city: dto.location?.city,
+      city: dto.location?.city ?? dto.city_name ?? undefined,
       governorate: normalizeGovernorate(dto.location?.governorate),
-      district: dto.location?.district,
+      district: dto.location?.district ?? dto.neighborhood_name ?? undefined,
     },
     images: Array.isArray(dto.images) ? dto.images : [],
     ownerId: String(dto.owner_id ?? ''),

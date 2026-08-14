@@ -3,12 +3,24 @@ import { useTranslation } from 'react-i18next';
 import { Card, Badge, Button, Spinner, MapPinIcon } from '@ui';
 import { statusToBadgeVariant } from '@shared/utils/status';
 import { PATHS } from '@app/router/paths';
+import { useNeighbourhoods } from '@features/region-management/hooks/useNeighbourhoods';
 import type { Region } from '@features/region-management/api/region.types';
 import styles from './AdminRegionsCard.module.css';
 
 interface Props {
   regions: Region[];
   isLoading: boolean;
+  /**
+   * Neighbourhoods GRANTED within the cities above. When a city has any, the
+   * admin covers only those — not the whole city.
+   */
+  includedNeighbourhoodIds?: string[];
+  /**
+   * Neighbourhoods carved OUT of the city grants above. A city row that hides
+   * these would overstate the admin's reach — "Riyadh" reads as the whole city
+   * when it may exclude several of its neighbourhoods.
+   */
+  excludedNeighbourhoodIds?: string[];
   /** Open the page-owned assign-regions modal. */
   onManage: () => void;
 }
@@ -18,9 +30,29 @@ interface Props {
  * with its status, linking to the region detail. "Manage" opens the same
  * assign-regions modal the header uses.
  */
-export function AdminRegionsCard({ regions, isLoading, onManage }: Props) {
+export function AdminRegionsCard({
+  regions,
+  isLoading,
+  includedNeighbourhoodIds = [],
+  excludedNeighbourhoodIds = [],
+  onManage,
+}: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { data: neighbourhoods } = useNeighbourhoods();
+
+  // Granted and excluded neighbourhood names, per city id. A city showing
+  // neither covers the whole city.
+  const grantsByCity = new Map<string, string[]>();
+  const exclusionsByCity = new Map<string, string[]>();
+  for (const hood of neighbourhoods ?? []) {
+    if (includedNeighbourhoodIds.includes(hood.id)) {
+      grantsByCity.set(hood.cityId, [...(grantsByCity.get(hood.cityId) ?? []), hood.name]);
+    }
+    if (excludedNeighbourhoodIds.includes(hood.id)) {
+      exclusionsByCity.set(hood.cityId, [...(exclusionsByCity.get(hood.cityId) ?? []), hood.name]);
+    }
+  }
 
   return (
     <Card className={styles.card} data-testid="admin-detail-regions">
@@ -53,6 +85,19 @@ export function AdminRegionsCard({ regions, isLoading, onManage }: Props) {
                 >
                   {region.name}
                 </button>
+                {grantsByCity.has(region.id) ? (
+                  <span className={styles.exclusions}>
+                    {t('admin.detail.regions.only', {
+                      names: grantsByCity.get(region.id)?.join(', '),
+                    })}
+                  </span>
+                ) : exclusionsByCity.has(region.id) ? (
+                  <span className={styles.exclusions}>
+                    {t('admin.detail.regions.except', {
+                      names: exclusionsByCity.get(region.id)?.join(', '),
+                    })}
+                  </span>
+                ) : null}
               </div>
               <Badge variant={statusToBadgeVariant(region.status)}>
                 {t(`region.status.${region.status}`)}

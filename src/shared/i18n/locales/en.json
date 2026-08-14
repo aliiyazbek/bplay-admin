@@ -700,7 +700,9 @@
     },
     "billing": {
       "monthly": "Monthly",
-      "annual": "Annual"
+      "quarterly": "Quarterly",
+      "annual": "Annual",
+      "class_pack": "Class pack"
     },
     "ratings": {
       "empty": "No ratings left yet.",
@@ -797,7 +799,6 @@
     "subtitle": "Create and manage platform admins",
     "invite": "Add admin",
     "search": "Search admins…",
-    "deletedTag": "Deleted",
     "stats": {
       "total": "Total admins",
       "active": "Active",
@@ -820,16 +821,11 @@
       "assignment": "Assignment",
       "allAssignment": "All assignment",
       "withRegion": "Has a region",
-      "noRegion": "No region yet",
-      "showDeleted": "Show deleted"
+      "noRegion": "No region yet"
     },
     "empty": {
       "title": "No admins found",
       "desc": "Add your first admin to get started."
-    },
-    "emptyDeleted": {
-      "title": "No deleted admins",
-      "desc": "Deleted admins will appear here."
     },
     "form": {
       "createTitle": "Add admin",
@@ -868,18 +864,31 @@
       "remove": "Remove {{name}}",
       "empty": "No regions available.",
       "noMatch": "No regions match your filters.",
-      "submit": "Save regions"
+      "submit": "Save regions",
+      "exclude": {
+        "title": "Neighbourhood exclusions",
+        "hint": "The admin covers each selected city in full. Tap a neighbourhood to carve it out of their scope.",
+        "included": "Covered",
+        "excluded": "Excluded"
+      },
+      "hoods": {
+        "title": "Neighbourhoods",
+        "hint": "Leave a city untouched to cover it entirely. Select neighbourhoods to limit the admin to just those. Several admins may share the same city or neighbourhood.",
+        "wholeCity": "whole city",
+        "limited": "{{count}} selected",
+        "on": "Assigned",
+        "off": "Not assigned"
+      }
     },
     "reset": {
-      "title": "Reset password",
-      "subtitle": "Reset {{name}}'s password to the original value",
-      "copy": "Copy",
-      "copied": "Copied",
-      "copiedToast": "Password copied to clipboard",
-      "warn": "This is the original password we issued. Share it securely — the admin can change it after signing in.",
-      "confirm": "Reset password",
-      "confirmHint": "This resets the admin’s password to the original value we issued and reveals it once so you can share it securely.",
-      "error": "Couldn’t reset the password. Please try again."
+      "title": "Set a new password",
+      "subtitle": "Set a new password for {{name}}",
+      "placeholder": "New password",
+      "doneToast": "Password updated",
+      "warn": "Share it securely — the admin can change it after signing in. It cannot be viewed again.",
+      "confirm": "Set password",
+      "confirmHint": "Choose a new password for this admin. It must be at least 8 characters and include a number and a symbol.",
+      "error": "Couldn’t set the password. Please try again."
     },
     "actions": {
       "viewDetails": "View details",
@@ -890,8 +899,7 @@
       "demote": "Set as region admin",
       "suspend": "Suspend",
       "activate": "Activate",
-      "delete": "Delete",
-      "restore": "Restore"
+      "delete": "Delete"
     },
     "suspend": {
       "title": "Suspend this admin?",
@@ -905,13 +913,8 @@
     },
     "delete": {
       "title": "Delete this admin?",
-      "message": "The admin is moved to the deleted list and can be restored.",
-      "confirm": "Delete"
-    },
-    "restore": {
-      "title": "Restore this admin?",
-      "message": "They return to the active list.",
-      "confirm": "Restore"
+      "message": "This permanently deletes the account and revokes its access immediately. This cannot be undone — to remove access temporarily, deactivate the admin instead.",
+      "confirm": "Delete permanently"
     },
     "promote": {
       "title": "Promote to general oversight?",
@@ -945,7 +948,9 @@
       },
       "regions": {
         "manage": "Manage regions",
-        "empty": "No regions assigned yet."
+        "empty": "No regions assigned yet.",
+        "except": "except {{names}}",
+        "only": "only {{names}}"
       },
       "facilities": {
         "empty": "No facilities in the assigned regions.",
@@ -968,7 +973,6 @@
       "suspended": "Admin suspended",
       "activated": "Admin activated",
       "deleted": "Admin deleted",
-      "restored": "Admin restored",
       "promoted": "Admin promoted to general oversight",
       "demoted": "Admin set as region admin",
       "assigned": "Regions updated"
@@ -1773,8 +1777,7 @@
       "deactivate": "Deactivate",
       "delete": "Delete",
       "restore": "Restore",
-      "viewDetails": "View details",
-      "addFacility": "Add facility"
+      "viewDetails": "View details"
     },
     "detail": {
       "subtitle": "Everything inside this region — map, admins, facilities and stats.",
@@ -1814,9 +1817,11 @@
       },
       "facilities": {
         "empty": "No facilities fall inside this region yet.",
-        "add": "Add facility",
         "view": "View facility",
-        "viewOwner": "Open owner {{name}}"
+        "viewOwner": "Open owner {{name}}",
+        "allHoods": "All neighbourhoods",
+        "noHood": "No neighbourhood",
+        "emptyFiltered": "No facilities in this neighbourhood"
       },
       "map": {
         "legend": "Facility status",
@@ -1862,6 +1867,35 @@
       "title": "Outside regions",
       "desc": "Facilities that fall outside every active region.",
       "count": "{{count}} outside regions"
+    },
+    "hood": {
+      "title": "Neighbourhoods",
+      "add": "Add neighbourhood",
+      "empty": "No neighbourhoods yet. Facilities placed in this city can only be matched to it once it has at least one.",
+      "radius": "{{km}} km radius",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "form": {
+        "createTitle": "Add a neighbourhood to {{city}}",
+        "editTitle": "Edit neighbourhood",
+        "name": "Neighbourhood name",
+        "namePlaceholder": "e.g. Olaya",
+        "centerHint": "The circle must sit entirely inside {{city}} — the city is worked out from where you place it.",
+        "outsideWarning": "This circle reaches outside {{city}}. Move the centre or reduce the radius, or the server will reject it."
+      },
+      "delete": {
+        "title": "Delete this neighbourhood?",
+        "message": "“{{name}}” will be permanently deleted. This cannot be undone — deactivate it instead to keep it on record.",
+        "confirm": "Delete permanently"
+      },
+      "toast": {
+        "created": "Neighbourhood added",
+        "updated": "Neighbourhood updated",
+        "activated": "Neighbourhood activated",
+        "deactivated": "Neighbourhood deactivated",
+        "deleted": "Neighbourhood deleted"
+      },
+      "column": "Neighbourhood"
     }
   },
   "community": {
@@ -2322,6 +2356,7 @@
       "paymentStatus": "Status",
       "usage": "Usage",
       "entriesUsed": "Entries used",
+      "entriesNotTracked": "Not tracked",
       "checkIns": "Check-ins",
       "checkInDate": "Date",
       "checkInMethod": "Method",

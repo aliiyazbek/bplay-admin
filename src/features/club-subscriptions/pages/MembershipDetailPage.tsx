@@ -105,6 +105,19 @@ function MembershipDetailContent({ membership }: { membership: Membership }) {
       ? t('membership.detail.unlimited')
       : nf.format(membership.plan.monthlyEntryLimit);
 
+  /**
+   * Entry usage, or a dash when it is not tracked.
+   *
+   * entriesUsed is null when the backend has no entry log to count (which is
+   * currently always). Rendering that as "0 / 12" would assert the member has
+   * never used their membership — a claim we cannot make and cannot be told
+   * apart from a real zero. An em dash says "unknown" instead.
+   */
+  const entryUsageLabel =
+    membership.entriesUsed === null
+      ? t('membership.detail.entriesNotTracked')
+      : `${nf.format(membership.entriesUsed)} / ${entryLimitLabel}`;
+
   const regionNames = scope?.regionNamesById.get(membership.clubId) ?? [];
   const isOrphan = scope ? (scope.isOrphanById.get(membership.clubId) ?? true) : false;
 
@@ -178,7 +191,7 @@ function MembershipDetailContent({ membership }: { membership: Membership }) {
             <MetaItem
               icon={<CheckIcon />}
               label={t('membership.detail.entriesUsed')}
-              value={`${nf.format(membership.entriesUsed)} / ${entryLimitLabel}`}
+              value={entryUsageLabel}
             />
           </>
         }
@@ -321,9 +334,7 @@ function MembershipDetailContent({ membership }: { membership: Membership }) {
       <Card padding="lg" className={styles.card} data-testid="membership-usage-card">
         <div className={styles.cardHead}>
           <h2 className={styles.cardTitle}>{t('membership.detail.usage')}</h2>
-          <span className={styles.usageCount}>
-            {nf.format(membership.entriesUsed)} / {entryLimitLabel}
-          </span>
+          <span className={styles.usageCount}>{entryUsageLabel}</span>
         </div>
         {membership.checkIns.length === 0 ? (
           <EmptyState icon={<InboxIcon />} title={t('membership.detail.noCheckIns')} />

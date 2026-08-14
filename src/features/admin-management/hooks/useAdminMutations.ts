@@ -7,7 +7,6 @@ import {
   createAdmin,
   deleteAdmin,
   resetAdminPassword,
-  restoreAdmin,
   setAdminScope,
   toggleAdminActive,
   updateAdmin,
@@ -81,8 +80,16 @@ export function useAssignRegions() {
   const toast = useToast();
   const { t } = useTranslation();
   return useMutation({
-    mutationFn: ({ id, regionIds }: { id: string; regionIds: string[] }) =>
-      assignRegions(id, regionIds),
+    mutationFn: ({
+      id,
+      regionIds,
+      neighbourhoods,
+    }: {
+      id: string;
+      regionIds: string[];
+      /** Omit to leave the neighbourhood-level scope untouched. */
+      neighbourhoods?: { includedIds: string[]; excludedIds: string[] };
+    }) => assignRegions(id, regionIds, neighbourhoods),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.all });
       queryClient.invalidateQueries({ queryKey: REGION_KEY });
@@ -91,10 +98,16 @@ export function useAssignRegions() {
   });
 }
 
-/** Reset to the original password and return it so the caller can reveal it once. */
+/**
+ * Set an admin's password to an explicit new value.
+ *
+ * The API requires the caller to supply the password — it neither generates one
+ * nor returns it, so there is no value to reveal afterwards.
+ */
 export function useResetAdminPassword() {
   return useMutation({
-    mutationFn: (id: string) => resetAdminPassword(id),
+    mutationFn: ({ id, password }: { id: string; password: string }) =>
+      resetAdminPassword(id, password),
   });
 }
 
@@ -114,17 +127,3 @@ export function useDeleteAdmin() {
   });
 }
 
-export function useRestoreAdmin() {
-  const queryClient = useQueryClient();
-  const toast = useToast();
-  const { t } = useTranslation();
-  return useMutation({
-    mutationFn: (id: string) => restoreAdmin(id),
-    onSuccess: () => {
-      // A restored admin comes back unassigned; refresh regions defensively.
-      queryClient.invalidateQueries({ queryKey: adminKeys.all });
-      queryClient.invalidateQueries({ queryKey: REGION_KEY });
-      toast.success(t('admin.toast.restored'));
-    },
-  });
-}

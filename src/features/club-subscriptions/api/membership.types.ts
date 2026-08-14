@@ -123,7 +123,15 @@ export interface Membership {
   status: MembershipStatus;
   startDate: string;
   endDate: string;
-  entriesUsed: number;
+  /**
+   * null = NOT TRACKED, which is not the same as 0 ("none used").
+   *
+   * This schema has no membership entry log, so the server cannot produce a
+   * real count and deliberately sends null. Coercing it to 0 here would render
+   * "0 / 12" — a claim that the member has never used their membership, which
+   * is indistinguishable from a genuine zero and is not something we know.
+   */
+  entriesUsed: number | null;
   payments: MembershipPayment[];
   checkIns: MembershipCheckIn[];
   createdAt: string;
@@ -145,7 +153,8 @@ export interface MembershipListItem {
   startDate: string;
   endDate: string;
   priceSyp: number;
-  entriesUsed: number;
+  /** null = not tracked, not 0. See Membership.entriesUsed. */
+  entriesUsed: number | null;
   monthlyEntryLimit: number | null;
   /** Names of the active scope regions containing this membership's club. */
   regionNames: string[];
@@ -420,7 +429,8 @@ export function toMembership(dto: MembershipDto): Membership {
     status: normalizeMembershipStatus(dto.status),
     startDate: dto.start_date ?? new Date().toISOString(),
     endDate: dto.end_date ?? new Date().toISOString(),
-    entriesUsed: dto.entries_used ?? 0,
+    // Preserved as null when the server does not track it — see the field doc.
+    entriesUsed: dto.entries_used ?? null,
     payments: Array.isArray(dto.payments)
       ? dto.payments.map((p, index) => ({
           id: String(p.id ?? index),
