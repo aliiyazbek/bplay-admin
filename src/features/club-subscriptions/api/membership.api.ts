@@ -41,10 +41,44 @@ const WORKING_SET = 2000;
  * Page params are therefore stripped from the request and a bounded working set
  * is fetched instead.
  */
+/**
+ * The querystring the server actually declares.
+ *
+ * Blank and 'all' values are OMITTED. Spreading the UI's filter state straight
+ * onto the request meant an untouched search box sent `q=`, which fails the
+ * declared `minLength: 1` — so this page 400'd on FIRST LOAD and rendered
+ * "Something went wrong" with nothing typed and no filter touched.
+ *
+ * `clubId` is declared `format: uuid`, so the 'all' sentinel would 400 as well.
+ * `regionId` is deliberately a plain string server-side (it carries a region
+ * NAME, not an id) but 'all' still means "no filter", so it is not sent either.
+ *
+ * The querystring is `additionalProperties: false`, so `dateRange` — a UI-only
+ * preset with no server counterpart — would be rejected outright rather than
+ * ignored. It is resolved client-side, like `segment`'s local re-filtering.
+ */
+function toMembershipQuery(params: MembershipListParams): Record<string, string | number> {
+  const query: Record<string, string | number> = { pageSize: WORKING_SET };
+
+  const q = params.q?.trim();
+  if (q) query.q = q;
+  if (params.status && params.status !== 'all') query.status = params.status;
+  if (params.clubId && params.clubId !== 'all') query.clubId = params.clubId;
+  if (params.planName && params.planName !== 'all') query.planName = params.planName;
+  if (params.segment && params.segment !== 'all') query.segment = params.segment;
+  if (params.regionId && params.regionId !== 'all' && params.regionId !== 'orphans') {
+    query.regionId = params.regionId;
+  }
+  if (params.playerId) query.playerId = params.playerId;
+  if (params.sortBy) query.sortBy = params.sortBy;
+  if (params.sortDir) query.sortDir = params.sortDir;
+
+  return query;
+}
+
 export async function getMemberships(params: MembershipListParams): Promise<MembershipListResult> {
-  const { page: _p, pageSize: _ps, ...serverParams } = params;
   const [res, idx] = await Promise.all([
-    apiClient.get(BASE, { params: { ...serverParams, pageSize: WORKING_SET } }),
+    apiClient.get(BASE, { params: toMembershipQuery(params) }),
     scopeIndex(),
   ]);
   const all = unwrapList<MembershipDto>(res.data, ['subscriptions']).map(toMembership);

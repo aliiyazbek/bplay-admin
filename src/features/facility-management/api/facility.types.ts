@@ -670,7 +670,19 @@ export interface FacilityDto {
   id?: string | number;
   name?: string;
   type?: string;
+  /** DETAIL endpoint. The LIST endpoint sends `approval_status` instead. */
   status?: string;
+  /**
+   * LIST endpoint's name for the same field.
+   *
+   * Reading only `status` meant every row in a list arrived undefined and
+   * `normalizeStatus` fell through to its 'pending' default — so the KPI row
+   * reported 8 pending / 0 active over a set that is really 1 pending and 7
+   * approved, and the directory could not filter by status at all.
+   */
+  approval_status?: string;
+  /** Suspension is orthogonal to the review outcome and overrides it. */
+  is_suspended?: boolean;
   location?: {
     lat?: number;
     lng?: number;
@@ -756,9 +768,31 @@ function numOr(...values: Array<number | string | null | undefined>): number {
   return Number.NaN;
 }
 
+/**
+ * The backend's review outcome vs the dashboard's status vocabulary.
+ *
+ * `approval_status` is approved | pending | rejected, and the dashboard calls
+ * an approved facility 'active'. Without this mapping 'approved' was not in
+ * FACILITY_STATUSES, so it fell through to the 'pending' default and every
+ * approved facility read as pending — the KPI row showed 8 pending / 0 active
+ * over a set that is really 1 pending and 7 approved.
+ *
+ * Suspension is NOT part of this enum on the wire: it is a separate boolean
+ * (`is_suspended` on the facility, plus the owner's own suspension), which is
+ * why the caller layers it on top rather than expecting it here.
+ */
+const STATUS_FROM_WIRE: Record<string, FacilityStatus> = {
+  approved: 'active',
+  active: 'active',
+  pending: 'pending',
+  rejected: 'rejected',
+  suspended: 'suspended',
+  owner_suspended: 'owner_suspended',
+};
+
 function normalizeStatus(value: string | undefined): FacilityStatus {
   const s = (value ?? '').toLowerCase();
-  return (FACILITY_STATUSES as string[]).includes(s) ? (s as FacilityStatus) : 'pending';
+  return STATUS_FROM_WIRE[s] ?? 'pending';
 }
 
 function normalizeKind(value: string | undefined): FacilityKind {
@@ -796,7 +830,12 @@ export function toFacility(dto: FacilityDto): Facility {
     id: String(dto.id ?? ''),
     name: dto.name ?? '',
     kind: normalizeKind(dto.type),
-    status: normalizeStatus(dto.status),
+    // Suspension overrides the review outcome: a suspended facility is still
+    // 'approved' on the wire, but the dashboard shows one state per row and
+    // "suspended" is the one that matters operationally.
+    status: dto.is_suspended
+      ? 'suspended'
+      : normalizeStatus(dto.status ?? dto.approval_status),
     // The detail endpoint nests coordinates under `location`; the LIST endpoint
     // returns them flat as `latitude`/`longitude`. Reading only the nested form
     // meant no facility in a list ever had coordinates.

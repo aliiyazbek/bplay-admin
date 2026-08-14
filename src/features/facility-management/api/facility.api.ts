@@ -63,13 +63,48 @@ function currentScope(): AdminScope {
  * fetched instead. `pageSize` is capped high server-side (100000) precisely to
  * allow this.
  */
-export async function getFacilities(params: FacilityListParams): Promise<FacilityListResult> {
-  // Everything except the paging keys: those are applied locally, after the
-  // filters the server cannot run.
-  const { page: _page, pageSize: _pageSize, ...serverParams } = params;
+/**
+ * The querystring the server actually declares.
+ *
+ * Only these keys exist on `listFacilitiesSchema`, and blank / 'all' values are
+ * OMITTED rather than sent. Spreading the UI's filter state straight onto the
+ * request meant an untouched search box sent `q=`, which fails the declared
+ * `minLength: 1` — so the facilities page 400'd on FIRST LOAD and rendered
+ * "Something went wrong" with no search typed and no filter touched.
+ *
+ * `regionId` and `ownerId` are declared `format: uuid`, so the sentinel 'all'
+ * (and 'orphans') would 400 too.
+ *
+ * Everything else the UI filters on — source, minRating, verification,
+ * amenities, dateRange, sortBy/sortDir — has no server-side counterpart and is
+ * applied locally by buildFacilityListResult. Sending those keys is at best
+ * ignored and at worst a 400, so they stay out of the request.
+ */
+function toFacilityQuery(params: FacilityListParams): Record<string, string | number> {
+  const query: Record<string, string | number> = { pageSize: WORKING_SET };
 
+  const q = params.q?.trim();
+  if (q) query.q = q;
+  if (params.status && params.status !== 'all') query.status = params.status;
+  if (params.kind && params.kind !== 'all') query.kind = params.kind;
+  if (params.sport && params.sport !== 'all') query.sport = params.sport;
+  if (params.governorate && params.governorate !== 'all') query.governorate = params.governorate;
+
+  const city = params.city?.trim();
+  if (city) query.city = city;
+
+  // uuid-typed: the 'all' / 'orphans' sentinels are resolved client-side.
+  if (params.regionId && params.regionId !== 'all' && params.regionId !== 'orphans') {
+    query.regionId = params.regionId;
+  }
+  if (params.ownerId && params.ownerId !== 'all') query.ownerId = params.ownerId;
+
+  return query;
+}
+
+export async function getFacilities(params: FacilityListParams): Promise<FacilityListResult> {
   const [res, regions] = await Promise.all([
-    apiClient.get(FACILITIES_PATH, { params: { ...serverParams, pageSize: WORKING_SET } }),
+    apiClient.get(FACILITIES_PATH, { params: toFacilityQuery(params) }),
     getScopeRegions(),
   ]);
   const all = unwrapList<FacilityDto>(res.data, ['facilities']).map(toFacility);
