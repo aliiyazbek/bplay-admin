@@ -8,6 +8,7 @@ import {
 } from './booking.filter';
 import {
   toBooking,
+  BOOKING_SPORT_WIRE_NAME,
   type Booking,
   type BookingDto,
   type BookingListParams,
@@ -75,7 +76,13 @@ function toQuery(params: BookingListParams): Record<string, string | number> {
     query.paymentStatus = params.paymentStatus;
   }
   if (params.facilityId && params.facilityId !== 'all') query.facilityId = params.facilityId;
-  if (params.sport && params.sport !== 'all') query.sport = params.sport;
+  // The server compares `s.name = $1` — exact and case-sensitive against the
+  // DISPLAY name in the `sports` table. Sending the dashboard's slug matched
+  // nothing, so picking any sport emptied the table. Translate back to the
+  // stored name on the way out.
+  if (params.sport && params.sport !== 'all') {
+    query.sport = BOOKING_SPORT_WIRE_NAME[params.sport] ?? params.sport;
+  }
   if (params.source && params.source !== 'all') query.source = params.source;
   if (params.playerId) query.playerId = params.playerId;
   if (params.sortBy) query.sortBy = params.sortBy;

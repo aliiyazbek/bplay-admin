@@ -8,6 +8,7 @@ import {
   type Owner,
   type OwnerAction,
   type OwnerDocAction,
+  type OwnerDocType,
   type OwnerDto,
   type OwnerListParams,
   type OwnerListResult,
@@ -112,6 +113,27 @@ export async function reviewOwnerDocument(
     action: action === 'accept' ? 'approved' : 'rejected',
     ...(trimmed ? { reason: trimmed } : {}),
   });
+}
+
+/**
+ * Upload a verification document on the owner's behalf.
+ *
+ * Multipart, not JSON: the file rides alongside a `docType` field. No explicit
+ * Content-Type header is set — the browser must add its own multipart boundary,
+ * and overriding it produces a body the server cannot parse.
+ *
+ * The document lands as `pending`, exactly like an owner's own upload. Adding a
+ * document is not approving it — that stays a separate review decision.
+ */
+export async function uploadOwnerDocument(
+  id: string,
+  docType: OwnerDocType,
+  file: File,
+): Promise<void> {
+  const form = new FormData();
+  form.append('docType', docType);
+  form.append('file', file);
+  await apiClient.post(`${OWNERS_PATH}/${id}/documents`, form);
 }
 
 export async function createOwner(input: CreateOwnerInput): Promise<CreatedOwner> {

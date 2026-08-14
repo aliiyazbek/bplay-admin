@@ -246,6 +246,34 @@ export async function reviewOwnerDocument(
   }
 }
 
+/**
+ * Upload a document on the owner's behalf. Lands as `pending` so the review
+ * flow behaves the same as it does against the real backend.
+ *
+ * `URL.createObjectURL` gives the mock a genuinely viewable link for the file
+ * the admin just picked, so the preview affordance works offline too.
+ */
+export async function uploadOwnerDocument(
+  id: string,
+  docType: OwnerDocType,
+  file: File,
+): Promise<void> {
+  await mockDelay();
+  const owner = db.find((item) => item.id === id);
+  if (!owner) return;
+  owner.documents.push({
+    id: `doc-${id}-${owner.documents.length + 1}`,
+    type: docType,
+    // The wire's `pending` is `under_review` in the dashboard's vocabulary —
+    // this mirrors what `normalizeDocStatus` does to a real response.
+    status: 'under_review',
+    // Drives which icon and which viewer the card uses.
+    kind: file.type.startsWith('image/') ? 'image' : 'pdf',
+    url: URL.createObjectURL(file),
+    uploadedAt: new Date().toISOString(),
+  });
+}
+
 export async function createOwner(input: CreateOwnerInput): Promise<CreatedOwner> {
   await mockDelay();
   const tempPassword = generateStrongPassword();

@@ -1,8 +1,17 @@
 import { z } from 'zod';
+import { SPORT_TYPES, type SportType } from './facility.types';
 
 // Enum schemas kept in sync with facility.types (literal tuples for zod).
 const kindEnum = z.enum(['club', 'pitch']);
-const sportEnum = z.enum(['tennis', 'padel', 'football', 'basketball', 'swimming', 'volleyball']);
+/**
+ * DERIVED from `SPORT_TYPES`, not retyped.
+ *
+ * This was a hand-copied literal tuple, and it drifted: the type gained the six
+ * remaining seeded sports while this list kept only the original six, so the
+ * wizard rejected a Badminton court that the rest of the app accepted. Reading
+ * the single source means the two cannot disagree again.
+ */
+const sportEnum = z.enum(SPORT_TYPES as [SportType, ...SportType[]]);
 const surfaceEnum = z.enum(['grass', 'artificial', 'hardcourt', 'clay', 'sand']);
 const governorateEnum = z.enum([
   'damascus',

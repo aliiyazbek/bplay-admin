@@ -15,3 +15,4 @@ export const updatePlayerStatus = impl.updatePlayerStatus;
 export const setPlayerRatingHidden = impl.setPlayerRatingHidden;
 export const resolvePlayerReport = impl.resolvePlayerReport;
 export const liftBookingSuspension = impl.liftBookingSuspension;
+export const createPlayer = impl.createPlayer;

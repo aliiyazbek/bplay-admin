@@ -3,6 +3,9 @@ import { unwrap, unwrapList } from '@shared/types/api';
 import { filterAndPaginatePlayers } from './player.filter';
 import {
   toPlayer,
+  type CreatedPlayer,
+  type CreatedPlayerDto,
+  type CreatePlayerInput,
   type Player,
   type PlayerAction,
   type PlayerDto,
@@ -146,4 +149,38 @@ export async function resolvePlayerReport(
 
 export async function liftBookingSuspension(playerId: string): Promise<void> {
   await apiClient.patch(`${PLAYERS_PATH}/${playerId}/lift-suspension`, {});
+}
+
+/**
+ * Create a player account with a one-time temporary password.
+ *
+ * Two details the wire contract forces:
+ *
+ * 1. The body rejects unknown keys, so ONLY the six declared fields go out.
+ *    `dateOfBirth` is omitted entirely when blank rather than sent as `''`,
+ *    which would fail the server's `format: 'date'` check.
+ * 2. The response carries BOTH `id` (the players row) and `userId` (the users
+ *    row), and they are different. Every other player route — detail, status,
+ *    ratings — keys on `id`, so that is what this returns for navigation.
+ *    Using `userId` yields a 404.
+ */
+export async function createPlayer(input: CreatePlayerInput): Promise<CreatedPlayer> {
+  const dateOfBirth = input.dateOfBirth?.trim();
+  const res = await apiClient.post(PLAYERS_PATH, {
+    fullName: input.fullName.trim(),
+    username: input.username.trim(),
+    email: input.email.trim(),
+    phone: `963${input.phone}`,
+    gender: input.gender,
+    ...(dateOfBirth ? { dateOfBirth } : {}),
+  });
+
+  const data = unwrap<CreatedPlayerDto>(res.data);
+  return {
+    id: String(data.id ?? ''),
+    userId: String(data.userId ?? ''),
+    username: data.username ?? '',
+    email: data.email ?? '',
+    tempPassword: data.temporaryPassword ?? '',
+  };
 }

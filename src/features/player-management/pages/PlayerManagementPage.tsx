@@ -15,6 +15,8 @@ import {
   RatingStars,
   ClearFiltersBar,
   EmptyState,
+  Button,
+  PlusIcon,
   InboxIcon,
   SearchIcon,
   PowerIcon,
@@ -24,11 +26,13 @@ import {
   CalendarIcon,
   type Column,
 } from '@ui';
+import { useDisclosure } from '@shared/hooks/useDisclosure';
 import { PATHS } from '@app/router/paths';
 import { usePlayersQuery } from '../hooks/usePlayersQuery';
 import { usePlayerStats } from '../hooks/usePlayerStats';
 import { PlayerStatCards } from '../components/PlayerStatCards';
 import { PlayerRowActions } from '../components/PlayerRowActions';
+import { PlayerFormModal } from '../components/PlayerFormModal';
 import {
   ACCOUNT_TYPE_VARIANT,
   playerState,
@@ -57,6 +61,7 @@ export default function PlayerManagementPage() {
   const [params, setParams] = useState<PlayerListParams>(INITIAL);
   const { data, isLoading, isError, refetch } = usePlayersQuery(params);
   const { data: stats } = usePlayerStats();
+  const create = useDisclosure();
 
   const openProfile = (player: Player) => navigate(`${PATHS.playerManagement}/${player.id}`);
   const patch = (next: Partial<PlayerListParams>) =>
@@ -118,7 +123,15 @@ export default function PlayerManagementPage() {
 
   return (
     <PageContainer>
-      <PageHeader title={t('player.title')} subtitle={t('player.subtitle')} />
+      <PageHeader
+        title={t('player.title')}
+        subtitle={t('player.subtitle')}
+        actions={
+          <Button leftIcon={<PlusIcon />} onClick={create.open} data-testid="player-create">
+            {t('player.create.title')}
+          </Button>
+        }
+      />
 
       <PlayerStatCards stats={stats} />
 
@@ -225,6 +238,8 @@ export default function PlayerManagementPage() {
         pageCount={data?.pageCount ?? 1}
         onPageChange={(page) => setParams((prev) => ({ ...prev, page }))}
       />
+
+      <PlayerFormModal isOpen={create.isOpen} onClose={create.close} />
     </PageContainer>
   );
 }
