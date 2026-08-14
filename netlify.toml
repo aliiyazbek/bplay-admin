@@ -1,15 +1,24 @@
-# Netlify config for the STANDALONE DEMO of the Bplay super-admin.
-# Builds the app on in-memory mock data (no backend / no server) and serves
-# it as a single-page app with working client-side routing.
+# Netlify config for the LIVE super-admin, wired to the deployed backend.
+#
+# This branch exists only because netlify.toml takes precedence over a site's
+# UI settings: `main` carries the standalone mock demo, and a second Netlify
+# site pointed at `main` would silently inherit that demo build no matter what
+# was configured in the dashboard. Keeping the two builds on two branches is
+# what keeps them independent.
+#
+# main        -> mock demo, no backend  (bplay-superadmin-yazbek2003)
+# deploy/live -> this file, real API    (the live site)
 
 [build]
-  command = "npm run build:demo"
+  command = "npm run build"
   publish = "dist"
 
-# Force mock mode during Netlify's build (overrides .env.production's false).
-# NODE_VERSION pins a modern Node so Vite 8 / React 19 build correctly.
 [build.environment]
-  VITE_USE_MOCKS = "true"
+  # Real data, not the in-memory mocks.
+  VITE_USE_MOCKS = "false"
+  # The deployed API, including the /api/v1 prefix the client expects.
+  # Must match the backend's own APP_URL host, or uploaded media 404s.
+  VITE_API_BASE_URL = "https://bplay-backend1-production.up.railway.app/api/v1"
   NODE_VERSION = "22"
 
 # SPA fallback: every path serves index.html so refresh & deep links work.
