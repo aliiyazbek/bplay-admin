@@ -4,7 +4,6 @@ import { getFacilities } from '@features/facility-management/api';
 import {
   buildBookingListResult,
   buildFacilityScopeIndex,
-  computeBookingStats,
   type FacilityScopeIndex,
 } from './booking.filter';
 import {
@@ -44,10 +43,50 @@ const WORKING_SET = 2000;
  * Page params are therefore stripped from the request and a bounded working set
  * is fetched instead.
  */
+/**
+ * The querystring the server will actually accept.
+ *
+ * Blank and 'all' values are OMITTED, never sent. Spreading the UI's filter
+ * state straight onto the request broke this list five different ways, and the
+ * two failure modes are worth telling apart:
+ *
+ *   400, so the whole list dies —
+ *     q=''            declared minLength 1
+ *     status='all'    not in the enum
+ *     paymentStatus   not in the enum
+ *     source='all'    not in the enum
+ *     facilityId='all' declared format uuid
+ *
+ *   200 with the WRONG answer, which is worse because it reads as real data —
+ *     sport='all'     matched literally against the sport name, so the server
+ *                     returned 0 of 19 bookings and the page looked empty
+ *                     rather than broken.
+ *
+ * `dateRange` is a UI-only preset resolved client-side and is never sent.
+ * `regionId` is also resolved client-side via the facility scope index.
+ */
+function toQuery(params: BookingListParams): Record<string, string | number> {
+  const query: Record<string, string | number> = { pageSize: WORKING_SET };
+
+  const q = params.q?.trim();
+  if (q) query.q = q;
+  if (params.status && params.status !== 'all') query.status = params.status;
+  if (params.paymentStatus && params.paymentStatus !== 'all') {
+    query.paymentStatus = params.paymentStatus;
+  }
+  if (params.facilityId && params.facilityId !== 'all') query.facilityId = params.facilityId;
+  if (params.sport && params.sport !== 'all') query.sport = params.sport;
+  if (params.source && params.source !== 'all') query.source = params.source;
+  if (params.playerId) query.playerId = params.playerId;
+  if (params.sortBy) query.sortBy = params.sortBy;
+  if (params.sortDir) query.sortDir = params.sortDir;
+
+  return query;
+}
+
 export async function getBookings(params: BookingListParams): Promise<BookingListResult> {
-  const { page: _p, pageSize: _ps, ...serverParams } = params;
   const [res, idx] = await Promise.all([
-    apiClient.get(BASE, { params: { ...serverParams, pageSize: WORKING_SET } }),
+    apiClient.get(BASE, { params: toQuery(params) }),
     scopeIndex(),
   ]);
   const all = unwrapList<BookingDto>(res.data, ['bookings']).map(toBooking);
@@ -63,12 +102,34 @@ export async function getBookingById(id: string): Promise<Booking> {
   return booking;
 }
 
-/** Scope-aware KPI figures — derived client-side over the visible booking set. */
+/** Raw KPI payload from `/bookings/stats` (server-computed, region-scoped). */
+interface BookingStatsDto {
+  total?: number;
+  under_review?: number;
+  confirmed?: number;
+  completed?: number;
+  attention?: number;
+  revenue_syp?: number;
+}
+
+/**
+ * KPI figures from the server, which applies the SAME region scope as the list —
+ * verified against live data: a Riyadh-only admin gets 9 bookings and a stats
+ * total of 9, while a super_admin gets 19 and 19.
+ *
+ * This used to fetch 1000 bookings and count them in the browser. That was
+ * redundant work with a silent ceiling: past 1000 rows the KPI row would simply
+ * have understated every figure, with nothing to indicate it.
+ */
 export async function getBookingStats(): Promise<BookingStats> {
-  const [res, idx] = await Promise.all([
-    apiClient.get(BASE, { params: { pageSize: 1000 } }),
-    scopeIndex(),
-  ]);
-  const all = unwrapList<BookingDto>(res.data, ['bookings']).map(toBooking);
-  return computeBookingStats(all, idx);
+  const res = await apiClient.get(`${BASE}/stats`);
+  const dto = unwrap<BookingStatsDto>(res.data);
+  return {
+    total: dto.total ?? 0,
+    underReview: dto.under_review ?? 0,
+    confirmed: dto.confirmed ?? 0,
+    completed: dto.completed ?? 0,
+    attention: dto.attention ?? 0,
+    revenueSyp: dto.revenue_syp ?? 0,
+  };
 }
