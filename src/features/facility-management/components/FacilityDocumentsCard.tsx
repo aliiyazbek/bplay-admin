@@ -150,6 +150,7 @@ export function FacilityDocumentsCard({ facilityId, documents }: Props) {
         openLabel={t('facility.doc.openTab')}
         emptyLabel={t('facility.doc.noPreview')}
         fallbackNote={t('facility.doc.pdfHint')}
+        errorLabel={t('common.docLoadError')}
       />
 
       <ReasonDialog

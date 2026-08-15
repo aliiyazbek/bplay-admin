@@ -40,7 +40,8 @@
       "permissionDenied": "You do not have permission to do that.",
       "tooManyRequests": "Too many attempts. Wait a moment and try again.",
       "network": "Cannot reach the server. Check your connection and try again."
-    }
+    },
+    "docLoadError": "This document could not be loaded. It may have been removed from the server."
   },
   "nav": {
     "adminManagement": "Admins",

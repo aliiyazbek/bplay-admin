@@ -206,6 +206,7 @@ export function OwnerDocumentsCard({ ownerId, documents }: Props) {
         openLabel={t('owner.doc.openTab')}
         emptyLabel={t('owner.doc.noPreview')}
         fallbackNote={t('owner.doc.pdfHint')}
+        errorLabel={t('common.docLoadError')}
       />
 
       <ReasonDialog
