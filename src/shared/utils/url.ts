@@ -81,20 +81,35 @@ function apiOrigin(): string {
   }
 }
 
+/** Where a served upload always sits, whatever host is in front of it. */
+const UPLOADS_SEGMENT = '/uploads/';
+
 /**
  * The absolute URL of an UPLOADED file (a KYC document, a logo, an attachment).
  *
  * The backend stamps these into the database at upload time as
- * `${APP_URL}/uploads/…`, so the stored value is only as correct as whatever
- * APP_URL happened to be that day: an empty one yields a bare `/uploads/…`, and
- * a wrong one yields another host entirely. Resolved the ordinary way, both land
- * on the DASHBOARD's origin — which serves no uploads and answers every unknown
- * path with the SPA's index.html. The viewer then "previews" an HTML page, which
- * is what a blank white document actually was.
+ * `${APP_URL}/uploads/…`, so a stored row is frozen at whatever APP_URL was that
+ * day — and every way of getting APP_URL wrong produces a URL that resolves
+ * somewhere harmless-looking instead of failing loudly:
  *
- * So uploads are resolved against the API origin instead, and a stored URL that
- * points `/uploads/…` at our own origin is repaired rather than trusted: this is
- * a static site, it has never served that path.
+ *   APP_URL=''                    → `/uploads/…`            → the DASHBOARD's origin,
+ *                                                             whose SPA fallback answers
+ *                                                             with index.html, so the
+ *                                                             viewer "previews" our own
+ *                                                             page as a blank document
+ *   APP_URL='api.example.com'     → `api.example.com/…`     → scheme-less, so the host is
+ *   (no scheme — the real one)                                read as a PATH SEGMENT and
+ *                                                             the API 404s on
+ *                                                             `/api.example.com/uploads/…`
+ *   APP_URL=<the dashboard's url> → the dashboard again
+ *
+ * All three share one fix: an upload is identified by its `/uploads/…` path, and
+ * that path belongs on whatever host is serving the API NOW. So a value that
+ * cannot be trusted to name a host is reduced to its uploads path and re-hosted,
+ * which also drops any host smuggled in through a scheme-less `//evil.com/…`.
+ *
+ * A properly-schemed URL on some OTHER host is left exactly as it is — that is a
+ * CDN or object-store link, not a mis-stamp, and rewriting it would break it.
  */
 export function resolveUploadUrl(url: string | undefined | null): string | undefined {
   if (typeof url !== 'string' || canonical(url) === '') return undefined;
@@ -104,15 +119,17 @@ export function resolveUploadUrl(url: string | undefined | null): string | undef
   try {
     const asIs = new URL(cleaned, origin);
     if (!SAFE_PROTOCOLS.has(asIs.protocol)) return undefined;
-    // Same hardening as `isSafeHttpUrl`: a scheme-less value must STAY on the
-    // origin it was resolved against, or `//evil.com/x` would smuggle in a host.
-    if (!HAS_SCHEME.test(cleaned)) return asIs.origin === origin ? asIs.href : undefined;
-    // An absolute URL that named our own origin is a mis-stamped upload — this
-    // static site has never served /uploads — so re-point it at the API.
-    if (asIs.origin === window.location.origin) {
-      return new URL(asIs.pathname + asIs.search, origin).href;
-    }
-    return asIs.href;
+
+    // Trustworthy as written: carries its own scheme and names a host that is not
+    // this dashboard (which is a static site and has never served an upload).
+    if (HAS_SCHEME.test(cleaned) && asIs.origin !== window.location.origin) return asIs.href;
+
+    // Everything else is repaired. Slicing at `/uploads/` is what recovers the
+    // scheme-less case, where the intended host was parsed as a leading path
+    // segment: `/api.example.com/uploads/x.pdf` → `/uploads/x.pdf`.
+    const path = asIs.pathname + asIs.search;
+    const at = path.indexOf(UPLOADS_SEGMENT);
+    return new URL(at === -1 ? path : path.slice(at), origin).href;
   } catch {
     return undefined;
   }
