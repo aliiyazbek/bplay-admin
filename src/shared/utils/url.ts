@@ -70,3 +70,50 @@ export function isSameOriginUrl(url: string | undefined | null): boolean {
   const result = parse(url ?? '');
   return result !== null && result.parsed.origin === window.location.origin;
 }
+
+/** The origin serving the API — where every uploaded file actually lives. */
+function apiOrigin(): string {
+  const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+  try {
+    return new URL(base, window.location.origin).origin;
+  } catch {
+    return window.location.origin;
+  }
+}
+
+/**
+ * The absolute URL of an UPLOADED file (a KYC document, a logo, an attachment).
+ *
+ * The backend stamps these into the database at upload time as
+ * `${APP_URL}/uploads/…`, so the stored value is only as correct as whatever
+ * APP_URL happened to be that day: an empty one yields a bare `/uploads/…`, and
+ * a wrong one yields another host entirely. Resolved the ordinary way, both land
+ * on the DASHBOARD's origin — which serves no uploads and answers every unknown
+ * path with the SPA's index.html. The viewer then "previews" an HTML page, which
+ * is what a blank white document actually was.
+ *
+ * So uploads are resolved against the API origin instead, and a stored URL that
+ * points `/uploads/…` at our own origin is repaired rather than trusted: this is
+ * a static site, it has never served that path.
+ */
+export function resolveUploadUrl(url: string | undefined | null): string | undefined {
+  if (typeof url !== 'string' || canonical(url) === '') return undefined;
+  const cleaned = canonical(url);
+  const origin = apiOrigin();
+
+  try {
+    const asIs = new URL(cleaned, origin);
+    if (!SAFE_PROTOCOLS.has(asIs.protocol)) return undefined;
+    // Same hardening as `isSafeHttpUrl`: a scheme-less value must STAY on the
+    // origin it was resolved against, or `//evil.com/x` would smuggle in a host.
+    if (!HAS_SCHEME.test(cleaned)) return asIs.origin === origin ? asIs.href : undefined;
+    // An absolute URL that named our own origin is a mis-stamped upload — this
+    // static site has never served /uploads — so re-point it at the API.
+    if (asIs.origin === window.location.origin) {
+      return new URL(asIs.pathname + asIs.search, origin).href;
+    }
+    return asIs.href;
+  } catch {
+    return undefined;
+  }
+}

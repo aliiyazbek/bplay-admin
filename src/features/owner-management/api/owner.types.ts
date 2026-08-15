@@ -18,6 +18,7 @@
 
 import type { BadgeVariant } from '@ui';
 import { statusToBadgeVariant } from '@shared/utils/status';
+import { resolveUploadUrl } from '@shared/utils/url';
 
 /** Runtime account lifecycle. `rejected` is the admin's review-denied outcome. */
 export type OwnerAccountStatus = 'under_review' | 'active' | 'rejected' | 'suspended';
@@ -273,7 +274,9 @@ export function toOwner(dto: OwnerDto): Owner {
   const documentsLoaded = Array.isArray(dto.documents);
   const documents: OwnerDocument[] = Array.isArray(dto.documents)
     ? dto.documents.map((document, index) => {
-        const url = document.file_url ?? '';
+        // Resolved against the API origin: a stored `/uploads/…` would otherwise
+        // resolve against the dashboard and preview the SPA's own index.html.
+        const url = resolveUploadUrl(document.file_url) ?? '';
         return {
           id: String(document.id ?? index),
           type: normalizeDocType(document.doc_type),

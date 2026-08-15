@@ -8,6 +8,7 @@
 
 import type { BadgeVariant, CoverageTone, DateRangeValue } from '@ui';
 import { statusToBadgeVariant } from '@shared/utils/status';
+import { resolveUploadUrl } from '@shared/utils/url';
 
 // ---------------------------------------------------------------------------
 // Enums (wire values match the mobile app's apiValue strings)
@@ -994,7 +995,7 @@ export function toFacility(dto: FacilityDto): Facility {
     rating: dto.rating,
     documents: Array.isArray(dto.documents)
       ? dto.documents.map((doc, index) => {
-          const url = doc.url ?? '';
+          const url = resolveUploadUrl(doc.url) ?? '';
           const name = doc.name ?? 'Document';
           return {
             id: String(doc.id ?? index),
