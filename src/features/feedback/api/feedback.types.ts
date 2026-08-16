@@ -17,6 +17,7 @@
 import type { BadgeVariant } from '@ui';
 import type { UserRole } from '@shared/stores/authStore';
 import { statusToBadgeVariant } from '@shared/utils/status';
+import { resolveUploadUrl } from '@shared/utils/url';
 
 /** Who wrote in. Drives the region resolution and the profile deep-link. */
 export type FeedbackSenderType = 'player' | 'owner';
@@ -351,7 +352,7 @@ export function toFeedback(dto: FeedbackDto): Feedback {
     kind: normalizeKind(dto.kind),
     body: dto.body ?? '',
     attachments: (dto.attachments ?? []).map((item) => {
-      const url = item.url ?? '';
+      const url = resolveUploadUrl(item.url) ?? '';
       return {
         id: String(item.id ?? ''),
         name: item.name ?? '',

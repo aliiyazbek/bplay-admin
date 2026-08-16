@@ -70,3 +70,67 @@ export function isSameOriginUrl(url: string | undefined | null): boolean {
   const result = parse(url ?? '');
   return result !== null && result.parsed.origin === window.location.origin;
 }
+
+/** The origin serving the API — where every uploaded file actually lives. */
+function apiOrigin(): string {
+  const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+  try {
+    return new URL(base, window.location.origin).origin;
+  } catch {
+    return window.location.origin;
+  }
+}
+
+/** Where a served upload always sits, whatever host is in front of it. */
+const UPLOADS_SEGMENT = '/uploads/';
+
+/**
+ * The absolute URL of an UPLOADED file (a KYC document, a logo, an attachment).
+ *
+ * The backend stamps these into the database at upload time as
+ * `${APP_URL}/uploads/…`, so a stored row is frozen at whatever APP_URL was that
+ * day — and every way of getting APP_URL wrong produces a URL that resolves
+ * somewhere harmless-looking instead of failing loudly:
+ *
+ *   APP_URL=''                    → `/uploads/…`            → the DASHBOARD's origin,
+ *                                                             whose SPA fallback answers
+ *                                                             with index.html, so the
+ *                                                             viewer "previews" our own
+ *                                                             page as a blank document
+ *   APP_URL='api.example.com'     → `api.example.com/…`     → scheme-less, so the host is
+ *   (no scheme — the real one)                                read as a PATH SEGMENT and
+ *                                                             the API 404s on
+ *                                                             `/api.example.com/uploads/…`
+ *   APP_URL=<the dashboard's url> → the dashboard again
+ *
+ * All three share one fix: an upload is identified by its `/uploads/…` path, and
+ * that path belongs on whatever host is serving the API NOW. So a value that
+ * cannot be trusted to name a host is reduced to its uploads path and re-hosted,
+ * which also drops any host smuggled in through a scheme-less `//evil.com/…`.
+ *
+ * A properly-schemed URL on some OTHER host is left exactly as it is — that is a
+ * CDN or object-store link, not a mis-stamp, and rewriting it would break it.
+ */
+export function resolveUploadUrl(url: string | undefined | null): string | undefined {
+  if (typeof url !== 'string' || canonical(url) === '') return undefined;
+  const cleaned = canonical(url);
+  const origin = apiOrigin();
+
+  try {
+    const asIs = new URL(cleaned, origin);
+    if (!SAFE_PROTOCOLS.has(asIs.protocol)) return undefined;
+
+    // Trustworthy as written: carries its own scheme and names a host that is not
+    // this dashboard (which is a static site and has never served an upload).
+    if (HAS_SCHEME.test(cleaned) && asIs.origin !== window.location.origin) return asIs.href;
+
+    // Everything else is repaired. Slicing at `/uploads/` is what recovers the
+    // scheme-less case, where the intended host was parsed as a leading path
+    // segment: `/api.example.com/uploads/x.pdf` → `/uploads/x.pdf`.
+    const path = asIs.pathname + asIs.search;
+    const at = path.indexOf(UPLOADS_SEGMENT);
+    return new URL(at === -1 ? path : path.slice(at), origin).href;
+  } catch {
+    return undefined;
+  }
+}

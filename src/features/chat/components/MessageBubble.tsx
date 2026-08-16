@@ -126,8 +126,8 @@ export function MessageBubble({
  * `isSafeHttpUrl()` before it can reach an `src`, an `href` or a viewer. One
  * that fails the gate is still shown — the admin needs to know a file was
  * attached — but as an inert, clearly-marked chip. Documents open in
- * DocumentViewerModal, whose iframe is sandboxed into an opaque origin so an
- * uploaded HTML file cannot read this session.
+ * DocumentViewerModal, which keeps an upload walled off from this session by the
+ * origin it is served from — see the security note there.
  */
 function MessageAttachments({ attachments }: { attachments: ChatAttachment[] }) {
   const { t } = useTranslation();
@@ -224,6 +224,7 @@ function MessageAttachments({ attachments }: { attachments: ChatAttachment[] }) 
           title={viewing.name}
           kind="pdf"
           closeLabel={t('common.close')}
+          errorLabel={t('common.docLoadError')}
         />
       )}
     </div>
