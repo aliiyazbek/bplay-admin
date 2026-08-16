@@ -13,6 +13,7 @@ import {
   LockIcon,
 } from '@ui';
 import { useAuthUser, useAuthRole } from '@shared/stores/authStore';
+import { displayName as toDisplayName } from '@shared/utils/displayName';
 import { EditProfileModal } from '../components/EditProfileModal';
 import { ChangePasswordModal } from '../components/ChangePasswordModal';
 import { AvatarViewerModal } from '../components/AvatarViewerModal';
@@ -22,7 +23,7 @@ export default function ProfilePage() {
   const { t } = useTranslation();
   const user = useAuthUser();
   const role = useAuthRole();
-  const displayName = user?.name ?? user?.email?.split('@')[0] ?? 'Admin';
+  const displayName = toDisplayName(user);
   const email = user?.email ?? '';
   const avatarUrl = user?.avatarUrl;
   const roleKey = role ?? 'admin';

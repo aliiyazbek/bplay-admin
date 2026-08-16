@@ -24,6 +24,7 @@ import {
   ShieldAlertIcon,
 } from '@ui';
 import { useAuthStore, useAuthUser, useAuthRole, type UserRole } from '@shared/stores/authStore';
+import { displayName as toDisplayName } from '@shared/utils/displayName';
 import { useUiStore } from '@shared/stores/uiStore';
 import { queryClient } from '@shared/lib/queryClient';
 import { logout as apiLogout } from '@features/auth/api';
@@ -108,7 +109,7 @@ export function AppSidebar() {
         ? role !== null && item.roles.includes(role)
         : !item.superAdminOnly || role === 'super_admin'),
   );
-  const displayName = user?.name ?? user?.email?.split('@')[0] ?? 'Admin';
+  const displayName = toDisplayName(user);
 
   return (
     <aside className={clsx(styles.sidebar, isSidebarOpen && styles.open)}>

@@ -2492,7 +2492,7 @@
     "title": "نظرة عامة على المنصة",
     "heroEyebrow": "المشرف العام · نظرة عامة على المنصة",
     "northStar": "الحجوزات المؤكدة · النجم الشمالي",
-    "ofTarget": "{{pct}}٪ من الهدف",
+    "ofTarget": "{{pct}}٪ من الفترة السابقة",
     "vsPrev": "مقارنةً بـ{{range}} السابقة",
     "rangeLabel": "النطاق الزمني",
     "regionLabel": "نطاق المنطقة",
@@ -2583,11 +2583,13 @@
       "orphanFacilities": "منشآت خارج المناطق",
       "nearExpiry": "اشتراكات قاربت الانتهاء",
       "idleFacilities": "منشآت خاملة/إشغال منخفض",
-      "newSubscriptions": "اشتراكات مدفوعة جديدة"
+      "newSubscriptions": "اشتراكات مدفوعة جديدة",
+      "underReviewBookings": "حجوزات قيد المراجعة",
+      "openReports": "بلاغات محتوى مفتوحة",
+      "expiringSubscriptions": "اشتراكات تنتهي قريباً"
     },
     "attentionMeta": {
-      "oldest4d": "أقدمها ٤ أيام",
-      "oldest2d": "أقدمها يومان",
+      "oldestDays": "أقدمها: {{days}} يوم",
       "recent": "حديث",
       "coverageGap": "فجوة تغطية",
       "within7d": "خلال ٧ أيام",
@@ -2633,6 +2635,7 @@
       "underReview": "قيد المراجعة",
       "active": "نشط",
       "pending": "معلّق",
+      "pendingActivation": "بانتظار الدفع",
       "rejected": "مرفوض",
       "suspended": "موقوف",
       "ownerSuspended": "موقوف من المالك",

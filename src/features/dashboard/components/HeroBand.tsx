@@ -19,6 +19,7 @@ import {
 } from '@ui';
 import { useCountUp } from '@shared/hooks/useCountUp';
 import { useAuthUser } from '@shared/stores/authStore';
+import { firstName } from '@shared/utils/displayName';
 import { Delta, Eyebrow } from './DashboardKit';
 import { Sparkline } from './DashboardCharts';
 import { fmtCompact, fmtInt } from './format';
@@ -37,7 +38,15 @@ const ATTENTION_ICON: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   nearExpiry: ClockIcon,
   idleFacilities: GaugeIcon,
   newSubscriptions: SparklesIcon,
+  // Queue keys the live statistics endpoint emits (statistics.service.js
+  // ATTENTION_SPEC), alongside the mock's set above.
+  underReviewBookings: CalendarIcon,
+  openReports: FlagIcon,
+  expiringSubscriptions: ClockIcon,
 };
+
+/** "oldest 13d" — the backend builds this key from a real age, so any N is valid. */
+const OLDEST_META = /^oldest(\d+)d$/;
 
 function greetingKey(): 'morning' | 'afternoon' | 'evening' {
   const h = new Date().getHours();
@@ -55,7 +64,7 @@ export function HeroBand({ data }: { data: DashboardData }) {
   const bookings = useCountUp(data.hero.bookings, 0.8);
   const gmv = useCountUp(data.hero.gmvSyp, 0.8);
 
-  const firstName = (user?.name ?? user?.email?.split('@')[0] ?? 'Admin').split(' ')[0];
+  const greetingName = firstName(user);
   const baseline = t('dashboard.vsPrev', { range: t(`dashboard.range.${range}`) });
   const regionLabel =
     regionId === 'all'
@@ -73,7 +82,7 @@ export function HeroBand({ data }: { data: DashboardData }) {
     <section>
       <Eyebrow>{t('dashboard.heroEyebrow')}</Eyebrow>
       <h1 className={styles.greeting}>
-        {t(`dashboard.greeting.${greetingKey()}`)}, <span className={styles.greetingName}>{firstName}</span>
+        {t(`dashboard.greeting.${greetingKey()}`)}, <span className={styles.greetingName}>{greetingName}</span>
       </h1>
       <p className={styles.subtitle}>
         {today} · {regionLabel} · {t(`dashboard.range.${range}`)}
@@ -164,6 +173,16 @@ export function HeroBand({ data }: { data: DashboardData }) {
 function AttentionRow({ item }: { item: AttentionItem }) {
   const { t } = useTranslation();
   const Icon = ATTENTION_ICON[item.key] ?? SparklesIcon;
+
+  // `oldest{N}d` carries its own number, so it resolves through one
+  // interpolated key instead of needing a translation per possible age.
+  const oldest = item.metaKey ? OLDEST_META.exec(item.metaKey) : null;
+  const meta = oldest
+    ? t('dashboard.attentionMeta.oldestDays', { days: Number(oldest[1]) })
+    : item.metaKey
+      ? t(`dashboard.attentionMeta.${item.metaKey}`)
+      : null;
+
   return (
     <Link to={item.to} className={styles.attnRow}>
       <span className={clsx(styles.attnChip, colors[item.tone])} aria-hidden>
@@ -171,7 +190,7 @@ function AttentionRow({ item }: { item: AttentionItem }) {
       </span>
       <span className={styles.attnBody}>
         <span className={styles.attnLabel}>{t(`dashboard.attention.${item.key}`)}</span>
-        <span className={styles.attnMeta}>{t(`dashboard.attentionMeta.${item.metaKey}`)}</span>
+        {meta && <span className={styles.attnMeta}>{meta}</span>}
       </span>
       <span className={clsx(styles.attnCount, colors[item.tone])}>{item.count}</span>
       <ChevronEndIcon className={clsx(styles.attnChevron, 'flipInRtl')} aria-hidden />

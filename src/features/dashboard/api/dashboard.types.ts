@@ -75,8 +75,13 @@ export interface AttentionItem {
   key: string;
   tone: Tone;
   count: number;
-  /** i18n key for the short meta ("oldest 4d", "within 7d"). */
-  metaKey: string;
+  /**
+   * i18n key for the short meta ("oldest 4d", "within 7d"). Optional: the
+   * backend only attaches one to the queue it has a timestamp for, so a row
+   * without it renders with no meta line rather than the literal string
+   * "dashboard.attentionMeta.undefined".
+   */
+  metaKey?: string;
   to: string;
 }
 

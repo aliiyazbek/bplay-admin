@@ -2492,7 +2492,7 @@
     "title": "Platform Overview",
     "heroEyebrow": "Super Admin · Platform Overview",
     "northStar": "Confirmed Bookings · North-star",
-    "ofTarget": "{{pct}}% of target",
+    "ofTarget": "{{pct}}% of previous period",
     "vsPrev": "vs prev {{range}}",
     "rangeLabel": "Time range",
     "regionLabel": "Region scope",
@@ -2583,11 +2583,13 @@
       "orphanFacilities": "Orphan facilities (no region)",
       "nearExpiry": "Near-expiry subscriptions",
       "idleFacilities": "Idle / low-occupancy facilities",
-      "newSubscriptions": "New paid subscriptions"
+      "newSubscriptions": "New paid subscriptions",
+      "underReviewBookings": "Bookings under review",
+      "openReports": "Open content reports",
+      "expiringSubscriptions": "Subscriptions expiring soon"
     },
     "attentionMeta": {
-      "oldest4d": "oldest 4d",
-      "oldest2d": "oldest 2d",
+      "oldestDays": "oldest {{days}}d",
       "recent": "recent",
       "coverageGap": "coverage gap",
       "within7d": "within 7d",
@@ -2633,6 +2635,7 @@
       "underReview": "Under review",
       "active": "Active",
       "pending": "Pending",
+      "pendingActivation": "Awaiting payment",
       "rejected": "Rejected",
       "suspended": "Suspended",
       "ownerSuspended": "Owner-susp.",
