@@ -717,7 +717,13 @@
       "empty": "No ratings left yet.",
       "hiddenTag": "Hidden",
       "show": "Show review",
-      "hide": "Hide review"
+      "hide": "Hide review",
+      "received": "Ratings received",
+      "given": "Ratings given",
+      "emptyReceived": "No ratings received yet.",
+      "unknownReviewer": "Unknown reviewer",
+      "count": "{{count}} rating",
+      "count_other": "{{count}} ratings"
     },
     "ratingTarget": {
       "facility": "Facility",
@@ -1693,7 +1699,8 @@
         "clubTitle": "Club",
         "clubDesc": "A venue with multiple courts, plans and services",
         "pitchTitle": "Pitch",
-        "pitchDesc": "A single independent bookable court"
+        "pitchDesc": "A single independent bookable court",
+        "noneApproved": "No approved owners yet. Approve an owner first — a facility cannot be created for an unverified account."
       },
       "basics": {
         "name": "Facility name",

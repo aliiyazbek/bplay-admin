@@ -215,6 +215,33 @@ export interface PlayerRating {
   hidden: boolean;
 }
 
+/**
+ * A rating the player RECEIVED — left by another player after a match, or by a
+ * facility. Distinct from PlayerRating, which is what the player GAVE: the two
+ * carry opposite ends of the relationship, so a shared shape would leave half
+ * the fields meaningless in each direction.
+ */
+export interface PlayerRatingReceived {
+  id: string;
+  /** Who left it. Null when the reviewer's account no longer exists. */
+  reviewerName?: string | null;
+  reviewerId?: string | null;
+  stars: number;
+  comment?: string;
+  date: string;
+  hidden: boolean;
+  /** Player reviews are per-match — the room it was earned in. */
+  roomId?: string | null;
+}
+
+/** Both directions of a player's ratings, plus the average of those received. */
+export interface PlayerRatingsResult {
+  given: PlayerRating[];
+  received: PlayerRatingReceived[];
+  averageReceived: number | null;
+  receivedCount: number;
+}
+
 /** A player-vs-player / content report (filed by, or against, this player). */
 export type ReportDirection = 'filed' | 'against';
 export type ReportStatus = 'open' | 'reviewing' | 'resolved' | 'dismissed';
@@ -299,6 +326,10 @@ export interface PlayerDto {
   player_id?: string | number;
   name?: string;
   full_name?: string;
+  /** What the admin list/detail endpoints actually send. */
+  fullName?: string;
+  username?: string;
+  avatarUrl?: string;
   email?: string;
   email_address?: string;
   phone?: string;
@@ -421,12 +452,16 @@ export function toPlayer(dto: PlayerDto): Player {
 
   return {
     id: String(dto.id ?? dto._id ?? dto.user_id ?? dto.player_id ?? ''),
-    name: dto.name ?? dto.full_name ?? '',
+    // The admin endpoints send `fullName` (camelCase); only `name`/`full_name`
+    // were read, so every row in the directory rendered a BLANK name. The
+    // username is the last resort — a handle is still better than an empty cell
+    // for a player who never set a display name.
+    name: dto.name ?? dto.fullName ?? dto.full_name ?? dto.username ?? '',
     email: dto.email ?? dto.email_address ?? '',
     phone: dto.phone ?? dto.phone_number ?? '',
     gender,
     dateOfBirth: dto.date_of_birth,
-    photoUrl: dto.avatar_url ?? dto.photo_url,
+    photoUrl: dto.avatarUrl ?? dto.avatar_url ?? dto.photo_url,
     city: dto.city ?? dto.region ?? '',
     bio: dto.bio,
     link: dto.link ?? dto.website ?? dto.social_link,

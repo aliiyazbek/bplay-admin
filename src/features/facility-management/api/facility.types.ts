@@ -849,7 +849,20 @@ export interface FacilityDto {
   neighbourhoodName?: string | null;
   images?: string[];
   /** The admin detail endpoint's name for the gallery. */
-  photos?: Array<string | { url?: string } | null>;
+  // `photoUrl` is what the admin detail endpoint actually sends; declaring only
+  // `url` is why the empty-gallery bug type-checked cleanly.
+  photos?: Array<
+    | string
+    | {
+        url?: string;
+        photoUrl?: string;
+        photo_url?: string;
+        isCover?: boolean;
+        sortOrder?: number;
+        sort_order?: number;
+      }
+    | null
+  >;
   owner_id?: string | number;
   ownerId?: string | number;
   owner_name?: string;
@@ -1103,10 +1116,33 @@ export function toFacility(dto: FacilityDto): Facility {
     },
     // The admin detail endpoint calls the gallery `photos`; the list endpoint
     // and the owner-facing one call it `images`.
+    //
+    // Each photo object is `{ photoUrl, isCover, sortOrder }` — `photoUrl`, NOT
+    // `url`. Only `url` was read, so every entry mapped to '' and was then
+    // dropped by the .filter(Boolean): the gallery came back EMPTY for every
+    // admin-created facility, which is why a facility filled in completely
+    // showed nothing on its profile. Ordered by `sortOrder` so the cover (0)
+    // stays first, which is what `images[0]` is used as.
     images: Array.isArray(dto.images)
       ? dto.images
       : Array.isArray(dto.photos)
-        ? dto.photos.map((photo) => (typeof photo === 'string' ? photo : (photo?.url ?? '')))
+        ? [...dto.photos]
+            .sort((a, b) => {
+              const ao = typeof a === 'string' ? 0 : (a?.sortOrder ?? a?.sort_order ?? 0);
+              const bo = typeof b === 'string' ? 0 : (b?.sortOrder ?? b?.sort_order ?? 0);
+              return ao - bo;
+            })
+            // Passed through `resolveUploadUrl` for the same reason the
+            // documents are: it repairs a scheme-less upload path and drops
+            // anything that is not safely http(s), so a bad row yields no image
+            // rather than a broken one.
+            .map((photo) =>
+              resolveUploadUrl(
+                typeof photo === 'string'
+                  ? photo
+                  : (photo?.photoUrl ?? photo?.photo_url ?? photo?.url),
+              ) ?? '',
+            )
             .filter(Boolean)
         : [],
     // Every field below arrives camelCased from the admin endpoints. Reading
@@ -1154,10 +1190,16 @@ export function toFacility(dto: FacilityDto): Facility {
     // `facility.doc.type.*`, so it is carried as the name and labelled there.
     documents: Array.isArray(dto.documents)
       ? dto.documents.map((doc, index) => {
-          const url = doc.url ?? doc.fileUrl ?? doc.file_url ?? '';
+          // Both halves matter, and the merge that brought `resolveUploadUrl`
+          // in kept only its half:
+          //   * the ALIASES — the admin detail endpoint sends `fileUrl` and
+          //     `docType`, so reading `doc.url`/`doc.name` alone leaves the url
+          //     empty (no way to open the document) and the name the literal
+          //     "Document";
+          //   * `resolveUploadUrl` — repairs a scheme-less upload path and
+          //     rejects anything that is not safely http(s).
+          const url = resolveUploadUrl(doc.url ?? doc.fileUrl ?? doc.file_url) ?? '';
           const name = doc.name ?? doc.docType ?? doc.doc_type ?? 'Document';
-          const url = resolveUploadUrl(doc.url) ?? '';
-          const name = doc.name ?? 'Document';
           return {
             id: String(doc.id ?? index),
             name,

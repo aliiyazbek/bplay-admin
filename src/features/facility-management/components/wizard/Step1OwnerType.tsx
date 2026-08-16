@@ -60,6 +60,12 @@ export function Step1OwnerType({ draft, onNext }: Step1OwnerTypeProps) {
             />
           )}
         />
+        {/* Only APPROVED owners are listed, so an empty dropdown is a real state
+            with a real cause — not a loading glitch. Say so, or the admin is
+            left staring at an empty list wondering what broke. */}
+        {!owners.isLoading && (owners.data ?? []).length === 0 && (
+          <p className={styles.hint}>{t('facility.wizard.owner.noneApproved')}</p>
+        )}
       </Field>
 
       <div className={styles.group} role="group" aria-label={t('facility.wizard.owner.kindLabel')}>

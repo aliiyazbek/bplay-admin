@@ -3,21 +3,26 @@ import { getOwners } from '@features/owner-management/api';
 import { ownerState } from '@features/owner-management/api/owner.types';
 
 /**
- * Owners selectable when creating a facility.
+ * Owners selectable when creating a facility — APPROVED accounts only.
  *
- * Blocked and suspended owners are removed. Everything they already hold was
- * deactivated when they were stopped, so offering them a NEW facility would
- * create a live, bookable venue under a banned account and quietly undo the
- * block. The backend now refuses this outright (ERR_OWNER_BLOCKED /
- * ERR_OWNER_SUSPENDED); this keeps the name out of the list so an admin never
- * picks one and meets an error at submit.
+ * `ownerState` resolves the precedence (blocked > suspended > review outcome)
+ * from three orthogonal wire signals; there is no single `state` field to read.
+ * Only `active` — an owner whose KYC review passed and who is not stopped —
+ * survives the filter.
  *
- * Pending owners stay: approving an owner and opening their first facility is
- * the normal path, and the wizard is often where that starts.
+ * Everything else is excluded for a reason:
+ *   * blocked / suspended — their existing facilities were deactivated when the
+ *     account was stopped, so a NEW facility would be live and bookable under a
+ *     banned account and quietly undo the block. The backend refuses this
+ *     outright (ERR_OWNER_BLOCKED / ERR_OWNER_SUSPENDED).
+ *   * under_review / rejected — an unapproved owner has not passed KYC. Creating
+ *     a facility for them puts a venue in the system attributed to an identity
+ *     nobody has verified, and it cannot be approved anyway while the owner is
+ *     still pending. Approve the owner first, then open their facility.
  *
- * The filter is applied to the fetched page rather than by a server `status`
- * filter because that parameter takes ONE bucket — 'active' alone would also
- * drop the pending owners this list wants to keep.
+ * Filtered client-side rather than with the server's `status` parameter because
+ * that takes ONE bucket and the mapping is not 1:1 with `ownerState` — the
+ * blocked/suspended precedence is resolved here, not on the wire.
  */
 export function useOwnersForPicker() {
   return useQuery({
@@ -25,13 +30,7 @@ export function useOwnersForPicker() {
     queryFn: () => getOwners({ page: 1, pageSize: 100 }),
     select: (result) =>
       result.items
-        .filter((owner) => {
-          // `ownerState` resolves the precedence (blocked > suspended > review
-          // outcome) from the three orthogonal wire signals — there is no single
-          // `state` field on Owner to read.
-          const state = ownerState(owner);
-          return state !== 'blocked' && state !== 'suspended';
-        })
+        .filter((owner) => ownerState(owner) === 'active')
         .map((owner) => ({ id: owner.id, name: owner.name, email: owner.email })),
   });
 }
