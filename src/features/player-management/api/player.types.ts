@@ -299,6 +299,10 @@ export interface PlayerDto {
   player_id?: string | number;
   name?: string;
   full_name?: string;
+  /** What the admin list/detail endpoints actually send. */
+  fullName?: string;
+  username?: string;
+  avatarUrl?: string;
   email?: string;
   email_address?: string;
   phone?: string;
@@ -421,12 +425,16 @@ export function toPlayer(dto: PlayerDto): Player {
 
   return {
     id: String(dto.id ?? dto._id ?? dto.user_id ?? dto.player_id ?? ''),
-    name: dto.name ?? dto.full_name ?? '',
+    // The admin endpoints send `fullName` (camelCase); only `name`/`full_name`
+    // were read, so every row in the directory rendered a BLANK name. The
+    // username is the last resort — a handle is still better than an empty cell
+    // for a player who never set a display name.
+    name: dto.name ?? dto.fullName ?? dto.full_name ?? dto.username ?? '',
     email: dto.email ?? dto.email_address ?? '',
     phone: dto.phone ?? dto.phone_number ?? '',
     gender,
     dateOfBirth: dto.date_of_birth,
-    photoUrl: dto.avatar_url ?? dto.photo_url,
+    photoUrl: dto.avatarUrl ?? dto.avatar_url ?? dto.photo_url,
     city: dto.city ?? dto.region ?? '',
     bio: dto.bio,
     link: dto.link ?? dto.website ?? dto.social_link,

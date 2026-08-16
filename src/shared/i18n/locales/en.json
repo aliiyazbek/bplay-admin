@@ -1692,7 +1692,8 @@
         "clubTitle": "Club",
         "clubDesc": "A venue with multiple courts, plans and services",
         "pitchTitle": "Pitch",
-        "pitchDesc": "A single independent bookable court"
+        "pitchDesc": "A single independent bookable court",
+        "noneApproved": "No approved owners yet. Approve an owner first — a facility cannot be created for an unverified account."
       },
       "basics": {
         "name": "Facility name",
