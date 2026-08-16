@@ -24,6 +24,7 @@
 import type { BadgeVariant } from '@ui';
 import type { UserRole } from '@shared/stores/authStore';
 import { statusToBadgeVariant } from '@shared/utils/status';
+import { resolveUploadUrl } from '@shared/utils/url';
 
 // ---------------------------------------------------------------------------
 // Vocabulary
@@ -465,7 +466,7 @@ export function attachmentType(
 }
 
 export function toChatAttachment(dto: ChatAttachmentDto): ChatAttachment {
-  const url = dto.url ?? '';
+  const url = resolveUploadUrl(dto.url) ?? '';
   return {
     id: String(dto.id ?? ''),
     name: dto.name ?? '',

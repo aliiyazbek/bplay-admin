@@ -24,8 +24,8 @@ interface Props {
  * gated by `isSafeHttpUrl()` before it can reach an `src`, an `href` or a viewer.
  * An attachment that fails the gate is still SHOWN — an admin needs to know the
  * sender attached something — but as an inert, clearly-marked chip that cannot be
- * clicked. PDFs open in DocumentViewerModal, whose iframe is sandboxed into an
- * opaque origin so an uploaded HTML file cannot read this session.
+ * clicked. PDFs open in DocumentViewerModal, which keeps an upload walled off
+ * from this session by the origin it is served from — see the security note there.
  */
 export function FeedbackAttachments({ attachments }: Props) {
   const { t } = useTranslation();
@@ -137,6 +137,7 @@ export function FeedbackAttachments({ attachments }: Props) {
         closeLabel={t('common.close')}
         openLabel={t('feedback.detail.openInNewTab')}
         emptyLabel={t('feedback.detail.attachmentEmpty')}
+        errorLabel={t('common.docLoadError')}
       />
     </div>
   );
