@@ -351,6 +351,18 @@ export interface CreateOwnerInput {
   address?: string;
 }
 
+/**
+ * Admin-edited owner details.
+ *
+ * Name and address ONLY — the endpoint refuses email, phone and national ID
+ * (ERR_FIELD_NOT_EDITABLE): the first two are login identifiers and the third is
+ * the KYC identity the approved documents attest to.
+ */
+export interface EditOwnerInput {
+  name: string;
+  address?: string;
+}
+
 /** The result of creating an owner — carries the one-time temporary password. */
 export interface CreatedOwner {
   owner: Owner;

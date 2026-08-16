@@ -35,6 +35,19 @@ export interface FileUploadProps {
   moveEarlierLabel?: string;
   moveLaterLabel?: string;
   maxReachedLabel?: string;
+  /**
+   * Persist a picked file and return its durable URL.
+   *
+   * Without this the component falls back to `URL.createObjectURL`, which is
+   * fine for mocks but produces a `blob:` URL scoped to the current tab — store
+   * one and it is already dead when the record is reopened. Pass an uploader
+   * wherever the URL is going to be SAVED.
+   */
+  uploadFile?: (file: File) => Promise<string>;
+  /** Announced while an upload is in flight. */
+  uploadingLabel?: string;
+  /** Shown if an upload fails; the file is dropped rather than stored broken. */
+  uploadErrorLabel?: string;
   testId?: string;
 }
 
@@ -60,28 +73,55 @@ export function FileUpload({
   moveEarlierLabel,
   moveLaterLabel,
   maxReachedLabel,
+  uploadFile,
+  uploadingLabel,
+  uploadErrorLabel,
   testId,
 }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
   const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(false);
 
   const atMax = typeof maxFiles === 'number' && value.length >= maxFiles;
   const remaining = typeof maxFiles === 'number' ? maxFiles - value.length : Infinity;
 
-  const addFiles = (files: FileList | null) => {
+  const addFiles = async (files: FileList | null) => {
     if (!files || disabled) return;
     const incoming = Array.from(files).slice(0, remaining === Infinity ? undefined : remaining);
     if (incoming.length === 0) return;
-    const mapped = incoming.map((file) => ({ url: URL.createObjectURL(file), name: file.name }));
-    onChange([...value, ...mapped]);
+
+    if (!uploadFile) {
+      const mapped = incoming.map((file) => ({ url: URL.createObjectURL(file), name: file.name }));
+      onChange([...value, ...mapped]);
+      return;
+    }
+
+    // A file that fails to upload is DROPPED, not added with a dead URL: an
+    // entry the form would happily submit as a broken link is worse than a
+    // visible failure the admin can retry.
+    setUploading(true);
+    setUploadError(false);
+    try {
+      const settled = await Promise.allSettled(
+        incoming.map(async (file) => ({ url: await uploadFile(file), name: file.name })),
+      );
+      const uploaded = settled
+        .filter((r): r is PromiseFulfilledResult<UploadedFile> => r.status === 'fulfilled')
+        .map((r) => r.value);
+      if (uploaded.length !== incoming.length) setUploadError(true);
+      if (uploaded.length > 0) onChange([...value, ...uploaded]);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const onDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragging(false);
     if (disabled || atMax) return;
-    addFiles(event.dataTransfer.files);
+    void addFiles(event.dataTransfer.files);
   };
 
   const onDragOver = (event: DragEvent<HTMLDivElement>) => {
@@ -139,11 +179,13 @@ export function FileUpload({
             className={styles.input}
             accept={accept}
             multiple
-            disabled={disabled}
+            disabled={disabled || uploading}
             onChange={(event) => {
-              addFiles(event.target.files);
-              // Reset so re-selecting the same file re-fires change.
+              const picked = event.target.files;
+              // Reset BEFORE awaiting: `event.target` is pooled and clearing it
+              // after the upload resolves can null out the next selection.
               event.target.value = '';
+              void addFiles(picked);
             }}
             tabIndex={-1}
           />
@@ -151,6 +193,17 @@ export function FileUpload({
       )}
 
       {atMax && maxReachedLabel && <p className={styles.maxNote}>{maxReachedLabel}</p>}
+
+      {uploading && uploadingLabel && (
+        <p className={styles.maxNote} role="status">
+          {uploadingLabel}
+        </p>
+      )}
+      {uploadError && uploadErrorLabel && (
+        <p className={styles.uploadError} role="alert">
+          {uploadErrorLabel}
+        </p>
+      )}
 
       {value.length > 0 &&
         (variant === 'image' ? (

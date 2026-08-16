@@ -17,6 +17,8 @@ import {
   PhoneIcon,
   DocumentIcon,
   CalendarIcon,
+  EditIcon,
+  Button,
   toLocalPhone,
 } from '@ui';
 import { useDisclosure } from '@shared/hooks/useDisclosure';
@@ -28,6 +30,7 @@ import { OwnerFacilityStats } from '../components/OwnerFacilityStats';
 import { OwnerFacilitiesCard } from '../components/OwnerFacilitiesCard';
 import { OwnerDocumentsCard } from '../components/OwnerDocumentsCard';
 import { OwnerAboutCard } from '../components/OwnerAboutCard';
+import { OwnerEditModal } from '../components/OwnerEditModal';
 import { OwnerSubscriptionCard } from '../components/OwnerSubscriptionCard';
 import { OwnerPostsCard } from '../components/OwnerPostsCard';
 import {
@@ -45,6 +48,7 @@ export default function OwnerProfilePage() {
   const { ownerId } = useParams<{ ownerId: string }>();
   const { t } = useTranslation();
   const { data: owner, isLoading, isError, error, refetch } = useOwnerQuery(ownerId);
+  const edit = useDisclosure();
 
   const notFound =
     (isError && error instanceof Error && error.message === NOT_FOUND_MESSAGE) ||
@@ -57,8 +61,24 @@ export default function OwnerProfilePage() {
         subtitle={t('owner.profile.subtitle')}
         showBack
         backLabel={t('common.back')}
-        actions={owner ? <OwnerStatusActions owner={owner} /> : undefined}
+        actions={
+          owner ? (
+            <>
+              <Button
+                variant="secondary"
+                leftIcon={<EditIcon />}
+                onClick={edit.open}
+                data-testid="owner-edit"
+              >
+                {t('owner.edit.action')}
+              </Button>
+              <OwnerStatusActions owner={owner} />
+            </>
+          ) : undefined
+        }
       />
+
+      {owner && <OwnerEditModal isOpen={edit.isOpen} onClose={edit.close} owner={owner} />}
 
       {isLoading ? (
         <div className={styles.center}>

@@ -5,6 +5,7 @@ import {
   toOwner,
   type CreatedOwner,
   type CreateOwnerInput,
+  type EditOwnerInput,
   type Owner,
   type OwnerAction,
   type OwnerDocAction,
@@ -118,9 +119,17 @@ export async function reviewOwnerDocument(
 /**
  * Upload a verification document on the owner's behalf.
  *
- * Multipart, not JSON: the file rides alongside a `docType` field. No explicit
- * Content-Type header is set — the browser must add its own multipart boundary,
- * and overriding it produces a body the server cannot parse.
+ * Multipart, not JSON: the file rides alongside a `docType` field.
+ *
+ * The Content-Type is explicitly cleared to `undefined`. Not setting it is NOT
+ * enough — `apiClient` declares `'Content-Type': 'application/json'` as an
+ * INSTANCE-LEVEL default, and axios applies that to every request including this
+ * one, so the browser never got to compute the multipart boundary. The server's
+ * multipart parser then rejected the body outright ("the request is not
+ * multipart"), and no admin could add a document for an owner.
+ *
+ * `undefined` (not a literal string) is what makes axios drop the header and
+ * derive `multipart/form-data; boundary=…` from the FormData itself.
  *
  * The document lands as `pending`, exactly like an owner's own upload. Adding a
  * document is not approving it — that stays a separate review decision.
@@ -133,7 +142,11 @@ export async function uploadOwnerDocument(
   const form = new FormData();
   form.append('docType', docType);
   form.append('file', file);
-  await apiClient.post(`${OWNERS_PATH}/${id}/documents`, form);
+  await apiClient.post(`${OWNERS_PATH}/${id}/documents`, form, {
+    headers: { 'Content-Type': undefined },
+    // Uploads are slower than the 15s default the JSON calls use.
+    timeout: 60_000,
+  });
 }
 
 export async function createOwner(input: CreateOwnerInput): Promise<CreatedOwner> {
@@ -149,4 +162,21 @@ export async function createOwner(input: CreateOwnerInput): Promise<CreatedOwner
 
   const data = unwrap<OwnerDto & { temporary_password?: string }>(res.data);
   return { owner: toOwner(data), tempPassword: data.temporary_password ?? '' };
+}
+
+/**
+ * Edit an owner's profile details — `PUT /owners/{id}`.
+ *
+ * Only name and address; the endpoint refuses email/phone/national_id outright
+ * (ERR_FIELD_NOT_EDITABLE) rather than ignoring them, so they are not sent.
+ *
+ * An empty address is sent as `null` — meaning "clear it" — while an untouched
+ * field is simply omitted.
+ */
+export async function updateOwner(id: string, input: EditOwnerInput): Promise<void> {
+  const address = input.address?.trim();
+  await apiClient.put(`${OWNERS_PATH}/${id}`, {
+    full_name: input.name.trim(),
+    address: address ? address : null,
+  });
 }

@@ -5,6 +5,7 @@ import { filterAndPaginateOwners } from './owner.filter';
 import type {
   CreatedOwner,
   CreateOwnerInput,
+  EditOwnerInput,
   Owner,
   OwnerAccountStatus,
   OwnerAction,
@@ -295,4 +296,13 @@ export async function createOwner(input: CreateOwnerInput): Promise<CreatedOwner
   };
   db.unshift(owner);
   return { owner, tempPassword };
+}
+
+/** Mock profile edit — name and address only, mirroring the real endpoint. */
+export async function updateOwner(id: string, input: EditOwnerInput): Promise<void> {
+  await mockDelay();
+  const owner = db.find((entry) => entry.id === id);
+  if (!owner) throw new Error('Owner not found');
+  owner.name = input.name.trim();
+  owner.address = input.address?.trim() || undefined;
 }

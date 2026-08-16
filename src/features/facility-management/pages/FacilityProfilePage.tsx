@@ -9,6 +9,7 @@ import {
   Button,
   Avatar,
   Alert,
+  Badge,
   Tabs,
   StatCard,
   RatingStars,
@@ -22,17 +23,21 @@ import {
   PhoneIcon,
   StadiumIcon,
   EditIcon,
+  TrashIcon,
   ChevronEndIcon,
+  ConfirmDialog,
 } from '@ui';
 import { PATHS } from '@app/router/paths';
 import { useAuthRole } from '@shared/stores/authStore';
 import { useFacilityQuery } from '../hooks/useFacilityQuery';
+import { useDeleteFacility } from '../hooks/useDeleteFacility';
 import { FacilityStatusActions } from '../components/FacilityStatusActions';
 import { FacilityStatusBadge } from '../components/FacilityStatusBadge';
 import { WorkingHoursView } from '../components/WorkingHoursView';
 import { PitchSpecsGrid } from '../components/PitchSpecsGrid';
 import { CourtCard } from '../components/CourtCard';
 import { FacilityDocumentsCard } from '../components/FacilityDocumentsCard';
+import { FacilityMediaManager } from '../components/FacilityMediaManager';
 import { FacilitySourceBadge } from '../components/FacilitySourceBadge';
 import { canEditFacility, type Facility } from '../api/facility.types';
 import styles from './FacilityProfilePage.module.css';
@@ -44,8 +49,24 @@ export default function FacilityProfilePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: facility, isLoading, isError, error, refetch } = useFacilityQuery(facilityId);
+  const deleteMutation = useDeleteFacility();
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const notFound = isError && error instanceof Error && error.message === 'Facility not found';
+
+  // Only navigate away once the delete actually succeeded — the backend refuses
+  // while upcoming bookings exist, and leaving the page on a rejected delete
+  // would hide the explanation the admin needs.
+  const onDeleteConfirmed = () => {
+    if (!facility) return;
+    deleteMutation.mutate(facility.id, {
+      onSuccess: () => {
+        setConfirmDelete(false);
+        navigate(PATHS.facilityManagement);
+      },
+      onError: () => setConfirmDelete(false),
+    });
+  };
 
   return (
     <PageContainer>
@@ -68,9 +89,29 @@ export default function FacilityProfilePage() {
                 </Button>
               )}
               <FacilityStatusActions facility={facility} />
+              <Button
+                variant="danger"
+                leftIcon={<TrashIcon />}
+                onClick={() => setConfirmDelete(true)}
+                data-testid="facility-delete"
+              >
+                {t('facility.profile.delete')}
+              </Button>
             </>
           ) : undefined
         }
+      />
+
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={onDeleteConfirmed}
+        title={t('facility.profile.deleteTitle')}
+        message={t('facility.profile.deleteMessage', { name: facility?.name ?? '' })}
+        confirmText={t('facility.profile.delete')}
+        cancelText={t('common.cancel')}
+        variant="danger"
+        isLoading={deleteMutation.isPending}
       />
 
       {isLoading ? (
@@ -123,9 +164,30 @@ function FacilityProfile({ facility }: { facility: Facility }) {
   // Owner profiles live on a super_admin-only route — only super_admins can open them.
   const canViewOwner = useAuthRole() === 'super_admin';
   const editPath = `${PATHS.facilityManagement}/${facility.id}/edit`;
+  const hasCoordinates =
+    Number.isFinite(facility.location.lat) && Number.isFinite(facility.location.lng);
 
   const numberLocale = i18n.language.startsWith('ar') ? 'ar-SY' : 'en-US';
-  const cover = facility.images[0];
+  // The owner's chosen hero image wins; the first gallery photo is the fallback.
+  // `coverUrl` was on the wire and previously ignored, so a facility with a cover
+  // set still showed whatever happened to be first in its gallery.
+  const cover = facility.coverUrl ?? facility.images[0];
+
+  const formatDate = (value?: string) =>
+    value
+      ? new Date(value).toLocaleDateString(numberLocale, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+      : '—';
+
+  // A club carries a list of disciplines; a pitch has exactly one.
+  const sportsList = facility.kind === 'club' ? facility.sports : [facility.sport];
+  const socialEntries = Object.entries(facility.socialLinks ?? {}).filter(
+    ([, url]) => typeof url === 'string' && url.length > 0,
+  );
+
   const locationLine =
     [
       facility.location.governorate
@@ -185,27 +247,38 @@ function FacilityProfile({ facility }: { facility: Facility }) {
         </motion.div>
       </motion.section>
 
+      {/* These now report what the endpoint computes. Occupancy and revenue are
+          NOT among them — showing a hard-coded 0 for both, as this did, reads as
+          "this facility earns nothing" rather than "not measured yet". Courts
+          and reviews are real numbers and take their place. */}
       <div className={styles.stats}>
         <StatCard
-          label={t('facility.profile.stats.occupancy')}
-          value={facility.statistics.occupancyPercent}
+          label={t('facility.profile.stats.bookings')}
+          value={facility.statistics.totalBookings}
           accent="primary"
           countUp
         />
         <StatCard
-          label={t('facility.profile.stats.revenue')}
-          value={`${facility.statistics.revenueSyp.toLocaleString(numberLocale)} ${t('facility.profile.stats.currency')}`}
-          accent="secondary"
-        />
-        <StatCard
-          label={t('facility.profile.stats.bookings')}
-          value={facility.statistics.todayBookings}
+          label={t('facility.profile.stats.reviews')}
+          value={facility.statistics.reviewCount}
           accent="info"
           countUp
         />
         <StatCard
+          label={t('facility.profile.stats.courts')}
+          value={facility.kind === 'club' ? facility.courts.length : 1}
+          accent="secondary"
+          countUp
+        />
+        <StatCard
           label={t('facility.profile.stats.rating')}
-          value={typeof facility.rating === 'number' ? facility.rating.toFixed(1) : '—'}
+          value={
+            facility.statistics.avgRating > 0
+              ? facility.statistics.avgRating.toFixed(1)
+              : typeof facility.rating === 'number'
+                ? facility.rating.toFixed(1)
+                : '—'
+          }
           accent="warning"
         />
       </div>
@@ -238,9 +311,15 @@ function FacilityProfile({ facility }: { facility: Facility }) {
           )}
 
           <div className={styles.overviewGrid}>
+            {/* MAIN column — what the facility offers. */}
+            <div className={styles.overviewMain}>
             <Card className={styles.card}>
               <h2 className={styles.sectionTitle}>{t('facility.profile.description')}</h2>
-              {facility.kind === 'club' && facility.description ? (
+              {/* Not gated on `kind === 'club'`: the endpoint returns a
+                  description for a pitch too, and gating it here meant a pitch
+                  always rendered the "no description" placeholder even when one
+                  had been written. */}
+              {facility.description ? (
                 <p className={styles.description}>{facility.description}</p>
               ) : (
                 <p className={styles.muted}>{t('facility.profile.noDescription')}</p>
@@ -250,6 +329,22 @@ function FacilityProfile({ facility }: { facility: Facility }) {
                   <PhoneIcon className={styles.contactIcon} />
                   <span className={styles.contactLabel}>{t('facility.profile.contact')}</span>
                   <span className={styles.contactValue}>{facility.contactPhone}</span>
+                </div>
+              )}
+
+              {/* The sports on offer. Returned by the endpoint for every
+                  facility but never rendered anywhere before, so a club's
+                  whole discipline list was invisible on its own profile. */}
+              {sportsList.length > 0 && (
+                <div className={styles.sports}>
+                  <span className={styles.label}>{t('facility.profile.sports')}</span>
+                  <span className={styles.chips}>
+                    {sportsList.map((sport) => (
+                      <Badge key={sport} variant="neutral" size="sm">
+                        {t(`facility.sport.${sport}`, { defaultValue: sport })}
+                      </Badge>
+                    ))}
+                  </span>
                 </div>
               )}
             </Card>
@@ -270,7 +365,10 @@ function FacilityProfile({ facility }: { facility: Facility }) {
                 />
               </Card>
             )}
+            </div>
 
+            {/* SIDE column — reference data: who and where. */}
+            <div className={styles.overviewSide}>
             <Card className={styles.card}>
               <h2 className={styles.sectionTitle}>{t('facility.profile.location')}</h2>
               <div className={styles.rows}>
@@ -295,10 +393,112 @@ function FacilityProfile({ facility }: { facility: Facility }) {
                   </span>
                 </div>
               </div>
-              <div className={styles.mapView}>
-                <MapView lat={facility.location.lat} lng={facility.location.lng} />
-              </div>
+              {/* A facility can have NO coordinates — `numOr` yields NaN, and
+                  Leaflet THROWS on an invalid LatLng, which took down the whole
+                  profile with "something went wrong". Half the seeded
+                  facilities have a null lat/lng, so this was not an edge case. */}
+              {hasCoordinates ? (
+                <div className={styles.mapView}>
+                  <MapView lat={facility.location.lat} lng={facility.location.lng} />
+                </div>
+              ) : (
+                <div className={styles.mapMissing}>
+                  <MapPinIcon aria-hidden />
+                  <span>{t('facility.profile.noLocation')}</span>
+                </div>
+              )}
             </Card>
+
+            {/* Everything else the record holds. These fields were all on the
+                wire and shown nowhere, so the profile claimed to be the full
+                view of a facility while omitting most of it. */}
+            <Card className={styles.card}>
+              <h2 className={styles.sectionTitle}>{t('facility.profile.details')}</h2>
+              <div className={styles.rows}>
+                <div className={styles.row}>
+                  <span className={styles.label}>{t('facility.profile.kind')}</span>
+                  <span className={styles.value}>{t(`facility.kind.${facility.kind}`)}</span>
+                </div>
+                {facility.venueType && (
+                  <div className={styles.row}>
+                    <span className={styles.label}>{t('facility.profile.venueType')}</span>
+                    <span className={styles.value}>
+                      {t(`facility.types.${facility.venueType}`, {
+                        defaultValue: facility.venueType,
+                      })}
+                    </span>
+                  </div>
+                )}
+                <div className={styles.row}>
+                  <span className={styles.label}>{t('facility.profile.owner')}</span>
+                  <span className={styles.value}>{facility.ownerName || '—'}</span>
+                </div>
+                {facility.ownerPhone && (
+                  <div className={styles.row}>
+                    <span className={styles.label}>{t('facility.profile.ownerPhone')}</span>
+                    <span className={styles.value} dir="ltr">
+                      {facility.ownerPhone}
+                    </span>
+                  </div>
+                )}
+                {/* Live/paused is independent of the review status, so a
+                    facility can be approved AND switched off. Both are shown. */}
+                {facility.isActive !== undefined && (
+                  <div className={styles.row}>
+                    <span className={styles.label}>{t('facility.profile.activeState')}</span>
+                    <span className={styles.value}>
+                      <Badge variant={facility.isActive ? 'success' : 'neutral'} size="sm">
+                        {t(facility.isActive ? 'facility.profile.live' : 'facility.profile.paused')}
+                      </Badge>
+                    </span>
+                  </div>
+                )}
+                {facility.suspendedAt && (
+                  <div className={styles.row}>
+                    <span className={styles.label}>{t('facility.profile.suspendedAt')}</span>
+                    <span className={styles.value}>{formatDate(facility.suspendedAt)}</span>
+                  </div>
+                )}
+                <div className={styles.row}>
+                  <span className={styles.label}>{t('facility.profile.createdAt')}</span>
+                  <span className={styles.value}>{formatDate(facility.createdAt)}</span>
+                </div>
+                {facility.updatedAt && (
+                  <div className={styles.row}>
+                    <span className={styles.label}>{t('facility.profile.updatedAt')}</span>
+                    <span className={styles.value}>{formatDate(facility.updatedAt)}</span>
+                  </div>
+                )}
+                <div className={styles.row}>
+                  <span className={styles.label}>{t('facility.profile.reviewCount')}</span>
+                  <span className={styles.value}>{facility.statistics.reviewCount ?? 0}</span>
+                </div>
+                <div className={styles.row}>
+                  <span className={styles.label}>{t('facility.profile.totalBookings')}</span>
+                  <span className={styles.value}>{facility.statistics.totalBookings ?? 0}</span>
+                </div>
+              </div>
+
+              {socialEntries.length > 0 && (
+                <div className={styles.social}>
+                  <span className={styles.label}>{t('facility.profile.social')}</span>
+                  <span className={styles.chips}>
+                    {socialEntries.map(([network, url]) => (
+                      <a
+                        key={network}
+                        className={styles.socialLink}
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        {network}
+                      </a>
+                    ))}
+                  </span>
+                </div>
+              )}
+            </Card>
+            </div>
           </div>
         </div>
       )}
@@ -372,6 +572,10 @@ function FacilityProfile({ facility }: { facility: Facility }) {
           </Card>
 
           <FacilityDocumentsCard facilityId={facility.id} documents={facility.documents} />
+
+          {/* Owner-submitted facilities are edited by their owner; the admin
+              reviews them rather than rewriting their media. */}
+          {canEditFacility(facility.source) && <FacilityMediaManager facility={facility} />}
         </div>
       )}
 

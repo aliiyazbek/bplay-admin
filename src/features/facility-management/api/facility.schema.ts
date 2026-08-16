@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SPORT_TYPES, type SportType } from './facility.types';
+import { FACILITY_DOC_TYPES, SPORT_TYPES, type SportType } from './facility.types';
 
 // Enum schemas kept in sync with facility.types (literal tuples for zod).
 const kindEnum = z.enum(['club', 'pitch']);
@@ -168,7 +168,10 @@ export const step5Schema = z.object({
   documents: z
     .array(
       z.object({
-        name: z.string().min(1),
+        // A doc-type CATEGORY from the API's closed enum, not a free-text label
+        // and not the uploaded filename. Derived from FACILITY_DOC_TYPES so the
+        // wizard cannot drift from what the create routes accept.
+        name: z.enum(FACILITY_DOC_TYPES),
         url: z.string().url('facility.wizard.errors.document'),
       }),
     )
