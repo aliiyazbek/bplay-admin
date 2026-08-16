@@ -77,11 +77,21 @@ function docs(facilityId: string, entries: Array<[DocName, DocStatus]>): Facilit
 }
 
 function zeroStats(): FacilityStatistics {
-  return { occupancyPercent: 0, revenueSyp: 0, todayBookings: 0 };
+  return { avgRating: 0, reviewCount: 0, totalBookings: 0, occupancyPercent: 0, revenueSyp: 0, todayBookings: 0 };
 }
 
+// The mock keeps supplying occupancy/revenue (its own dashboard tiles read them)
+// AND now the three the real endpoint returns, so mock and live agree on shape.
+// `totalBookings` is derived from the daily figure so the two stay plausible.
 function stats(occupancyPercent: number, revenueSyp: number, todayBookings: number): FacilityStatistics {
-  return { occupancyPercent, revenueSyp, todayBookings };
+  return {
+    avgRating: 0,
+    reviewCount: 0,
+    totalBookings: todayBookings * 30,
+    occupancyPercent,
+    revenueSyp,
+    todayBookings,
+  };
 }
 
 /** 09:00–23:00 every day unless overridden (5 = Friday for the usual variations). */
@@ -1111,4 +1121,23 @@ export async function getRegionFacilities(region: {
         region.radiusKm,
     )
     .map(toRegionFacility);
+}
+
+/**
+ * Mock upload — keeps the object URL, which is correct HERE.
+ *
+ * Nothing is persisted in mock mode, so the blob lives exactly as long as the
+ * page that made it. The real implementation posts to /facilities/media and
+ * returns a durable URL instead.
+ */
+export async function uploadFacilityMedia(file: File): Promise<string> {
+  await mockDelay();
+  return URL.createObjectURL(file);
+}
+
+/** Mock delete — drops the row from the in-memory db. */
+export async function deleteFacility(id: string): Promise<void> {
+  await mockDelay();
+  const index = db.findIndex((facility) => facility.id === id);
+  if (index >= 0) db.splice(index, 1);
 }

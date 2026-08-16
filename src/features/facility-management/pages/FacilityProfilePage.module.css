@@ -130,11 +130,39 @@
   gap: var(--space-4);
 }
 
+/*
+ * Overview layout: a wide MAIN column with a narrower SIDE column.
+ *
+ * This was `1fr 1fr`, which read as confusing for a structural reason rather
+ * than a stylistic one — two equal columns give a short card (Details: a handful
+ * of label/value rows) the same visual weight as a tall one (Location, with its
+ * map), so the eye has no way to tell what the page is actually about, and the
+ * shorter card leaves a large gap beside its neighbour.
+ *
+ * 3:2 puts the substantive content (description, hours, courts) in the main
+ * column and the reference data (identity, location) alongside it, so each
+ * column reads top-to-bottom as one coherent story.
+ */
 .overviewGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 3fr 2fr;
   gap: var(--space-4);
   align-items: start;
+}
+
+/* Cards that belong to the narrow reference column. */
+.overviewSide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-inline-size: 0;
+}
+
+.overviewMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-inline-size: 0;
 }
 
 .card {
@@ -205,6 +233,23 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--color-glass-border);
+}
+
+/* Stands in for the map when the facility has no coordinates, so the card keeps
+   its shape instead of collapsing. */
+.mapMissing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  block-size: 220px;
+  margin-block-start: var(--space-2);
+  border: 1px dashed var(--color-glass-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+  text-align: center;
 }
 
 .row {
@@ -406,4 +451,33 @@
   .photoLink:hover .photo {
     transform: none;
   }
+}
+
+/* Sports chips on the description card, and the social links on the details
+   card. Both are label + wrapping row of small items. */
+.sports,
+.social {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-4);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.socialLink {
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.socialLink:hover,
+.socialLink:focus-visible {
+  text-decoration: underline;
 }

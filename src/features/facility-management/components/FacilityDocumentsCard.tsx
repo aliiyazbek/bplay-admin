@@ -79,7 +79,13 @@ export function FacilityDocumentsCard({ facilityId, documents }: Props) {
               </span>
               <span className={styles.docMeta}>
                 <span className={styles.docHead}>
-                  <span className={styles.docName}>{document.name}</span>
+                  {/* `name` is the endpoint's `docType` slug ('ownership_proof').
+                      Translated through the shared owner.doc.type labels — the
+                      same five types — falling back to the raw value for a
+                      one-off name that has no key. */}
+                  <span className={styles.docName}>
+                    {t(`owner.doc.type.${document.name}`, { defaultValue: document.name })}
+                  </span>
                   <Badge variant={facilityDocBadgeVariant(document.status)} size="sm">
                     {t(`facility.doc.status.${document.status}`)}
                   </Badge>

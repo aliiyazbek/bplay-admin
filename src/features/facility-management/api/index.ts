@@ -24,6 +24,8 @@ export type {
   CourtInput,
   BulkFacilityAction,
   BulkActionResult,
+  FacilityDocType,
+  FacilityDocumentInput,
 } from './facility.types';
 export {
   FACILITY_STATUSES,
@@ -33,6 +35,10 @@ export {
   FACILITY_VERIFICATIONS,
   facilityStatusTone,
   facilityRegionSeed,
+  FACILITY_DOC_TYPES,
+  toFacilityDocType,
+  facilityToInput,
+  canEditFacility,
 } from './facility.types';
 
 export const getFacilities = impl.getFacilities;
@@ -46,6 +52,8 @@ export const reactivateFacility = impl.reactivateFacility;
 export const reviewFacilityDocument = impl.reviewFacilityDocument;
 export const createFacility = impl.createFacility;
 export const updateFacility = impl.updateFacility;
+export const uploadFacilityMedia = impl.uploadFacilityMedia;
+export const deleteFacility = impl.deleteFacility;
 export const bulkAction = impl.bulkAction;
 export const getRegionFacilityCounts = impl.getRegionFacilityCounts;
 export const getFacilityCountsByOwner = impl.getFacilityCountsByOwner;

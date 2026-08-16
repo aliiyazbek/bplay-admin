@@ -255,10 +255,25 @@ export interface FacilityDocument {
 }
 
 /** Read-only figures (D-ADM-5) — the admin never edits these. */
+/**
+ * The counters the detail endpoint actually computes.
+ *
+ * It returns `avgRating`, `reviewCount` and `totalBookings`. The model used to
+ * declare `occupancyPercent` / `revenueSyp` / `todayBookings` — three keys the
+ * API has never sent — so all three read `undefined`, fell through to their `?? 0`
+ * defaults, and the profile's stat row showed a confident 0 / 0 SYP / 0 for every
+ * facility while the real figures went unused.
+ *
+ * The old three are kept as optional so a future endpoint can supply them
+ * without another model change, but nothing displays them unless they arrive.
+ */
 export interface FacilityStatistics {
-  occupancyPercent: number;
-  revenueSyp: number;
-  todayBookings: number;
+  avgRating: number;
+  reviewCount: number;
+  totalBookings: number;
+  occupancyPercent?: number;
+  revenueSyp?: number;
+  todayBookings?: number;
 }
 
 /** An in-club court. A pitch-kind facility IS its own single court. */
@@ -320,6 +335,35 @@ export interface FacilityBase {
   /** Admin suspension reason — set when status is 'suspended'. */
   suspensionReason?: string;
   rating?: number;
+  /**
+   * Free-text blurb. On the BASE, not just on a club: the detail endpoint
+   * returns `description` for both kinds, but it used to be declared on
+   * `ClubFacility` alone — so a pitch's description was mapped nowhere and the
+   * profile page, which also gated the section on `kind === 'club'`, could
+   * never show one.
+   */
+  description?: string;
+  /**
+   * The rest of what the detail endpoint returns. Every one of these was on the
+   * wire and dropped on the floor: the model simply had nowhere to put them, so
+   * the profile page could not show them however it was written.
+   */
+  /** Sub-type of the venue ('complex', 'stadium', …). Free text from the owner. */
+  venueType?: string;
+  /** Owner's contact number, distinct from the facility's public `contactPhone`. */
+  ownerPhone?: string;
+  /** Hero image chosen by the owner; `images[0]` is the fallback. */
+  coverUrl?: string;
+  /** Whatever social profiles the owner registered, keyed by network. */
+  socialLinks?: Record<string, string>;
+  /** Live/paused independently of the review `status`. */
+  isActive?: boolean;
+  /** When an admin suspended it — pairs with `suspensionReason`. */
+  suspendedAt?: string;
+  /** Admin who last reviewed the facility. */
+  reviewedBy?: string;
+  /** Last modification, for the audit line in the details card. */
+  updatedAt?: string;
   documents: FacilityDocument[];
   statistics: FacilityStatistics;
 }
@@ -606,9 +650,38 @@ export interface CourtInput {
   isActive: boolean;
 }
 
-/** An uploaded verification document (name + resolvable URL). */
+/**
+ * The verification-document CATEGORY the API accepts — a closed set, not a label.
+ *
+ * `documents[].name` is declared as an enum of exactly these five values on both
+ * create routes. It is a doc TYPE, matching `owner.doc.type.*` and what the
+ * profile card already renders, NOT a human-readable title.
+ *
+ * The wizard used to send the uploaded FILE'S NAME here ('business-license.pdf'),
+ * which is not a member of the enum, so every real upload failed validation with
+ * "Request validation failed" and no facility could be created at all. Only a
+ * file literally named `business_license` would have passed.
+ */
+export const FACILITY_DOC_TYPES = [
+  'national_id',
+  'business_license',
+  'tax_certificate',
+  'ownership_proof',
+  'other',
+] as const;
+
+export type FacilityDocType = (typeof FACILITY_DOC_TYPES)[number];
+
+/** Anything outside the enum is filed as `other` rather than rejected on send. */
+export function toFacilityDocType(value: string | undefined): FacilityDocType {
+  return FACILITY_DOC_TYPES.includes(value as FacilityDocType)
+    ? (value as FacilityDocType)
+    : 'other';
+}
+
+/** An uploaded verification document (category + resolvable URL). */
 export interface FacilityDocumentInput {
-  name: string;
+  name: FacilityDocType;
   url: string;
 }
 
@@ -649,7 +722,13 @@ export function facilityToInput(facility: Facility): CreateFacilityInput {
     contactPhone: facility.kind === 'club' ? facility.contactPhone : undefined,
     location: { ...facility.location },
     images: [...facility.images],
-    documents: facility.documents.map((doc) => ({ name: doc.name, url: doc.url })),
+    // Coerced, not passed through: a stored document may predate the enum (or
+    // carry a filename written by the old wizard), and re-submitting that value
+    // verbatim would fail validation on save in edit mode.
+    documents: facility.documents.map((doc) => ({
+      name: toFacilityDocType(doc.name),
+      url: doc.url,
+    })),
   };
   if (facility.kind === 'club') {
     return {
@@ -714,7 +793,28 @@ export interface BulkActionResult {
 export interface FacilityDto {
   id?: string | number;
   name?: string;
+  /**
+   * club | pitch. The detail and list endpoints send `kind`; the CREATE response
+   * calls the same thing `type`, which is why a freshly created club mapped to
+   * a pitch until `createFacility` reconciled them.
+   */
+  kind?: string;
   type?: string;
+  /** Detail-endpoint extras that the model now carries through to the page. */
+  ownerPhone?: string;
+  owner_phone?: string;
+  coverUrl?: string;
+  cover_url?: string;
+  socialLinks?: Record<string, string> | null;
+  social_links?: Record<string, string> | null;
+  isActive?: boolean;
+  is_active?: boolean;
+  suspendedAt?: string | null;
+  suspended_at?: string | null;
+  reviewedBy?: string | null;
+  reviewed_by?: string | null;
+  updatedAt?: string;
+  updated_at?: string;
   /** DETAIL endpoint. The LIST endpoint sends `approval_status` instead. */
   status?: string;
   /**
@@ -768,12 +868,29 @@ export interface FacilityDto {
     name?: string;
     status?: string;
     rejection_reason?: string;
+    rejectReason?: string;
     url?: string;
     mime_type?: string;
+    /** What the admin detail endpoint actually sends. */
+    fileUrl?: string;
+    file_url?: string;
+    docType?: string;
+    doc_type?: string;
+    mimeType?: string;
   }>;
   statistics?: {
+    /** What the detail endpoint returns. */
+    avgRating?: number | string;
+    avg_rating?: number | string;
+    reviewCount?: number | string;
+    review_count?: number | string;
+    totalBookings?: number | string;
+    total_bookings?: number | string;
+    occupancyPercent?: number;
     occupancy_percent?: number;
+    revenueSyp?: number;
     revenue_syp?: number;
+    todayBookings?: number;
     today_bookings?: number;
   };
   // Club
@@ -944,7 +1061,16 @@ export function toFacility(dto: FacilityDto): Facility {
   const base: FacilityBase = {
     id: String(dto.id ?? ''),
     name: dto.name ?? '',
-    kind: normalizeKind(dto.type),
+    // `kind` first, `type` only as a fallback. They are DIFFERENT fields on the
+    // detail endpoint: `kind` is club|pitch, while `type` is the venue sub-type
+    // ('complex', 'gym', 'court'). Reading `type` alone made
+    // `normalizeKind('complex')` fall through to its 'pitch' default, so every
+    // club whose sub-type was set rendered as a pitch — no courts tab, no
+    // working hours, no sports.
+    //
+    // The CREATE response is the one place `type` really does carry club|pitch,
+    // which is why it stays as the fallback.
+    kind: normalizeKind(dto.kind ?? dto.type),
     // Suspension overrides the review outcome: a suspended facility is still
     // 'approved' on the wire, but the dashboard shows one state per row and
     // "suspended" is the one that matters operationally.
@@ -993,24 +1119,65 @@ export function toFacility(dto: FacilityDto): Facility {
     adminNotes: dto.admin_notes ?? dto.adminNotes,
     suspensionReason: dto.suspension_reason ?? dto.suspensionReason,
     rating: dto.rating,
+    // Mapped on the base so a PITCH keeps its description too — the club branch
+    // below re-states it only because `ClubFacility` narrows the field.
+    description: dto.description ?? undefined,
+    // The remaining detail-endpoint fields. Carried unconditionally so the
+    // profile page can show the whole record rather than the subset the model
+    // happened to declare.
+    // Only a genuine sub-type. On the create response `type` holds club|pitch,
+    // which is the KIND, not a sub-type — showing "club" in a "Venue type" row
+    // would be noise, so the two kind words are excluded here.
+    venueType:
+      dto.type && dto.type !== 'club' && dto.type !== 'pitch' ? dto.type : undefined,
+    ownerPhone: dto.ownerPhone ?? dto.owner_phone ?? undefined,
+    coverUrl: dto.coverUrl ?? dto.cover_url ?? undefined,
+    // `{}` is what the endpoint sends when nothing is registered; normalised to
+    // undefined so the page can test truthiness rather than key count.
+    socialLinks:
+      dto.socialLinks && Object.keys(dto.socialLinks).length > 0
+        ? dto.socialLinks
+        : dto.social_links && Object.keys(dto.social_links).length > 0
+          ? dto.social_links
+          : undefined,
+    isActive: dto.isActive ?? dto.is_active ?? undefined,
+    suspendedAt: dto.suspendedAt ?? dto.suspended_at ?? undefined,
+    reviewedBy: dto.reviewedBy ?? dto.reviewed_by ?? undefined,
+    updatedAt: dto.updatedAt ?? dto.updated_at ?? undefined,
+    // The admin detail endpoint names these `fileUrl` and `docType`; only the
+    // snake_case aliases were read, so `url` was always '' and `name` always the
+    // literal "Document". The card renders its view button as
+    // `{document.url && ...}`, so an empty url meant NO WAY TO OPEN A DOCUMENT
+    // at all — the row rendered, unclickable.
+    //
+    // `docType` is a slug ('national_id'); the card translates it through
+    // `facility.doc.type.*`, so it is carried as the name and labelled there.
     documents: Array.isArray(dto.documents)
       ? dto.documents.map((doc, index) => {
+          const url = doc.url ?? doc.fileUrl ?? doc.file_url ?? '';
+          const name = doc.name ?? doc.docType ?? doc.doc_type ?? 'Document';
           const url = resolveUploadUrl(doc.url) ?? '';
           const name = doc.name ?? 'Document';
           return {
             id: String(doc.id ?? index),
             name,
             status: normalizeDocStatus(doc.status),
-            rejectionReason: doc.rejection_reason,
+            rejectionReason: doc.rejection_reason ?? doc.rejectReason,
             url,
-            kind: facilityDocumentKind(url, doc.mime_type, name),
+            kind: facilityDocumentKind(url, doc.mime_type ?? doc.mimeType, name),
           };
         })
       : [],
+    // Read the keys the endpoint actually sends. The snake_case reads are kept
+    // second so an older payload still maps; see FacilityStatistics for why the
+    // original three were always zero.
     statistics: {
-      occupancyPercent: dto.statistics?.occupancy_percent ?? 0,
-      revenueSyp: dto.statistics?.revenue_syp ?? 0,
-      todayBookings: dto.statistics?.today_bookings ?? 0,
+      avgRating: Number(dto.statistics?.avgRating ?? dto.statistics?.avg_rating ?? 0),
+      reviewCount: Number(dto.statistics?.reviewCount ?? dto.statistics?.review_count ?? 0),
+      totalBookings: Number(dto.statistics?.totalBookings ?? dto.statistics?.total_bookings ?? 0),
+      occupancyPercent: dto.statistics?.occupancyPercent ?? dto.statistics?.occupancy_percent,
+      revenueSyp: dto.statistics?.revenueSyp ?? dto.statistics?.revenue_syp,
+      todayBookings: dto.statistics?.todayBookings ?? dto.statistics?.today_bookings,
     },
   };
 
@@ -1026,8 +1193,13 @@ export function toFacility(dto: FacilityDto): Facility {
     const rawHours = dto.working_hours ?? dto.workingHours;
     if (Array.isArray(rawHours)) {
       for (const entry of rawHours) {
-        const weekday = Number(entry?.dayOfWeek ?? entry?.day_of_week);
-        if (!Number.isInteger(weekday)) continue;
+        const raw = Number(entry?.dayOfWeek ?? entry?.day_of_week);
+        if (!Number.isInteger(raw)) continue;
+        // Sun=0 on the wire (Postgres EXTRACT(DOW)) -> Sun=7 in the UI, which
+        // keys its week Mon=1..Sun=7. Without this the Sunday row would land on
+        // a `0` bucket that no day renders, so saved Sunday hours would silently
+        // disappear from the profile and come back empty in the edit wizard.
+        const weekday = raw === 0 ? 7 : raw;
         const closed = entry?.isClosed ?? entry?.is_closed ?? false;
         // A closed day carries null times; the model wants them absent.
         workingHours[weekday] = {

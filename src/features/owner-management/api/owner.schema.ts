@@ -19,3 +19,17 @@ export const createOwnerSchema = z.object({
   address: z.string().trim().max(500, 'owner.errors.addressTooLong').optional(),
 });
 export type CreateOwnerValues = z.infer<typeof createOwnerSchema>;
+
+/**
+ * Profile edit — name and address only.
+ *
+ * Email, phone and national ID are absent DELIBERATELY, matching the endpoint:
+ * the first two are login identifiers with unique constraints, and the national
+ * ID is the KYC identity the approved documents attest to. Changing any of them
+ * is an account/verification flow, not a profile edit.
+ */
+export const editOwnerSchema = z.object({
+  name: z.string().trim().min(2, 'owner.errors.nameRequired'),
+  address: z.string().trim().max(500, 'owner.errors.addressTooLong').optional(),
+});
+export type EditOwnerValues = z.infer<typeof editOwnerSchema>;

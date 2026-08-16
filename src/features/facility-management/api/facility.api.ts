@@ -181,6 +181,43 @@ export async function reviewFacilityDocument(
 }
 
 /**
+ * Soft-delete a facility.
+ *
+ * The backend refuses (409 ERR_FACILITY_HAS_BOOKINGS) while upcoming bookings
+ * exist, so the caller must surface that message rather than assume success.
+ */
+export async function deleteFacility(id: string): Promise<void> {
+  await apiClient.delete(`${FACILITIES_PATH}/${id}`);
+}
+
+/**
+ * Upload a photo or verification document, returning its stored URL.
+ *
+ * The wizard used to keep `URL.createObjectURL` blobs and post those as the
+ * photo/document URLs. A `blob:` URL only resolves inside the tab that created
+ * it, so every admin-created facility was saved with links that were already
+ * dead — broken thumbnails in the gallery and unopenable KYC documents.
+ *
+ * Multipart, matching the owner-document upload; the field name is `file`.
+ */
+export async function uploadFacilityMedia(file: File): Promise<string> {
+  const form = new FormData();
+  form.append('file', file);
+  // `undefined` (not a literal string) so axios computes the multipart
+  // Content-Type INCLUDING its boundary. The client sets a JSON default at the
+  // instance level, and leaving that in place makes the server parse the body
+  // as JSON and reject the upload.
+  const res = await apiClient.post(`${FACILITIES_PATH}/media`, form, {
+    headers: { 'Content-Type': undefined },
+    // Uploads are slower than the 15s default the JSON calls use.
+    timeout: 60_000,
+  });
+  const { url } = unwrap<{ url: string }>(res.data);
+  if (!url) throw new Error('Upload did not return a URL');
+  return url;
+}
+
+/**
  * Sport SLUG -> UUID.
  *
  * The wizard speaks slugs ('tennis'); every facility route wants the sports
@@ -200,22 +237,54 @@ async function sportIds(): Promise<Map<string, string>> {
   return sportIdCache;
 }
 
-/** Surfaces the backend accepts; anything else is sent as null rather than rejected. */
-const SURFACES = new Set([
-  'artificial_grass',
-  'natural_grass',
-  'hard_court',
-  'clay',
-  'sand',
-  'wood',
-  'other',
-]);
+/**
+ * The dashboard's surface vocabulary against the backend's.
+ *
+ * The two do NOT use the same words: the UI says `grass` / `artificial` /
+ * `hardcourt`, the API wants `natural_grass` / `artificial_grass` /
+ * `hard_court`. This used to be a membership test against the BACKEND's list,
+ * so a UI value never matched and three of the five surfaces were silently sent
+ * as null — the surface an admin picked was thrown away on save, and (until the
+ * schema fix that accompanies this) the null then failed validation outright.
+ *
+ * `clay` and `sand` are spelled the same on both sides, which is why those two
+ * appeared to work and the bug looked intermittent.
+ */
+const SURFACE_WIRE: Record<string, string> = {
+  grass: 'natural_grass',
+  artificial: 'artificial_grass',
+  hardcourt: 'hard_court',
+  clay: 'clay',
+  sand: 'sand',
+};
 
-const toSurface = (surface?: string) =>
-  surface && SURFACES.has(surface) ? surface : null;
+/** Backend values, accepted unchanged so an already-translated value survives. */
+const SURFACES = new Set(Object.values(SURFACE_WIRE).concat(['wood', 'other']));
+
+const toSurface = (surface?: string) => {
+  if (!surface) return null;
+  if (SURFACE_WIRE[surface]) return SURFACE_WIRE[surface];
+  return SURFACES.has(surface) ? surface : null;
+};
 
 /** The wizard's isIndoor boolean against the backend's environment enum. */
 const toEnvironment = (isIndoor?: boolean) => (isIndoor ? 'indoor' : 'outdoor');
+
+/**
+ * ISO weekday (Mon=1..Sun=7, what the UI uses) -> the DB's Sun=0..Sat=6.
+ *
+ * The two conventions genuinely differ and only SUNDAY disagrees, which is why
+ * this stayed hidden: the wizard seeds all seven days, so every submission
+ * carried a `dayOfWeek: 7` that the API rejects outright (`must be <= 6`) — the
+ * "request validation failed" on Add Facility.
+ *
+ * Clamping to 6 or dropping the row would be worse than the 400. Availability is
+ * resolved with Postgres `EXTRACT(DOW)` (0=Sunday), so a mis-numbered row is not
+ * a cosmetic problem: every day would shift by one and Sunday's hours would
+ * never match. Converting is the only correct option, and it matches what the
+ * owner API already does server-side for the same payload.
+ */
+const toWireDay = (day: number) => (day === 7 ? 0 : day);
 
 /**
  * WorkingHours is Record<dayIndex, DayHours> in the UI and an ARRAY of
@@ -224,7 +293,7 @@ const toEnvironment = (isIndoor?: boolean) => (isIndoor ? 'indoor' : 'outdoor');
  */
 function toWorkingHours(hours: CreateFacilityInput['workingHours']) {
   return Object.entries(hours ?? {}).map(([day, dayHours]) => ({
-    dayOfWeek: Number(day),
+    dayOfWeek: toWireDay(Number(day)),
     openTime: dayHours.isOpen ? (dayHours.openTime ?? null) : null,
     closeTime: dayHours.isOpen ? (dayHours.closeTime ?? null) : null,
     isClosed: !dayHours.isOpen,
@@ -308,7 +377,21 @@ export async function createFacility(input: CreateFacilityInput): Promise<Facili
     input.kind === 'club'
       ? await apiClient.post(`${FACILITIES_PATH}/clubs`, await buildClubBody(input))
       : await apiClient.post(`${FACILITIES_PATH}/pitches`, await buildPitchBody(input));
-  return toFacility(unwrap<FacilityDto>(res.data));
+
+  // The create response is a 6-field STUB — `{id, type, name, owner_id, status,
+  // source}` — not a facility record. Two things follow:
+  //
+  //  1. It names the discriminator `type`, while the mapper reads `kind`. A club
+  //     therefore mapped to `kind: 'pitch'` (the fallback), and the caller got
+  //     an object claiming to be a pitch with none of a pitch's fields.
+  //  2. Everything else the model needs — location, images, courts, statistics —
+  //     is absent, so the mapped result is mostly empty defaults.
+  //
+  // `kind` is supplied from the input (we know what was asked for) and the id is
+  // what the caller actually uses, to navigate to the profile that then loads
+  // the real record.
+  const dto = unwrap<FacilityDto>(res.data);
+  return toFacility({ ...dto, kind: dto.kind ?? dto.type ?? input.kind });
 }
 
 /**

@@ -22,6 +22,26 @@ export const apiClient = axios.create({
   timeout: 15_000,
 });
 
+/**
+ * Never send `application/json` for a FormData body.
+ *
+ * The instance above declares a JSON Content-Type default, which axios applies
+ * to EVERY request — including file uploads. The browser then never gets to
+ * compute the `multipart/form-data; boundary=…` value, and the server's parser
+ * rejects the body with "the request is not multipart".
+ *
+ * This bit two separate upload screens (owner KYC documents, facility media)
+ * before being fixed at the source. Deleting the header here lets axios derive
+ * the correct multipart Content-Type from the FormData itself, so a caller
+ * cannot get it wrong by forgetting to override it.
+ */
+apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+  return config;
+});
+
 // Request: attach the Bearer token from the auth store (not a raw localStorage read).
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // A caller that set its own Authorization header wins. Sign-in does exactly

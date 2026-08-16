@@ -1162,7 +1162,9 @@
       "activate": "Owner activated",
       "block": "Owner blocked",
       "unblock": "Owner unblocked",
-      "created": "Owner created"
+      "created": "Owner created",
+      "updated": "Owner details updated",
+      "error": "Could not update the owner"
     },
     "errors": {
       "nameRequired": "Name is required",
@@ -1179,7 +1181,9 @@
       "notFound": "This owner no longer exists.",
       "duplicateEmail": "This email is already registered.",
       "duplicatePhone": "This phone number is already registered.",
-      "duplicateNationalId": "This national number is already registered."
+      "duplicateNationalId": "This national number is already registered.",
+      "fieldNotEditable": "That field cannot be changed here — it is a sign-in credential or verified identity.",
+      "noFields": "Nothing to update."
     },
     "create": {
       "title": "Add owner",
@@ -1335,6 +1339,11 @@
       "rejectedDocs_other": "{{count}} documents were rejected. The owner must re-upload them before the account can be approved.",
       "pendingDocs": "Review the documents first: {{count}} still awaiting a decision.",
       "rejectedDocs": "{{count}} rejected. The owner must re-upload before the account can be approved."
+    },
+    "edit": {
+      "action": "Edit details",
+      "title": "Edit owner details",
+      "lockedHint": "Email, phone and national ID cannot be changed here — they are sign-in credentials and verified identity."
     }
   },
   "facility": {
@@ -1570,7 +1579,8 @@
       "error": "Something went wrong. Please try again.",
       "bulkApproved": "{{count}} facilities approved",
       "bulkRejected": "{{count}} facilities rejected",
-      "bulkSkipped": "{{count}} skipped (not eligible)"
+      "bulkSkipped": "{{count}} skipped (not eligible)",
+      "deleted": "Facility deleted"
     },
     "approveBlocked": "Approve all documents first",
     "profile": {
@@ -1585,9 +1595,11 @@
       "stats": {
         "occupancy": "Occupancy",
         "revenue": "Monthly revenue",
-        "bookings": "Today's bookings",
+        "bookings": "Total bookings",
         "rating": "Rating",
-        "currency": "SYP"
+        "currency": "SYP",
+        "reviews": "Reviews",
+        "courts": "Courts"
       },
       "description": "About",
       "noDescription": "No description provided.",
@@ -1624,7 +1636,25 @@
       "lockerRoom": "Locker room",
       "cafe": "Café",
       "capacity": "Capacity",
-      "pricePerHour": "Price / hour"
+      "pricePerHour": "Price / hour",
+      "details": "Details",
+      "venueType": "Venue type",
+      "kind": "Kind",
+      "ownerPhone": "Owner's phone",
+      "activeState": "Availability",
+      "live": "Live",
+      "paused": "Paused",
+      "suspendedAt": "Suspended on",
+      "createdAt": "Added on",
+      "updatedAt": "Last updated",
+      "reviewCount": "Reviews",
+      "totalBookings": "Total bookings",
+      "social": "Social links",
+      "sports": "Sports",
+      "delete": "Delete",
+      "deleteTitle": "Delete this facility?",
+      "deleteMessage": "“{{name}}” will be removed from the dashboard. Its booking history is kept. This cannot be undone from here.",
+      "manageMedia": "Manage media"
     },
     "days": {
       "1": "Monday",
@@ -1722,7 +1752,10 @@
         "documentsHint": "Required — business license, ownership proof, etc.",
         "docDrop": "Drag documents here or browse",
         "docTypes": "PDF or image files",
-        "photo": "Photo"
+        "photo": "Photo",
+        "docType": "Document type",
+        "uploading": "Uploading…",
+        "uploadError": "Some files could not be uploaded. Please try again."
       },
       "errors": {
         "owner": "Choose an owner",
@@ -1741,6 +1774,12 @@
         "document": "Enter a valid document URL",
         "documents": "Upload at least one verification document"
       }
+    },
+    "errors": {
+      "notFound": "Facility not found.",
+      "hasBookings": "This facility still has upcoming bookings. Cancel them, or suspend the facility instead.",
+      "unsupportedFileType": "That file type is not supported. Use a PDF or an image.",
+      "fileTooLarge": "That file is too large."
     }
   },
   "region": {

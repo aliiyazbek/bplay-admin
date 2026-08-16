@@ -1,9 +1,15 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { Button, FileUpload, type UploadedFile } from '@ui';
+import { Button, FileUpload, Select, type UploadedFile } from '@ui';
 import { step5Schema, type Step5Values } from '../../api/facility.schema';
-import type { CreateFacilityInput } from '../../api/facility.types';
+import { uploadFacilityMedia } from '../../api';
+import {
+  FACILITY_DOC_TYPES,
+  toFacilityDocType,
+  type CreateFacilityInput,
+  type FacilityDocType,
+} from '../../api/facility.types';
 import styles from './wizard.module.css';
 
 const MAX_IMAGES = 6;
@@ -41,7 +47,27 @@ export function Step5Media({ draft, isSubmitting, submitLabel, onBack, onNext }:
     url,
     name: `${t('facility.wizard.media.photo')} ${index + 1}`,
   }));
-  const documentFiles: UploadedFile[] = documents.map((doc) => ({ url: doc.url, name: doc.name }));
+
+  /**
+   * The uploader is keyed by URL, not by name.
+   *
+   * `documents[].name` is the API's doc-TYPE enum, so it cannot double as the
+   * label shown in the file list — and the old code did exactly that: it wrote
+   * the uploaded filename into `name` and sent it as the type, which is not a
+   * member of the enum and made every create request fail validation.
+   *
+   * So the two are kept apart: the row below carries the type in a Select, and
+   * the uploader only ever reports URLs back to us.
+   */
+  const documentFiles: UploadedFile[] = documents.map((doc) => ({
+    url: doc.url,
+    name: t(`owner.doc.type.${doc.name}`, { defaultValue: doc.name }),
+  }));
+
+  const docTypeOptions = FACILITY_DOC_TYPES.map((type) => ({
+    value: type,
+    label: t(`owner.doc.type.${type}`, { defaultValue: type }),
+  }));
 
   const onImagesChange = (files: UploadedFile[]) =>
     setValue(
@@ -50,10 +76,24 @@ export function Step5Media({ draft, isSubmitting, submitLabel, onBack, onNext }:
       { shouldValidate: isSubmitted, shouldDirty: true },
     );
 
-  const onDocumentsChange = (files: UploadedFile[]) =>
+  /**
+   * Newly added files default to `other` — a valid enum member — so a document
+   * is never left holding a value the API would reject. The admin refines it
+   * with the per-document Select; existing rows keep the type already chosen.
+   */
+  const onDocumentsChange = (files: UploadedFile[]) => {
+    const byUrl = new Map(documents.map((doc) => [doc.url, doc.name]));
     setValue(
       'documents',
-      files.map((file) => ({ name: file.name, url: file.url })),
+      files.map((file) => ({ name: toFacilityDocType(byUrl.get(file.url)), url: file.url })),
+      { shouldValidate: isSubmitted, shouldDirty: true },
+    );
+  };
+
+  const onDocumentTypeChange = (url: string, type: FacilityDocType) =>
+    setValue(
+      'documents',
+      documents.map((doc) => (doc.url === url ? { ...doc, name: type } : doc)),
       { shouldValidate: isSubmitted, shouldDirty: true },
     );
 
@@ -83,6 +123,9 @@ export function Step5Media({ draft, isSubmitting, submitLabel, onBack, onNext }:
           moveEarlierLabel={t('facility.wizard.media.moveEarlier')}
           moveLaterLabel={t('facility.wizard.media.moveLater')}
           maxReachedLabel={t('facility.wizard.media.imagesMax')}
+          uploadFile={uploadFacilityMedia}
+          uploadingLabel={t('facility.wizard.media.uploading')}
+          uploadErrorLabel={t('facility.wizard.media.uploadError')}
           testId="wizard-images"
         />
         {errors.images?.message && (
@@ -104,8 +147,28 @@ export function Step5Media({ draft, isSubmitting, submitLabel, onBack, onNext }:
           browseLabel={t('facility.wizard.media.browse')}
           hint={t('facility.wizard.media.docTypes')}
           removeLabel={t('facility.wizard.media.remove')}
+          uploadFile={uploadFacilityMedia}
+          uploadingLabel={t('facility.wizard.media.uploading')}
+          uploadErrorLabel={t('facility.wizard.media.uploadError')}
           testId="wizard-docs"
         />
+        {documents.length > 0 && (
+          <ul className={styles.docTypeList} data-testid="wizard-doc-types">
+            {documents.map((doc) => (
+              <li key={doc.url} className={styles.docTypeRow}>
+                <span className={styles.docTypeName} title={doc.url}>
+                  {t(`owner.doc.type.${doc.name}`, { defaultValue: doc.name })}
+                </span>
+                <Select
+                  value={doc.name}
+                  onChange={(value) => onDocumentTypeChange(doc.url, value as FacilityDocType)}
+                  options={docTypeOptions}
+                  aria-label={t('facility.wizard.media.docType')}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
         {errors.documents?.message && (
           <p className={styles.error} role="alert">
             {t(errors.documents.message)}

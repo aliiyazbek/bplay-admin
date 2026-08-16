@@ -36,8 +36,16 @@ export function MapView({ lat, lng, zoom = 14, className }: MapViewProps) {
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
 
+  // Leaflet THROWS on a non-finite coordinate ("Invalid LatLng object: (NaN,
+  // NaN)"), and a throw inside this effect takes down the whole page, not just
+  // the map. Callers should not render a map for a record with no location —
+  // but a missing coordinate is ordinary data, not a programming error, so the
+  // component refuses to render rather than letting one null field break a page.
+  const valid = Number.isFinite(lat) && Number.isFinite(lng);
+
   // Init once.
   useEffect(() => {
+    if (!valid) return;
     if (!containerRef.current || mapRef.current) return;
     const map = L.map(containerRef.current, {
       zoomControl: false,
@@ -70,13 +78,16 @@ export function MapView({ lat, lng, zoom = 14, className }: MapViewProps) {
       markerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [valid]);
 
   // Follow coordinate changes.
   useEffect(() => {
+    if (!valid) return;
     mapRef.current?.setView([lat, lng], zoom);
     markerRef.current?.setLatLng([lat, lng]);
-  }, [lat, lng, zoom]);
+  }, [lat, lng, zoom, valid]);
+
+  if (!valid) return null;
 
   return <div ref={containerRef} className={clsx(styles.map, className)} data-testid="map-view" />;
 }

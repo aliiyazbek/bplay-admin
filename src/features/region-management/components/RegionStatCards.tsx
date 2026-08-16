@@ -22,7 +22,10 @@ export function RegionStatCards({ region, facilities }: Props) {
   const total = facilities.length;
   const adminCount = region.assignedAdminIds.length;
 
-  const revenue = facilities.reduce((sum, facility) => sum + facility.statistics.revenueSyp, 0);
+  // `revenueSyp` is optional: the live facility endpoint does not compute it, so
+  // it is absent outside mocks. Coerced to 0 per facility rather than letting one
+  // undefined turn the whole sum into NaN.
+  const revenue = facilities.reduce((sum, facility) => sum + (facility.statistics.revenueSyp ?? 0), 0);
   // Compact notation ("14.25M") keeps big SYP sums short; the currency lives in
   // the label so the tile never wraps a currency word mid-line. Intl inserts a
   // non-breaking space before the compact word ("14.25M" / "١٤٫٢٥ مليون") —

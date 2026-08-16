@@ -141,6 +141,13 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   ERR_DUPLICATE_EMAIL: 'owner.errors.duplicateEmail',
   ERR_DUPLICATE_PHONE: 'owner.errors.duplicatePhone',
   ERR_DUPLICATE_NATIONAL_ID: 'owner.errors.duplicateNationalId',
+  ERR_FIELD_NOT_EDITABLE: 'owner.errors.fieldNotEditable',
+  ERR_NO_FIELDS: 'owner.errors.noFields',
+  // Facility lifecycle (super-admin/facilities-management)
+  ERR_FACILITY_NOT_FOUND: 'facility.errors.notFound',
+  ERR_FACILITY_HAS_BOOKINGS: 'facility.errors.hasBookings',
+  ERR_UNSUPPORTED_FILE_TYPE: 'facility.errors.unsupportedFileType',
+  ERR_FILE_TOO_LARGE: 'facility.errors.fileTooLarge',
   // Authorization
   ERR_PERMISSION_DENIED: 'common.errors.permissionDenied',
 };
