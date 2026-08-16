@@ -36,6 +36,7 @@ export * from './Pagination/Pagination';
 export * from './SearchInput/SearchInput';
 export * from './Skeleton/Skeleton';
 export * from './Avatar/Avatar';
+export * from './Thumb/Thumb';
 export * from './UserCell/UserCell';
 export * from './RegionTag/RegionTag';
 export * from './PageContainer/PageContainer';

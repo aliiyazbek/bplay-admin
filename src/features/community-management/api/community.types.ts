@@ -15,6 +15,7 @@
 
 import type { BadgeVariant, DateRangeValue } from '@ui';
 import { statusToBadgeVariant } from '@shared/utils/status';
+import { resolveUploadUrl } from '@shared/utils/url';
 
 /** A post/comment author or a reactor — a player or a facility. */
 export type CommunityActorType = 'player' | 'facility';
@@ -277,7 +278,7 @@ export function toActor(dto: CommunityActorDto | undefined): CommunityActor {
     id: String(raw.id ?? raw.author_id ?? raw.actor_id ?? ''),
     type: normalizeActorType(raw.type ?? raw.author_type ?? raw.actor_type),
     name: raw.name ?? raw.full_name ?? '',
-    logoUrl: raw.logo_url ?? raw.avatar_url ?? raw.photo_url,
+    logoUrl: resolveUploadUrl(raw.logo_url ?? raw.avatar_url ?? raw.photo_url),
     facilityId: facilityId != null ? String(facilityId) : undefined,
   };
 }
@@ -299,8 +300,15 @@ export function toPost(dto: PostDto): Post {
     id: String(dto.id ?? dto._id ?? dto.post_id ?? ''),
     author: toActor(dto.author),
     body: dto.body ?? dto.content ?? dto.text,
-    images: Array.isArray(dto.media_urls) ? dto.media_urls : (dto.images ?? []),
-    mediaUrl: dto.media_url ?? dto.mediaUrl,
+    // Every media field goes through `resolveUploadUrl`, like the facility
+    // gallery and the KYC documents already do. Without it a row stamped with an
+    // empty APP_URL stays the relative `/uploads/…`, which resolves against the
+    // DASHBOARD's origin — and the SPA fallback answers with index.html, so the
+    // moderator sees a blank tile instead of the post they have to judge.
+    images: (Array.isArray(dto.media_urls) ? dto.media_urls : (dto.images ?? []))
+      .map((url) => resolveUploadUrl(url) ?? '')
+      .filter(Boolean),
+    mediaUrl: resolveUploadUrl(dto.media_url ?? dto.mediaUrl),
     mediaType: (dto.media_type ?? dto.mediaType) === 'video' ? 'video' : dto.media_url || dto.mediaUrl ? 'image' : undefined,
     visibility: dto.visibility === 'private' ? 'private' : 'public',
     createdAt: dto.created_at ?? dto.createdAt ?? new Date().toISOString(),

@@ -481,3 +481,14 @@
 .socialLink:focus-visible {
   text-decoration: underline;
 }
+
+/* Gallery cell whose photo is missing or failed to load — keeps the 3:2 slot so
+   the grid does not reflow around a dead image. */
+.photoFallback {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  aspect-ratio: 3 / 2;
+  background: var(--color-surface-3);
+  color: var(--color-text-subtle);
+}

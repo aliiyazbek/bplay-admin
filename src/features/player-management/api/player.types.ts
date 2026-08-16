@@ -12,6 +12,7 @@
 
 import type { BadgeVariant } from '@ui';
 import { statusToBadgeVariant } from '@shared/utils/status';
+import { resolveUploadUrl } from '@shared/utils/url';
 import type { GeoPoint } from '@shared/lib/geo';
 
 /** Runtime account lifecycle for a player. */
@@ -461,7 +462,10 @@ export function toPlayer(dto: PlayerDto): Player {
     phone: dto.phone ?? dto.phone_number ?? '',
     gender,
     dateOfBirth: dto.date_of_birth,
-    photoUrl: dto.avatarUrl ?? dto.avatar_url ?? dto.photo_url,
+    // Resolved against the API origin for the same reason the owner documents
+    // are: a row stamped with an empty or scheme-less APP_URL otherwise points at
+    // the dashboard's own host and renders as a broken avatar in every row.
+    photoUrl: resolveUploadUrl(dto.avatarUrl ?? dto.avatar_url ?? dto.photo_url),
     city: dto.city ?? dto.region ?? '',
     bio: dto.bio,
     link: dto.link ?? dto.website ?? dto.social_link,

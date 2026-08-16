@@ -10,6 +10,7 @@ import {
   MessageCircleIcon,
   ImageIcon,
   InboxIcon,
+  Thumb,
 } from '@ui';
 import { PATHS } from '@app/router/paths';
 import type { Post } from '@features/community-management/api';
@@ -77,13 +78,12 @@ function PostRow({ post, locale, onOpen }: { post: Post; locale: string; onOpen:
       onClick={onOpen}
       data-testid={`player-post-${post.id}`}
     >
-      {image ? (
-        <img className={styles.thumb} src={image} alt="" loading="lazy" />
-      ) : (
-        <span className={styles.thumbFallback} aria-hidden>
-          <ImageIcon />
-        </span>
-      )}
+      <Thumb
+        src={image}
+        className={styles.thumb}
+        fallbackClassName={styles.thumbFallback}
+        fallback={<ImageIcon />}
+      />
       <span className={styles.main}>
         <span className={styles.body}>{post.body || t('community.noBody')}</span>
         <span className={styles.meta}>

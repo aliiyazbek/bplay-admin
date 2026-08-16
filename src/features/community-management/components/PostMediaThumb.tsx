@@ -1,4 +1,4 @@
-import { clsx, PlayIcon, ImageIcon } from '@ui';
+import { clsx, PlayIcon, ImageIcon, Thumb } from '@ui';
 import { hasVideo, postMedia, type Post } from '../api/community.types';
 import styles from './PostMediaThumb.module.css';
 
@@ -23,13 +23,12 @@ export function PostMediaThumb({ post, size = 'sm' }: Props) {
 
   return (
     <span className={clsx(styles.thumb, styles[size])}>
-      {poster ? (
-        <img className={styles.img} src={poster} alt="" loading="lazy" />
-      ) : (
-        <span className={styles.tile} aria-hidden>
-          <ImageIcon />
-        </span>
-      )}
+      <Thumb
+        src={poster}
+        className={styles.img}
+        fallbackClassName={styles.tile}
+        fallback={<ImageIcon />}
+      />
       {video && (
         <span className={styles.play} aria-hidden>
           <PlayIcon fill="currentColor" />

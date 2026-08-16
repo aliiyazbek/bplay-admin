@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Badge, StadiumIcon, clsx } from '@ui';
+import { Badge, StadiumIcon, Thumb, clsx } from '@ui';
 import type { FacilityKind } from '../api/facility.types';
 import styles from './PhotoStrip.module.css';
 
@@ -28,12 +28,17 @@ export function PhotoStrip({ images, kind, name }: PhotoStripProps) {
       ) : (
         <div className={styles.scroller}>
           {images.map((src, index) => (
-            <img
+            <Thumb
               key={`${index}-${src}`}
               src={src}
               alt={index === 0 ? name : ''}
-              loading="lazy"
               className={clsx(styles.photo, index === 0 && styles.hero)}
+              fallbackClassName={clsx(
+                styles.photo,
+                index === 0 && styles.hero,
+                styles.fallback,
+              )}
+              fallback={<StadiumIcon />}
             />
           ))}
         </div>

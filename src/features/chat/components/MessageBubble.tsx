@@ -8,6 +8,7 @@ import {
   ImageIcon,
   ImageLightbox,
   RotateCcwIcon,
+  Thumb,
   clsx,
   type LightboxItem,
 } from '@ui';
@@ -167,7 +168,12 @@ function MessageAttachments({ attachments }: { attachments: ChatAttachment[] }) 
               }}
               aria-label={t('chat.attachment.openImage', { name: item.name })}
             >
-              <img src={item.url} alt={item.name} loading="lazy" />
+              <Thumb
+                src={item.url}
+                alt={item.name}
+                fallbackClassName={styles.thumbFallback}
+                fallback={<ImageIcon />}
+              />
             </button>
           ))}
         </div>

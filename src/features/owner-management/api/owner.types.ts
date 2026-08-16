@@ -300,7 +300,10 @@ export function toOwner(dto: OwnerDto): Owner {
     phone: dto.phone ?? dto.phone_business ?? '',
     nationalId: dto.national_id ?? undefined,
     dateOfBirth: dto.date_of_birth ?? undefined,
-    photoUrl: dto.photo_url ?? undefined,
+    // Resolved for the same reason the KYC documents below are: a row stamped
+    // with an empty or scheme-less APP_URL otherwise points at the dashboard's
+    // own host and the owner's avatar renders broken on every screen.
+    photoUrl: resolveUploadUrl(dto.photo_url),
     city,
     address: dto.address ?? undefined,
     bio: dto.bio ?? undefined,

@@ -115,3 +115,14 @@
 .blockedNote {
   font-size: var(--text-xs);
 }
+
+/* Shown when an attachment URL is absent or fails to load — the tile keeps the
+   grid cell's shape instead of collapsing to a bare glyph. */
+.thumbFallback {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  background: var(--color-surface-3);
+  color: var(--color-text-subtle);
+}

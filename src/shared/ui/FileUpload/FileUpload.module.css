@@ -217,3 +217,14 @@
   outline: 2px solid var(--color-focus);
   outline-offset: 1px;
 }
+
+/* Shown when an uploaded image cannot be rendered — keeps the tile's box so the
+   reorder/remove controls stay where the operator expects them. */
+.thumbFallback {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  background: var(--color-surface-3);
+  color: var(--color-text-subtle);
+}

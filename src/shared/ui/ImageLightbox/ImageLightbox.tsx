@@ -76,7 +76,13 @@ export function ImageLightbox({
   const scaleRef = useRef(scale);
   scaleRef.current = scale;
 
-  const current = gallery[index];
+  // A dead URL used to paint the browser's broken-image glyph across the whole
+  // stage; the `fallback` node below was only reached when there was no item at
+  // all. Keyed by src so navigating the gallery re-tries each shot on its own.
+  const [failedSrc, setFailedSrc] = useState<string | undefined>();
+
+  const item = gallery[index];
+  const current = item && item.src === failedSrc ? undefined : item;
   const isImage = current?.kind === 'image';
 
   const reset = useCallback(() => {
@@ -161,6 +167,7 @@ export function ImageLightbox({
                 src={current.src}
                 alt={current.alt ?? alt}
                 draggable={false}
+                onError={() => setFailedSrc(current.src)}
                 style={{
                   transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
                   transition: dragging ? 'none' : undefined,

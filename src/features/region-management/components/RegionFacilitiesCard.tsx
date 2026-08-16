@@ -16,6 +16,7 @@ import {
   InboxIcon,
   MapPinIcon,
   type Column,
+  Thumb,
 } from '@ui';
 import { statusToBadgeVariant } from '@shared/utils/status';
 import { PATHS } from '@app/router/paths';
@@ -74,13 +75,12 @@ export function RegionFacilitiesCard({ region, facilities, isLoading }: Props) {
         header: t('facility.col.name'),
         render: (facility) => (
           <span className={styles.nameCell}>
-            {facility.thumbnailUrl ? (
-              <img className={styles.thumb} src={facility.thumbnailUrl} alt="" loading="lazy" />
-            ) : (
-              <span className={styles.thumbFallback} aria-hidden>
-                <StadiumIcon />
-              </span>
-            )}
+            <Thumb
+              src={facility.thumbnailUrl}
+              className={styles.thumb}
+              fallbackClassName={styles.thumbFallback}
+              fallback={<StadiumIcon />}
+            />
             <span className={styles.name}>{facility.name}</span>
             <span
               className={styles.kindGlyph}

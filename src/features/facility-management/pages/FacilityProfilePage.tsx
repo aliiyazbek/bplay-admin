@@ -26,6 +26,7 @@ import {
   TrashIcon,
   ChevronEndIcon,
   ConfirmDialog,
+  Thumb,
 } from '@ui';
 import { PATHS } from '@app/router/paths';
 import { useAuthRole } from '@shared/stores/authStore';
@@ -208,13 +209,14 @@ function FacilityProfile({ facility }: { facility: Facility }) {
         transition={{ duration: 0.4, ease: 'easeOut' }}
         data-testid="facility-profile-hero"
       >
-        {cover ? (
-          <img className={styles.heroImage} src={cover} alt={facility.name} />
-        ) : (
-          <div className={styles.heroFallback} aria-hidden>
-            <StadiumIcon />
-          </div>
-        )}
+        <Thumb
+          src={cover}
+          alt={facility.name}
+          loading="eager"
+          className={styles.heroImage}
+          fallbackClassName={styles.heroFallback}
+          fallback={<StadiumIcon />}
+        />
         <div className={styles.scrim} aria-hidden />
 
         <motion.div
@@ -564,7 +566,12 @@ function FacilityProfile({ facility }: { facility: Facility }) {
                     aria-label={`${facility.name} — ${t('facility.profile.photos')} ${index + 1}`}
                     data-testid={`facility-photo-${index}`}
                   >
-                    <img className={styles.photo} src={image} alt="" loading="lazy" />
+                    <Thumb
+                      src={image}
+                      className={styles.photo}
+                      fallbackClassName={styles.photoFallback}
+                      fallback={<StadiumIcon />}
+                    />
                   </button>
                 ))}
               </div>

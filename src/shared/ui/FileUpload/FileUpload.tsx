@@ -4,9 +4,11 @@ import {
   UploadCloudIcon,
   XIcon,
   DocumentIcon,
+  ImageIcon,
   ArrowStartIcon,
   ChevronEndIcon,
 } from '../icons';
+import { Thumb } from '../Thumb/Thumb';
 import styles from './FileUpload.module.css';
 
 /** One uploaded asset. `url` is an object URL in mock mode, a remote URL post-backend. */
@@ -210,7 +212,13 @@ export function FileUpload({
           <ul className={styles.grid}>
             {value.map((file, index) => (
               <li key={file.url} className={styles.thumb}>
-                <img className={styles.thumbImg} src={file.url} alt={file.name} loading="lazy" />
+                <Thumb
+                  className={styles.thumbImg}
+                  fallbackClassName={styles.thumbFallback}
+                  src={file.url}
+                  alt={file.name}
+                  fallback={<ImageIcon />}
+                />
                 {index === 0 && coverLabel && <span className={styles.cover}>{coverLabel}</span>}
                 <div className={styles.thumbBar}>
                   <button

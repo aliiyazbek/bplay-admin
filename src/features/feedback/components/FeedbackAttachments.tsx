@@ -5,7 +5,9 @@ import {
   Button,
   DocumentIcon,
   DocumentViewerModal,
+  ImageIcon,
   ImageLightbox,
+  Thumb,
   type LightboxItem,
 } from '@ui';
 import { useDisclosure } from '@shared/hooks/useDisclosure';
@@ -74,7 +76,11 @@ export function FeedbackAttachments({ attachments }: Props) {
               aria-label={t('feedback.detail.openAttachment', { name: item.name })}
               data-testid={`feedback-attachment-${item.id}`}
             >
-              <img src={item.url} alt="" loading="lazy" />
+              <Thumb
+                src={item.url}
+                fallbackClassName={styles.thumbFallback}
+                fallback={<ImageIcon />}
+              />
             </button>
           ))}
         </div>

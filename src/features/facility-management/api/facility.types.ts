@@ -1124,7 +1124,11 @@ export function toFacility(dto: FacilityDto): Facility {
     // showed nothing on its profile. Ordered by `sortOrder` so the cover (0)
     // stays first, which is what `images[0]` is used as.
     images: Array.isArray(dto.images)
-      ? dto.images
+      ? // The `photos` branch below already repairs its URLs; this one did not,
+        // so the LIST endpoint's galleries stayed unresolved while the DETAIL
+        // endpoint's were fixed — the same facility rendered differently in the
+        // table and on its profile. Both branches now go through the same gate.
+        dto.images.map((image) => resolveUploadUrl(image) ?? '').filter(Boolean)
       : Array.isArray(dto.photos)
         ? [...dto.photos]
             .sort((a, b) => {

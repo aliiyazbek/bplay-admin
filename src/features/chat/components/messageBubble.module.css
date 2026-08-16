@@ -271,3 +271,14 @@
   font-size: 11px;
   color: var(--color-text-subtle);
 }
+
+/* Shown when an attachment URL is absent or fails to load — the tile keeps the
+   thumb's shape instead of collapsing to a bare glyph. */
+.thumbFallback {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  background: var(--color-surface-3);
+  color: var(--color-text-subtle);
+}

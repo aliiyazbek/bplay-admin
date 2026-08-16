@@ -7,6 +7,8 @@ import {
   PlayIcon,
   MessageCircleIcon,
   ShareIcon,
+  ImageIcon,
+  Thumb,
   type LightboxItem,
 } from '@ui';
 import { useDisclosure } from '@shared/hooks/useDisclosure';
@@ -95,7 +97,12 @@ export function PostHeroCard({ post }: Props) {
                   <PlayIcon fill="currentColor" />
                 </span>
               ) : (
-                <img className={styles.mediaImg} src={item.src} alt="" loading="lazy" />
+                <Thumb
+                  src={item.src}
+                  className={styles.mediaImg}
+                  fallbackClassName={styles.videoThumb}
+                  fallback={<ImageIcon />}
+                />
               )}
             </button>
           ))}

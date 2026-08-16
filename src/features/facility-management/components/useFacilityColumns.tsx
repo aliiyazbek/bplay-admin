@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BuildingIcon, RatingStars, RegionTag, StadiumIcon, type Column } from '@ui';
+import { BuildingIcon, RatingStars, RegionTag, StadiumIcon, Thumb, type Column } from '@ui';
 import { FacilityStatusBadge } from './FacilityStatusBadge';
 import { FacilitySourceBadge } from './FacilitySourceBadge';
 import type { FacilityListItem } from '../api/facility.types';
@@ -29,13 +29,12 @@ export function useFacilityColumns({
         sortable: true,
         render: (item) => (
           <span className={styles.nameCell}>
-            {item.thumbnailUrl ? (
-              <img className={styles.thumb} src={item.thumbnailUrl} alt="" loading="lazy" />
-            ) : (
-              <span className={styles.thumbFallback} aria-hidden>
-                <StadiumIcon />
-              </span>
-            )}
+            <Thumb
+              src={item.thumbnailUrl}
+              className={styles.thumb}
+              fallbackClassName={styles.thumbFallback}
+              fallback={<StadiumIcon />}
+            />
             <span className={styles.name}>{item.name}</span>
             <span
               className={styles.kindGlyph}
