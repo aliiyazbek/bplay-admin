@@ -1132,10 +1132,16 @@ export function toFacility(dto: FacilityDto): Facility {
               const bo = typeof b === 'string' ? 0 : (b?.sortOrder ?? b?.sort_order ?? 0);
               return ao - bo;
             })
+            // Passed through `resolveUploadUrl` for the same reason the
+            // documents are: it repairs a scheme-less upload path and drops
+            // anything that is not safely http(s), so a bad row yields no image
+            // rather than a broken one.
             .map((photo) =>
-              typeof photo === 'string'
-                ? photo
-                : (photo?.photoUrl ?? photo?.photo_url ?? photo?.url ?? ''),
+              resolveUploadUrl(
+                typeof photo === 'string'
+                  ? photo
+                  : (photo?.photoUrl ?? photo?.photo_url ?? photo?.url),
+              ) ?? '',
             )
             .filter(Boolean)
         : [],
@@ -1184,10 +1190,16 @@ export function toFacility(dto: FacilityDto): Facility {
     // `facility.doc.type.*`, so it is carried as the name and labelled there.
     documents: Array.isArray(dto.documents)
       ? dto.documents.map((doc, index) => {
-          const url = doc.url ?? doc.fileUrl ?? doc.file_url ?? '';
+          // Both halves matter, and the merge that brought `resolveUploadUrl`
+          // in kept only its half:
+          //   * the ALIASES — the admin detail endpoint sends `fileUrl` and
+          //     `docType`, so reading `doc.url`/`doc.name` alone leaves the url
+          //     empty (no way to open the document) and the name the literal
+          //     "Document";
+          //   * `resolveUploadUrl` — repairs a scheme-less upload path and
+          //     rejects anything that is not safely http(s).
+          const url = resolveUploadUrl(doc.url ?? doc.fileUrl ?? doc.file_url) ?? '';
           const name = doc.name ?? doc.docType ?? doc.doc_type ?? 'Document';
-          const url = resolveUploadUrl(doc.url) ?? '';
-          const name = doc.name ?? 'Document';
           return {
             id: String(doc.id ?? index),
             name,
