@@ -15,6 +15,7 @@ import type {
   PlayerListParams,
   PlayerListResult,
   PlayerRating,
+  PlayerRatingsResult,
   PlayerReport,
   PlayerRoom,
   PlayerSport,
@@ -408,9 +409,13 @@ export async function getPlayerRooms(id: string): Promise<PlayerRoom[]> {
   return (roomsBy[id] ?? []).map((room) => ({ ...room }));
 }
 
-export async function getPlayerRatings(id: string): Promise<PlayerRating[]> {
+export async function getPlayerRatings(id: string): Promise<PlayerRatingsResult> {
   await mockDelay(300);
-  return (ratingsBy[id] ?? []).map((rating) => ({ ...rating }));
+  const given = (ratingsBy[id] ?? []).map((rating) => ({ ...rating }));
+  // The mock fixtures only ever held the "given" side; the received direction
+  // is empty here rather than fabricated, so the mock cannot imply a reputation
+  // the real backend would not report.
+  return { given, received: [], averageReceived: null, receivedCount: 0 };
 }
 
 export async function getPlayerReports(id: string): Promise<PlayerReport[]> {

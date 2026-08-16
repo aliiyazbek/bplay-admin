@@ -70,7 +70,16 @@ export function NotificationBell() {
   const markAllRead = useMarkAllNotificationsRead();
 
   const unread = unreadQuery.data ?? 0;
-  const items = recentQuery.data ?? [];
+  /**
+   * The dropdown is an ACTION QUEUE, so it lists only what is still outstanding.
+   *
+   * It used to show recent notifications regardless of state, which meant an
+   * item stayed in the list after it had been opened and dealt with — the panel
+   * filled with things already handled and the admin had to remember which was
+   * which. Read items remain on the full notifications page, which is the
+   * history; this panel is "what still needs me".
+   */
+  const items = (recentQuery.data ?? []).filter((item) => !item.isRead);
 
   const close = () => {
     setIsOpen(false);
@@ -139,7 +148,13 @@ export function NotificationBell() {
    */
   const openNotification = (notification: Notification) => {
     setIsOpen(false);
+    // Marked read whether or not it has somewhere to go: the admin has now SEEN
+    // it, and leaving it unread means it sits in this queue forever.
     if (!notification.isRead) markRead.mutate(notification.id);
+    // Falls back to the notifications page rather than a dead route. A subject
+    // whose entity has since been deleted resolves to a link that renders
+    // "Something went wrong" — dropping the admin on a broken page for a
+    // notification they cannot act on any more.
     navigate(notification.link ?? PATHS.notifications);
   };
 

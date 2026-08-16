@@ -12,6 +12,8 @@ import {
   type PlayerListParams,
   type PlayerListResult,
   type PlayerRating,
+  type PlayerRatingReceived,
+  type PlayerRatingsResult,
   type PlayerReport,
   type PlayerRoom,
   type PlayerStats,
@@ -112,9 +114,29 @@ export async function getPlayerRooms(id: string): Promise<PlayerRoom[]> {
   return unwrapList<PlayerRoom>(res.data, ['rooms']);
 }
 
-export async function getPlayerRatings(id: string): Promise<PlayerRating[]> {
+/**
+ * Both directions of a player's ratings.
+ *
+ * `ratings` on the wire is what the player GAVE (the key kept its original name
+ * so nothing else broke); `received` is how the player is rated by others.
+ * Previously only the given side was fetched, so an admin judging a report could
+ * see the player's opinion of everyone else but not anyone's opinion of them.
+ */
+export async function getPlayerRatings(id: string): Promise<PlayerRatingsResult> {
   const res = await apiClient.get(`${PLAYERS_PATH}/${id}/ratings`);
-  return unwrapList<PlayerRating>(res.data, ['ratings']);
+  const data = unwrap<{
+    ratings?: PlayerRating[];
+    received?: PlayerRatingReceived[];
+    averageReceived?: number | null;
+    receivedCount?: number;
+  }>(res.data);
+  const received = data?.received ?? [];
+  return {
+    given: data?.ratings ?? [],
+    received,
+    averageReceived: data?.averageReceived ?? null,
+    receivedCount: data?.receivedCount ?? received.length,
+  };
 }
 
 export async function getPlayerReports(id: string): Promise<PlayerReport[]> {

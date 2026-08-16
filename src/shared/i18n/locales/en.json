@@ -716,7 +716,13 @@
       "empty": "No ratings left yet.",
       "hiddenTag": "Hidden",
       "show": "Show review",
-      "hide": "Hide review"
+      "hide": "Hide review",
+      "received": "Ratings received",
+      "given": "Ratings given",
+      "emptyReceived": "No ratings received yet.",
+      "unknownReviewer": "Unknown reviewer",
+      "count": "{{count}} rating",
+      "count_other": "{{count}} ratings"
     },
     "ratingTarget": {
       "facility": "Facility",

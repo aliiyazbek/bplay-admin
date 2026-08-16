@@ -215,6 +215,33 @@ export interface PlayerRating {
   hidden: boolean;
 }
 
+/**
+ * A rating the player RECEIVED — left by another player after a match, or by a
+ * facility. Distinct from PlayerRating, which is what the player GAVE: the two
+ * carry opposite ends of the relationship, so a shared shape would leave half
+ * the fields meaningless in each direction.
+ */
+export interface PlayerRatingReceived {
+  id: string;
+  /** Who left it. Null when the reviewer's account no longer exists. */
+  reviewerName?: string | null;
+  reviewerId?: string | null;
+  stars: number;
+  comment?: string;
+  date: string;
+  hidden: boolean;
+  /** Player reviews are per-match — the room it was earned in. */
+  roomId?: string | null;
+}
+
+/** Both directions of a player's ratings, plus the average of those received. */
+export interface PlayerRatingsResult {
+  given: PlayerRating[];
+  received: PlayerRatingReceived[];
+  averageReceived: number | null;
+  receivedCount: number;
+}
+
 /** A player-vs-player / content report (filed by, or against, this player). */
 export type ReportDirection = 'filed' | 'against';
 export type ReportStatus = 'open' | 'reviewing' | 'resolved' | 'dismissed';
