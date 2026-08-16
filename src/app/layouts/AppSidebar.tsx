@@ -51,13 +51,19 @@ const NAV_ITEMS: NavItem[] = [
   { to: PATHS.dashboard, key: 'nav.dashboard', Icon: LayoutGridIcon, superAdminOnly: true },
   { to: PATHS.adminManagement, key: 'nav.adminManagement', Icon: UsersIcon, superAdminOnly: true },
   { to: PATHS.regionManagement, key: 'nav.regionManagement', Icon: GlobeIcon, superAdminOnly: true },
-  { to: PATHS.ownerManagement, key: 'nav.ownerManagement', Icon: BuildingIcon, superAdminOnly: true },
-  { to: PATHS.playerManagement, key: 'nav.playerManagement', Icon: TrophyIcon, superAdminOnly: true },
+  // Region-scoped server-side, and the `admin` role holds view/update-owners and
+  // view/create/edit-players — so a regional admin gets these, narrowed to their
+  // own regions by the API.
+  { to: PATHS.ownerManagement, key: 'nav.ownerManagement', Icon: BuildingIcon, superAdminOnly: false },
+  { to: PATHS.playerManagement, key: 'nav.playerManagement', Icon: TrophyIcon, superAdminOnly: false },
   { to: PATHS.facilityManagement, key: 'nav.facilityManagement', Icon: StadiumIcon, superAdminOnly: false },
   { to: PATHS.bookingManagement, key: 'nav.bookingManagement', Icon: CalendarIcon, superAdminOnly: false },
   { to: PATHS.plans, key: 'nav.plans', Icon: LayersIcon, superAdminOnly: true },
   { to: PATHS.clubSubscriptions, key: 'nav.clubSubscriptions', Icon: CreditCardIcon, superAdminOnly: false },
-  { to: PATHS.communityManagement, key: 'nav.communityManagement', Icon: MessageCircleIcon, superAdminOnly: false },
+  // super_admin only, matching the API — every community route is guarded by
+  // requireSuperAdmin, so offering this to a regional admin only led to a screen
+  // of failed 403 queries.
+  { to: PATHS.communityManagement, key: 'nav.communityManagement', Icon: MessageCircleIcon, superAdminOnly: true },
   { to: PATHS.feedback, key: 'nav.feedback', Icon: InboxIcon, superAdminOnly: false },
   {
     to: PATHS.chat,

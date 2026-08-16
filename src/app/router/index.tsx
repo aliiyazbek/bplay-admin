@@ -134,36 +134,44 @@ export default function AppRouter() {
                 </RequireRole>
               }
             />
+            {/*
+              Owners and players are region-scoped server-side (regionScopeFilter
+              / canAdminSeeRow), and the `admin` role carries view-owners,
+              update-owners, view-players, create-players and edit-players. The
+              super_admin-only gate here contradicted all of that: a regional
+              admin was bounced to /profile from pages the API would have served
+              them, correctly narrowed to their own regions.
+            */}
             <Route
               path="owner-management"
               element={
-                <RequireRole role="super_admin">
+                <RequireAnyRole roles={['super_admin', 'admin']}>
                   <OwnerManagementPage />
-                </RequireRole>
+                </RequireAnyRole>
               }
             />
             <Route
               path="owner-management/:ownerId"
               element={
-                <RequireRole role="super_admin">
+                <RequireAnyRole roles={['super_admin', 'admin']}>
                   <OwnerProfilePage />
-                </RequireRole>
+                </RequireAnyRole>
               }
             />
             <Route
               path="player-management"
               element={
-                <RequireRole role="super_admin">
+                <RequireAnyRole roles={['super_admin', 'admin']}>
                   <PlayerManagementPage />
-                </RequireRole>
+                </RequireAnyRole>
               }
             />
             <Route
               path="player-management/:playerId"
               element={
-                <RequireRole role="super_admin">
+                <RequireAnyRole roles={['super_admin', 'admin']}>
                   <PlayerProfilePage />
-                </RequireRole>
+                </RequireAnyRole>
               }
             />
             <Route
@@ -198,20 +206,32 @@ export default function AppRouter() {
                 </RequireAnyRole>
               }
             />
+            {/*
+              super_admin only, matching the API: every /admin/community-management
+              route is guarded by requireSuperAdmin. Letting `admin` in here
+              rendered the page and then failed every query with 403, so the
+              whole screen read "Something went wrong" for a regional admin.
+
+              The API is deliberate rather than an oversight — the feed is
+              platform-wide, and a player's region is geo-resolved from
+              coordinates and usually NULL, so scoping it would hide most posts
+              instead of narrowing them. Opening this to regional admins means
+              backfilling player regions first.
+            */}
             <Route
               path="community-management"
               element={
-                <RequireAnyRole roles={['super_admin', 'admin']}>
+                <RequireRole role="super_admin">
                   <CommunityManagementPage />
-                </RequireAnyRole>
+                </RequireRole>
               }
             />
             <Route
               path="community-management/:postId"
               element={
-                <RequireAnyRole roles={['super_admin', 'admin']}>
+                <RequireRole role="super_admin">
                   <PostDetailPage />
-                </RequireAnyRole>
+                </RequireRole>
               }
             />
             <Route
