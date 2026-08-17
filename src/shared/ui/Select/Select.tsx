@@ -7,6 +7,16 @@ import styles from './Select.module.css';
 export interface SelectOption {
   label: string;
   value: string;
+  /**
+   * Render indented, as a child of the option above it.
+   *
+   * Purely presentational — an indented option is still selectable and still
+   * occupies one slot in `options`, so `activeIndex`, arrow-key navigation and
+   * `commit()` need no special cases. A separate non-selectable header row was
+   * the other way to show hierarchy, but it printed the parent's name twice:
+   * once as the heading and again as the row that selects the whole parent.
+   */
+  indent?: boolean;
 }
 
 export interface SelectProps {
@@ -160,7 +170,11 @@ export function Select({
                 key={option.value}
                 role="option"
                 aria-selected={option.value === value}
-                className={clsx(styles.option, index === activeIndex && styles.optionActive)}
+                className={clsx(
+                  styles.option,
+                  option.indent && styles.optionNested,
+                  index === activeIndex && styles.optionActive,
+                )}
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseDown={(event) => {
                   event.preventDefault();

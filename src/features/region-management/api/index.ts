@@ -8,6 +8,9 @@ export const getRegions = impl.getRegions;
 export const getRegionById = impl.getRegionById;
 export const getRegionStats = impl.getRegionStats;
 export const getScopeRegions = impl.getScopeRegions;
+/** Cities + neighbourhoods, both valid values for the facilities region filter. */
+export const getScopeTree = impl.getScopeTree;
+export type { ScopeNeighbourhood } from './region.api';
 export const createRegion = impl.createRegion;
 export const updateRegion = impl.updateRegion;
 export const toggleRegionActive = impl.toggleRegionActive;
