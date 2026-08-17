@@ -24,7 +24,7 @@ import {
   isDateRangeActive,
 } from '@ui';
 import { useAdminScope } from '../hooks/useAdminScope';
-import { useScopeRegionsQuery } from '../hooks/useScopeRegionsQuery';
+import { useScopeNeighbourhoodsQuery, useScopeRegionsQuery } from '../hooks/useScopeRegionsQuery';
 import { useOwnersForPicker } from '../hooks/useOwnersForPicker';
 import {
   FACILITY_AMENITIES,
@@ -85,6 +85,7 @@ export function FacilityFiltersBar({
   const [open, setOpen] = useState(false);
   const { isSuperAdmin, assignedRegionIds } = useAdminScope();
   const regionsQuery = useScopeRegionsQuery();
+  const neighbourhoodsQuery = useScopeNeighbourhoodsQuery();
   const ownersQuery = useOwnersForPicker();
 
   const status = params.status ?? 'all';
@@ -112,9 +113,22 @@ export function FacilityFiltersBar({
     (region) =>
       !assignedRegionIds || assignedRegionIds.length === 0 || assignedRegionIds.includes(region.id),
   );
+  // Each city, then its own neighbourhoods indented beneath it. Both are valid
+  // `regionId` values — the API matches `city_id = $1 OR neighbourhood_id = $1`
+  // — so a neighbourhood filters to just that neighbourhood, and its city to
+  // the whole city. Cities with nothing under them stay ungrouped, which keeps
+  // the list flat wherever no neighbourhoods are drawn.
+  const scopedNeighbourhoods = (neighbourhoodsQuery.data ?? []).filter((n) =>
+    scopedRegions.some((region) => region.id === n.cityId),
+  );
   const regionOptions = [
     allOption,
-    ...scopedRegions.map((region) => ({ value: region.id, label: region.name })),
+    ...scopedRegions.flatMap((region) => [
+      { value: region.id, label: region.name },
+      ...scopedNeighbourhoods
+        .filter((n) => n.cityId === region.id)
+        .map((n) => ({ value: n.id, label: n.name, indent: true })),
+    ]),
     ...(isSuperAdmin ? [{ value: 'orphans', label: t('facility.filters.orphansOption') }] : []),
   ];
 

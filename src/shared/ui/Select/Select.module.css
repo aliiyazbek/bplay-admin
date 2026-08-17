@@ -89,6 +89,13 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Indented so a neighbourhood reads as belonging to the city above it. The
+   parent stays selectable in place, so no separate heading row is needed.
+   padding-inline-start (not left) keeps the nesting on the correct side in RTL. */
+.optionNested {
+  padding-inline-start: var(--space-6);
+}
 .check {
   font-size: 16px;
   color: var(--color-primary);

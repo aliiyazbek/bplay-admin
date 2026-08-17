@@ -62,40 +62,52 @@ interface ScopedEntry {
   containingIds: string[];
 }
 
-/** Project every facility to a scoped entry (region membership + orphan flag). */
-function buildEntries(facilities: Facility[], regions: Region[]): ScopedEntry[] {
-  const geoRegions = activeGeoRegions(regions);
+/**
+ * Project every facility to a scoped entry.
+ *
+ * Membership comes from the SERVER's stored `city_id` / `neighbourhood_id`
+ * (surfaced as `location.city` / `location.district`), not from a distance test
+ * in the browser. Those FK columns are what the API itself filters on, so this
+ * is the same definition rather than a second, disagreeing one — and a facility
+ * whose pin sits just outside a hand-drawn circle no longer reads as belonging
+ * to no region at all.
+ */
+function buildEntries(facilities: Facility[]): ScopedEntry[] {
   return facilities.map((facility) => {
-    const containing = geoRegions.filter((region) => contains(region, facility));
+    const regionNames = [facility.location.city, facility.location.district].filter(
+      (name): name is string => Boolean(name),
+    );
     return {
-      containingIds: containing.map((region) => region.id),
-      item: toFacilityListItem(
-        facility,
-        containing.map((region) => region.name),
-        containing.length === 0,
-      ),
+      containingIds: [],
+      // Orphan = the server resolved no region for it. That is a real state
+      // worth surfacing (it means the row is invisible to every regional
+      // admin), but it is no longer inferred from coordinates.
+      item: toFacilityListItem(facility, regionNames, regionNames.length === 0),
     };
   });
 }
 
 /**
- * Apply role visibility: super_admin sees everything (orphans included); an admin
- * with assigned regions sees only facilities inside ≥1 of their (active, geo)
- * regions — never orphans; an admin with no assigned regions (general oversight)
- * sees all non-orphan facilities.
+ * No client-side narrowing. The API already applied the caller's region scope —
+ * `city_id`/`neighbourhood_id` against `admin_cities`/`admin_neighbourhoods`,
+ * including the general-oversight tier — so re-filtering here could only ever
+ * subtract rows the server deliberately returned.
+ *
+ * It did exactly that: this used to drop every "orphan" for all roles except
+ * super_admin, where orphan meant "outside every drawn circle". A
+ * general-oversight admin, whom the backend grants the whole platform, was
+ * shown an EMPTY facilities screen. Facilities with absent or NaN coordinates
+ * vanished the same way, for everyone.
+ *
+ * Kept as a named pass-through so the seam stays visible: if per-role hiding is
+ * ever wanted again it belongs in the query, not here.
  */
-function applyScope(entries: ScopedEntry[], scope: AdminScope): ScopedEntry[] {
-  const assignedRegionIds = scope.assignedRegionIds ?? [];
-  if (scope.role === 'super_admin') return entries;
-  if (scope.role === 'admin' && assignedRegionIds.length > 0) {
-    const assigned = new Set(assignedRegionIds);
-    return entries.filter((entry) => entry.containingIds.some((id) => assigned.has(id)));
-  }
-  return entries.filter((entry) => !entry.item.isOrphan);
+function applyScope(entries: ScopedEntry[], _scope: AdminScope): ScopedEntry[] {
+  return entries;
 }
 
-function scopedEntries(facilities: Facility[], regions: Region[], scope: AdminScope): ScopedEntry[] {
-  return applyScope(buildEntries(facilities, regions), scope);
+function scopedEntries(facilities: Facility[], _regions: Region[], scope: AdminScope): ScopedEntry[] {
+  return applyScope(buildEntries(facilities), scope);
 }
 
 function compareBy(a: FacilityListItem, b: FacilityListItem, sortBy: FacilityListParams['sortBy']): number {

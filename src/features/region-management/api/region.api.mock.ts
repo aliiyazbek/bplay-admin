@@ -1,5 +1,6 @@
 import { mockDelay } from '@shared/lib/mock';
 import { filterAndPaginateRegions } from './region.filter';
+import type { ScopeNeighbourhood } from './region.api';
 import type {
   Region,
   RegionListParams,
@@ -144,6 +145,19 @@ export async function getRegionStats(): Promise<RegionStats> {
 export async function getScopeRegions(): Promise<Region[]> {
   await mockDelay();
   return db.filter((region) => !region.isDeleted).map((region) => ({ ...region }));
+}
+
+/**
+ * Mirrors the real `getScopeTree`. Neighbourhoods were never mocked (the
+ * screens that manage them only run against a real API), so the list is empty
+ * and the grouped dropdown degrades to cities — which is what the demo build
+ * showed before neighbourhoods existed.
+ */
+export async function getScopeTree(): Promise<{
+  regions: Region[];
+  neighbourhoods: ScopeNeighbourhood[];
+}> {
+  return { regions: await getScopeRegions(), neighbourhoods: [] };
 }
 
 export async function createRegion(input: CreateRegionInput): Promise<Region> {

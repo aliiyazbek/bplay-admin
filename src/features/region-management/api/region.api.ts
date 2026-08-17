@@ -123,6 +123,70 @@ export async function getScopeRegions(): Promise<Region[]> {
 }
 
 /**
+ * A neighbourhood as the scope selectors need it: an id the facilities filter
+ * accepts, a label, and the city to group it under.
+ *
+ * NOT filtered on the geo circle the way cities are. That filter exists because
+ * the dashboard resolves region membership by testing coordinates against each
+ * city's circle in the browser; a neighbourhood id is only ever handed back to
+ * the API as `regionId`, which matches the stored `neighbourhood_id`. Dropping
+ * circle-less neighbourhoods here would hide them from the filter for no reason.
+ */
+export interface ScopeNeighbourhood {
+  id: string;
+  name: string;
+  cityId: string;
+  isActive: boolean;
+}
+
+interface ScopeNeighbourhoodDto {
+  id?: string | number;
+  name?: string;
+  city_id?: string | number;
+  is_active?: boolean;
+}
+
+/**
+ * Cities AND neighbourhoods in one call — both are valid values for the
+ * facilities `regionId` filter, which matches
+ * `city_id = $1 OR neighbourhood_id = $1`.
+ *
+ * Consumers share one query key so the endpoint is fetched once and read
+ * through two selectors, rather than once per consumer.
+ */
+export async function getScopeTree(): Promise<{
+  regions: Region[];
+  neighbourhoods: ScopeNeighbourhood[];
+}> {
+  const res = await apiClient.get(REGIONS_PATH);
+  const payload = (res.data?.data ?? res.data ?? {}) as {
+    regions?: RegionDto[];
+    neighbourhoods?: ScopeNeighbourhoodDto[];
+  };
+
+  const regions = (payload.regions ?? [])
+    .map(toRegion)
+    .filter(
+      (region) =>
+        !region.isDeleted &&
+        typeof region.centerLat === 'number' &&
+        typeof region.centerLng === 'number' &&
+        typeof region.radiusKm === 'number',
+    );
+
+  const neighbourhoods = (payload.neighbourhoods ?? [])
+    .filter((n) => n.id != null && n.city_id != null)
+    .map((n) => ({
+      id: String(n.id),
+      name: n.name ?? '',
+      cityId: String(n.city_id),
+      isActive: n.is_active !== false,
+    }));
+
+  return { regions, neighbourhoods };
+}
+
+/**
  * The wire form of a region's geo circle.
  *
  * Two conversions, both easy to get wrong and both silent if missed:
